@@ -1,6 +1,7 @@
 package app.knock.sdk
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE
+import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -86,6 +87,19 @@ class KnockAPI(
                 }
             }
         )
+    }
+
+    /**
+     * Helper to get the serialized value,
+     * for instance in path parameters that have to be converted to `String`.
+     *
+     * One example is an `Enum` that should be transformed to its serialized value as specified by a `@JsonProperty`
+     *
+     * @param value the value to be serialized
+     * @return the `String` representation
+     */
+    fun serializeValueAsString(value: Any): String {
+        return mapper.valueToTree<TextNode>(value).textValue()
     }
 
     fun get(path: String, queryItems: List<URLQueryItem>?, handler: (Result<String>) -> Unit) {

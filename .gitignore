@@ -1,1 +1,7 @@
 .DS_Store
+/Knock/.idea
+/Knock/local.properties
+/Knock/.gradle
+/Knock/gradle
+/Knock/gradlew
+/Knock/gradlew.bat

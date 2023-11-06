@@ -15,12 +15,6 @@ data class Block(
     var rendered: String,
 )
 
-//@JsonIgnoreProperties(ignoreUnknown = true)
-//data class NotificationSource(
-//    var key: String,
-//    var versionId: String,
-//)
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class FeedItem(
     @JsonProperty("__cursor") var feedCursor: String,
@@ -192,9 +186,11 @@ class FeedManager(
      *
      * This will initialize the connection.
      *
-     * You should also call the `on(eventName, completionHandler)` function to delegate what should be executed on certain received events and the `disconnectFromFeed()` function to terminate the connection.
+     * You should also call the `on(eventName, completionHandler)` function to delegate what should
+     * be executed on certain received events and the `disconnectFromFeed()` function to terminate the connection.
      *
-     * @param options options of type `FeedClientOptions` to merge with the default ones (set on the constructor) and scope as much as possible the results
+     * @param options options of type `FeedClientOptions` to merge with the default ones (set on the constructor)
+     * and scope as much as possible the results
      */
     fun connectToFeed(options: FeedClientOptions? = null) {
         // Setup the socket to receive open/close events
@@ -253,7 +249,8 @@ class FeedManager(
     /**
      * Gets the content of the user feed
      *
-     * @param options options of type `FeedClientOptions` to merge with the default ones (set on the constructor) and scope as much as possible the results
+     * @param options options of type `FeedClientOptions` to merge with the default
+     * ones (set on the constructor) and scope as much as possible the results
      * @param completionHandler the code to execute when the response is received
      */
     fun getUserFeedContent(options: FeedClientOptions? = null, completionHandler: (Result<Feed>) -> Unit) {
@@ -277,7 +274,11 @@ class FeedManager(
     /**
      * Updates feed messages in bulk
      *
-     * **Attention:** : The base scope for the call should take into account all of the options currently set on the feed, as well as being scoped for the current user. We do this so that we **ONLY** make changes to the messages that are currently in view on this feed, and not all messages that exist.
+     * **Attention:** : The base scope for the call should take into account all of the options
+     * currently set on the feed, as well as being scoped for the current user.
+     * We do this so that we **ONLY** make changes to the messages that are currently in view on
+     * this feed, and not all messages that exist.
+     *
      * @param type the kind of update
      * @param options all the options currently set on the feed to scope as much as possible the bulk update
      * @param completionHandler the code to execute when the response is received
@@ -289,6 +290,31 @@ class FeedManager(
         // delivery_status: one of `queued`, `sent`, `delivered`, `delivery_attempted`, `undelivered`, `not_sent`
         // engagement_status: one of `seen`, `unseen`, `read`, `unread`, `archived`, `unarchived`, `interacted`
         // Also check if the parameters sent here are valid
+
+        val engagementStatus = if (options.status != null && options.status!! != FeedItemScope.ALL) {
+            api.serializeValueAsString(options.status!!)
+        }
+        else {
+            ""
+        }
+
+        val tenants = if (options.tenant != null) {
+            listOf(options.tenant!!)
+        }
+        else {
+            null
+        }
+
+        val body = mapOf(
+            "user_ids" to listOf(userId),
+            "engagement_status" to engagementStatus,
+            "archived" to options.archived,
+            "has_tenant" to options.hasTenant,
+            "tenants" to tenants,
+        )
+
+        val typeValue = api.serializeValueAsString(type)
+        api.decodeFromPost("/channels/$feedId/messages/bulk/$typeValue", body, completionHandler)
     }
 
     private fun paramsFromOptions(options: FeedClientOptions): Map<String, Any> {
