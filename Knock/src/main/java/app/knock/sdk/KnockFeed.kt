@@ -271,9 +271,7 @@ class FeedManager(
             URLQueryItem("trigger_data", mergedOptions.triggerData),
         )
 
-        api.decodeFromGet<Feed>("/users/$userId/feeds/$feedId", queryItems) {
-            completionHandler(it)
-        }
+        api.decodeFromGet("/users/$userId/feeds/$feedId", queryItems, completionHandler)
     }
 
     /**

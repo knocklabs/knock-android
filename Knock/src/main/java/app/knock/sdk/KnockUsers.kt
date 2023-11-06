@@ -21,9 +21,9 @@ data class KnockUser(
 )
 
 fun Knock.getUser(completionHandler: (Result<KnockUser>) -> Unit) {
-    api.decodeFromGet<KnockUser>("/users/$userId", null, completionHandler)
+    api.decodeFromGet("/users/$userId", null, completionHandler)
 }
 
 fun Knock.updateUser(user: KnockUser, completionHandler: (Result<KnockUser>) -> Unit) {
-    api.decodeFromPut<KnockUser>("/users/$userId", user, completionHandler)
+    api.decodeFromPut("/users/$userId", user, completionHandler)
 }
