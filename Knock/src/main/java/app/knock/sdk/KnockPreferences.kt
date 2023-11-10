@@ -131,3 +131,15 @@ data class PreferenceSet (
     @JsonIgnoreProperties(ignoreUnknown = true)
     var categories: Map<String, Either<Boolean, WorkflowPreference>> = mapOf(),
 )
+
+fun Knock.getAllUserPreferences(completionHandler: (Result<List<PreferenceSet>>) -> Unit) {
+    api.decodeFromGet("/users/$userId/preferences", null, completionHandler)
+}
+
+fun Knock.getUserPreferences(preferenceId: String, completionHandler: (Result<PreferenceSet>) -> Unit) {
+    api.decodeFromGet("/users/$userId/preferences/$preferenceId", null, completionHandler)
+}
+
+fun Knock.setUserPreferences(preferenceId: String, preferenceSet: PreferenceSet, completionHandler: (Result<PreferenceSet>) -> Unit) {
+    api.decodeFromPut("/users/$userId/preferences/$preferenceId", preferenceSet, completionHandler)
+}
