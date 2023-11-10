@@ -2,6 +2,7 @@ package app.knock.sdk
 
 import arrow.core.Either
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -56,26 +57,31 @@ object BooleanOrConditionsArraySerializer : JsonSerializer<Either<Boolean, Condi
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class ChannelTypePreferences(
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonDeserialize(using = BooleanOrConditionsArrayDeserializer::class)
     @JsonSerialize(using = BooleanOrConditionsArraySerializer::class)
     @JsonIgnoreProperties(ignoreUnknown = true)
     var email: Either<Boolean, ConditionsArray>? = null,
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonDeserialize(using = BooleanOrConditionsArrayDeserializer::class)
     @JsonSerialize(using = BooleanOrConditionsArraySerializer::class)
     @JsonIgnoreProperties(ignoreUnknown = true)
     var inAppFeed: Either<Boolean, ConditionsArray>? = null,
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonDeserialize(using = BooleanOrConditionsArrayDeserializer::class)
     @JsonSerialize(using = BooleanOrConditionsArraySerializer::class)
     @JsonIgnoreProperties(ignoreUnknown = true)
     var sms: Either<Boolean, ConditionsArray>? = null,
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonDeserialize(using = BooleanOrConditionsArrayDeserializer::class)
     @JsonSerialize(using = BooleanOrConditionsArraySerializer::class)
     @JsonIgnoreProperties(ignoreUnknown = true)
     var push: Either<Boolean, ConditionsArray>? = null,
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonDeserialize(using = BooleanOrConditionsArrayDeserializer::class)
     @JsonSerialize(using = BooleanOrConditionsArraySerializer::class)
     @JsonIgnoreProperties(ignoreUnknown = true)
