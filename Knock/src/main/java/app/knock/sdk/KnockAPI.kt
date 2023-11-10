@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -47,6 +48,7 @@ class KnockAPI(
 
         mapper.propertyNamingStrategy = SNAKE_CASE
         mapper.registerModule(JavaTimeModule())
+        mapper.registerKotlinModule()
     }
 
     inline fun <reified T: Any> decodeFromGet(path: String, queryItems: List<URLQueryItem>?, crossinline handler: (Result<T>) -> Unit) {
