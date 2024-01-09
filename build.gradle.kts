@@ -1,3 +1,13 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        google()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:7.4.0")
+    }
+}
+
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
