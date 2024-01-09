@@ -1,4 +1,4 @@
-package app.knock.sdk
+package app.knock.client
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE
 import com.fasterxml.jackson.databind.node.TextNode

@@ -1,8 +1,40 @@
-# Knock's Kotlin SDK
+# Knock Kotlin client-side SDK
 
-## Init the SDK and FeedManager
+A client-side Kotlin library to integrate Knock into Android applications.
 
-``` kotlin
+## Documentation
+
+See the [documentation](https://docs.knock.app/in-app-ui/android/reference) for usage examples.
+
+## Installation
+
+Add the dependency to your `build.grandle` file as follows:
+
+```java
+dependencies {
+    implementation 'app.knock.client:knock:VERSION'
+}
+```
+
+Or to your `maven.xml` file:
+
+```xml
+<dependencies>
+    <!-- more dependencies here -->
+    <dependency>
+        <groupId>app.knock.client</groupId>
+        <artifactId>knock</artifactId>
+        <version>VERSION</version>
+    </dependency>
+    <!-- more dependencies here -->
+</dependencies>
+```
+
+## Examples
+
+### Init the SDK and FeedManager
+
+```kotlin
 val publishableKey = "..."
 val userId = "..."
 val inAppChannelId = "..."
@@ -12,9 +44,9 @@ val feedManager = FeedManager(client = knockClient, feedId = inAppChannelId)
 
 ```
 
-## Connect to a feed and get new-messages events
+### Connect to a feed and get new-messages events
 
-``` kotlin
+```kotlin
 
 val feedOptions = FeedClientOptions(tenant = "team-a", hasTenant = true)
 feedManager.connectToFeed(feedOptions)
@@ -24,9 +56,9 @@ feedManager.on("new-message") {
 
 ```
 
-## Get feed content
+### Get feed content
 
-``` kotlin
+```kotlin
 
 feedManager.getUserFeedContent(feedOptions) { result ->
     result.fold(
@@ -41,9 +73,9 @@ feedManager.getUserFeedContent(feedOptions) { result ->
 
 ```
 
-## Users
+### Users
 
-``` kotlin
+```kotlin
 
 // Get a user
 knockClient.getUser { result ->

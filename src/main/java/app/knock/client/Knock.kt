@@ -1,4 +1,4 @@
-package app.knock.sdk
+package app.knock.client
 
 /**
  * Returns a new instance of the Knock Client

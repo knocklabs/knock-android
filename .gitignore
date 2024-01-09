@@ -1,7 +1,21 @@
 .DS_Store
-/Knock/.idea
-/Knock/local.properties
-/Knock/.gradle
-/Knock/gradle
-/Knock/gradlew
-/Knock/gradlew.bat
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore IntelliJ projects
+.idea
+
+# Ignore Eclipse projects
+.project
+
+# Ignore classpath
+.classpath
+
+# Ignore Gradle build output directory
+build
+bin
+
+# Credentials
+gradle.properties
+signing.key
