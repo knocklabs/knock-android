@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "app.knock.sdk"
+    namespace = "app.knock.client"
     compileSdk = 34
 
     defaultConfig {

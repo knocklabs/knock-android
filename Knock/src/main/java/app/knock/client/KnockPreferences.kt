@@ -1,4 +1,4 @@
-package app.knock.sdk
+package app.knock.client
 
 import arrow.core.Either
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties

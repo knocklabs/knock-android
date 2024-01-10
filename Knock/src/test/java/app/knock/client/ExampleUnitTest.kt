@@ -1,4 +1,4 @@
-package app.knock.sdk
+package app.knock.client
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
