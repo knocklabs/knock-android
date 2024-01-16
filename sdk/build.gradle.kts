@@ -4,52 +4,19 @@ plugins {
     id("maven-publish")
     id("signing")
 }
+
 group = "app.knock.client"
-version = "$version"
+version = "0.1.0"
 
 publishing {
     publications {
-        release(MavenPublication) {
-            // Apply configurations like groupId, artifactId, and version
-            from components.release
-
-                    groupId = 'com.yourdomain'
-            artifactId = 'libraryname'
-            version = '1.0.0'
-
-            pom {
-                name = 'Your Library Name'
-                description = 'A description of your library'
-                url = 'Library URL or project URL'
-
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id = 'your_id'
-                        name = 'Your Name'
-                        email = 'your@email.com'
-                    }
-                }
-
-                scm {
-                    connection = 'scm:git:github.com/yourusername/your-repo.git'
-                    developerConnection = 'scm:git:ssh://github.com:yourusername/your-repo.git'
-                    url = 'http://github.com/yourusername/your-repo'
-                }
+        register<MavenPublication>("release") {
+            groupId = "app.knock.client"
+            artifactId = "knock-android"
+            version = "0.1.0"
+            afterEvaluate {
+                from(components["release"])
             }
-        }
-    }
-
-    repositories {
-        maven {
-            // URL of the Maven repository to publish to
-            url = uri('path_to_your_maven_repo')
         }
     }
 }
@@ -60,7 +27,9 @@ android {
 
     defaultConfig {
         minSdk = 31
-
+        aarMetadata {
+            minCompileSdk = 31
+        }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
