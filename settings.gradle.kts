@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Knock Android"
-include(":Knock")
+rootProject.name = "knock-android"
+include(":sdk")
