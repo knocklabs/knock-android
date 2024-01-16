@@ -2,7 +2,6 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("maven-publish")
-    id("signing")
 }
 
 group = "app.knock.client"
@@ -11,9 +10,7 @@ version = "0.1.0"
 publishing {
     publications {
         register<MavenPublication>("release") {
-            groupId = "app.knock.client"
             artifactId = "knock-android"
-            version = "0.1.0"
             afterEvaluate {
                 from(components["release"])
             }
