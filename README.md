@@ -1,50 +1,81 @@
-# Knock Kotlin client-side SDK
+# Knock Android
 
 A client-side Kotlin library to integrate Knock into Android applications.
 
-## Documentation
+# Documentation
 
 See the [documentation](https://docs.knock.app/in-app-ui/android/reference) for usage examples.
 
-## Installation
+# Requirements & Support
 
-Add the dependency to your `build.grandle` file as follows:
+<table>
+    <thead>
+        <tr>
+            <th width="880px" align="left">Requirements</th>
+            <th width="120px" align="center"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr width="600px">
+            <td align="left">Knock Account</td>
+            <td align="center">
+                <a href="https://dashboard.knock.app/signup">
+                    <code>Sign Up</code>
+                </a>
+            </td>
+        </tr>
+        <tr width="600px">
+            <td align="left">Minimum Android SDK Version</td>
+            <td align="center">
+                <code>29</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-```java
+&emsp;
+
+# Installation
+
+### 1. Add Jitpack repository support in your `settings.gradle` file
+
+```gradle
+pluginManagement {
+    repositories {
+        ..
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        ..
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+### 2. Add the implementation to your app `build.gradle` file
+
+```gradle
 dependencies {
-    implementation 'app.knock.client:knock:VERSION'
+    implementation 'com.github.knocklabs:knock-android:<VERSION>'
 }
 ```
 
-Or to your `maven.xml` file:
-
-```xml
-<dependencies>
-    <!-- more dependencies here -->
-    <dependency>
-        <groupId>app.knock.client</groupId>
-        <artifactId>knock</artifactId>
-        <version>VERSION</version>
-    </dependency>
-    <!-- more dependencies here -->
-</dependencies>
-```
-
-## Examples
-
-### Init the SDK and FeedManager
+### 3. Init the SDK and FeedManager
 
 ```kotlin
-val publishableKey = "..."
-val userId = "..."
-val inAppChannelId = "..."
+val publishableKey = "<KNOCK_PUBLIC_KEY>"
+val userId = "<CURRENT_USER_ID>"
+val inAppChannelId = "<IN_APP_CHANNEL_ID"
 
 val knockClient = Knock(publishableKey = publishableKey, userId = userId)
 val feedManager = FeedManager(client = knockClient, feedId = inAppChannelId)
 
 ```
+# Usage
 
-## Connect to a feed and get new-messages events
+### Connect to a feed and get new-messages events
 
 ```kotlin
 
