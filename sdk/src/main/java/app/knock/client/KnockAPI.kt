@@ -6,6 +6,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -14,7 +16,10 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.IOException
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
 import java.net.URL
+import com.google.gson.Gson
 
 data class URLQueryItem(
     val name: String,
@@ -181,4 +186,66 @@ class KnockAPI(
             HTTPMethod.DELETE -> builder.delete(mapper.writeValueAsString(body).toRequestBody())
         }
     }
+}
+
+interface KnockAPIService {
+    suspend fun <T> get(path: String, queryItems: List<Pair<String, String>>? = null): T
+    suspend fun <T> post(path: String, body: Any? = null): T
+    // Add put and delete as needed
+}
+
+class KnockAPI2 : KnockAPIService {
+    private val gson = Gson()
+
+    private suspend fun apiBaseUrl(): String {
+        return "https://api.example.com/v1"
+    }
+
+    private suspend fun <T> makeRequest(
+        method: String,
+        path: String,
+        queryItems: List<Pair<String, String>>? = null,
+        body: Any? = null
+    ): T = withContext(Dispatchers.IO) {
+        val baseUrl = apiBaseUrl()
+        val fullUrl = StringBuilder(baseUrl).append(path)
+
+        queryItems?.let {
+            fullUrl.append("?").append(queryItems.joinToString("&") { "${it.first}=${it.second}" })
+        }
+
+        val url = URL(fullUrl.toString())
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = method
+        connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+
+        if (body != null) {
+            connection.doOutput = true
+            val outputBytes = gson.toJson(body).toByteArray()
+            connection.outputStream.use { os ->
+//                os.write(outputBytes)
+            }
+        }
+
+        val responseCode = connection.responseCode
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            InputStreamReader(connection.inputStream).use { reader ->
+                gson.fromJson(reader, responseType)
+            }
+        } else {
+            throw RuntimeException("HTTP Response Code: $responseCode")
+        }
+    }
+
+    override suspend fun <T> get(
+        path: String,
+        queryItems: List<Pair<String, String>>?
+    ): T = makeRequest("GET", path, queryItems, null)
+
+    override suspend fun <T> post(
+        path: String,
+        body: Any?
+    ): T = makeRequest("POST", path, null, body)
+
+    // Implement put and delete by calling makeRequest with "PUT" and "DELETE"
 }
