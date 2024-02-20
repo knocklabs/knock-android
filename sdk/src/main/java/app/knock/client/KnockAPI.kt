@@ -39,7 +39,7 @@ class KnockAPI(
     private val apiBasePath: String
         get() = "$hostname/v1"
     private val clientVersion: String
-        get() = "0.1.3"
+        get() = "0.1.4"
 
     init {
         if(hostname != null) {
