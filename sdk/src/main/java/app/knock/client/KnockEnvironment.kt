@@ -1,7 +1,11 @@
 package app.knock.client
 
 class KnockEnvironment {
-    companion object val defaultBaseUrl: String = "https://api.knock.app"
+    companion object {
+        val defaultBaseUrl: String = "https://api.knock.app"
+        val appVersion: String = "1.0.0"
+    }
+
     private val userDevicePushTokenKey = "knock_push_device_token"
     private val previousPushTokensKey = "knock_previous_push_token"
 
@@ -58,7 +62,7 @@ class KnockEnvironment {
     }
 
     @Synchronized
-    fun getPublishableKey(): String? = publishableKey
+    fun getPublishableKey(): String = publishableKey!!
 
     @Synchronized
     @Throws(Exception::class)

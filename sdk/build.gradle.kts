@@ -69,7 +69,6 @@ dependencies {
 
     // Arrow
     implementation("io.arrow-kt:arrow-core:1.2.0")
-    implementation("io.arrow-kt:arrow-fx-coroutines:1.2.0")
     implementation("io.arrow-kt:arrow-integrations-jackson-module:0.14.1")
 
     implementation("com.google.code.gson:gson:2.10.1")

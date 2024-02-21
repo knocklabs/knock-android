@@ -1,167 +1,23 @@
-package app.knock.client
+package app.knock.client.modules
 
 import android.util.Log
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonProperty
+import app.knock.client.Knock
+import app.knock.client.services.KnockAPIService
+import app.knock.client.services.URLQueryItem
+import app.knock.client.models.feed.BulkChannelMessageStatusUpdateType
+import app.knock.client.models.feed.BulkOperation
+import app.knock.client.models.feed.FeedClientOptions
+import app.knock.client.models.feed.FeedItemScope
 import org.phoenixframework.Channel
 import org.phoenixframework.Message
 import org.phoenixframework.Socket
-import java.time.ZonedDateTime
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Block(
-    var content: String,
-    var name: String,
-    var rendered: String,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class FeedItem(
-    @JsonProperty("__cursor") var feedCursor: String,
-    // var clickedAt: ZonedDateTime?,
-    var blocks: List<Block>,
-    var data: Map<String, Any> = hashMapOf(),
-    var id: String,
-    var insertedAt: ZonedDateTime?,
-    // var interactedAt: ZonedDateTime?,
-    // var linkClickedAt: ZonedDateTime?,
-    var readAt: ZonedDateTime?,
-    var seenAt: ZonedDateTime?,
-    var tenant: String,
-    var totalActivities: Int,
-    var totalActors: Int,
-    var updatedAt: ZonedDateTime?,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class PageInfo(
-    var before: String? = null,
-    var after: String? = null,
-    var pageSize: Int = 0,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class FeedMetadata(
-    var totalCount: Int = 0,
-    var unreadCount: Int = 0,
-    var unseenCount: Int = 0,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Feed(
-    var entries: List<FeedItem> = listOf(),
-    var meta: FeedMetadata = FeedMetadata(),
-    var pageInfo: PageInfo = PageInfo(),
-)
-
-enum class BulkOperationStatus {
-    @JsonProperty("queued") QUEUED,
-    @JsonProperty("processing") PROCESSING,
-    @JsonProperty("completed") COMPLETED,
-    @JsonProperty("failed") FAILED,
-}
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class BulkOperation(
-    var id: String,
-    var name: String,
-    var status: BulkOperationStatus,
-    var estimatedTotalRows: Int,
-    var processedRows: Int,
-    var startedAt: ZonedDateTime?,
-    var completedAt: ZonedDateTime?,
-    var failedAt: ZonedDateTime?,
-)
-
-enum class FeedItemScope {
-    @JsonProperty("all") ALL,
-    @JsonProperty("unread") UNREAD,
-    @JsonProperty("read") READ,
-    @JsonProperty("unseen") UNSEEN,
-    @JsonProperty("seen") SEEN,
-}
-
-enum class FeedItemArchivedScope {
-    @JsonProperty("include") INCLUDE,
-    @JsonProperty("exclude") EXCLUDE,
-    @JsonProperty("only") ONLY,
-}
-
-enum class BulkChannelMessageStatusUpdateType {
-    @JsonProperty("seen") SEEN,
-    @JsonProperty("read") READ,
-    @JsonProperty("archived") ARCHIVED,
-    @JsonProperty("unseen") UNSEEN,
-    @JsonProperty("unread") UNREAD,
-    @JsonProperty("unarchived") UNARCHIVED,
-}
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class FeedClientOptions(
-    var before: String? = null,
-    var after: String? = null,
-    var pageSize: Int? = null,
-    var status: FeedItemScope? = null,
-    var source: String? = null, // Optionally scope all notifications to a particular source only
-    var tenant: String? = null,  // Optionally scope all requests to a particular tenant
-    var hasTenant: Boolean? = null, // Optionally scope to notifications with any tenancy or no tenancy
-    var archived: FeedItemArchivedScope? = null, // Optionally scope to a given archived status (defaults to `exclude`)
-    var triggerData: Map<String, Any>? = null,
-) {
-    /**
-     * Merge new options to the exiting ones, if the new ones are nil, only a copy of `self` will be returned
-     *
-     * @param options the options to merge with the current struct, if they are nil, only a copy of `self` will be returned
-     * @return a new struct of type `FeedClientOptions` with the options passed as the parameter merged into it.
-     */
-    fun mergeOptions(options: FeedClientOptions? = null): FeedClientOptions {
-        // initialize a new `mergedOptions` as a copy of `this`
-        val mergedOptions = this.copy()
-
-        // check if the passed options are not nil
-        if (options == null) {
-            return mergedOptions
-        }
-
-        // for each one of the properties `not nil` in the parameter `options`, override the ones in the new struct
-        if (options.before != null) {
-            mergedOptions.before = options.before
-        }
-        if (options.after != null) {
-            mergedOptions.after = options.after
-        }
-        if (options.pageSize != null) {
-            mergedOptions.pageSize = options.pageSize
-        }
-        if (options.status != null) {
-            mergedOptions.status = options.status
-        }
-        if (options.source != null) {
-            mergedOptions.source = options.source
-        }
-        if (options.tenant != null) {
-            mergedOptions.tenant = options.tenant
-        }
-        if (options.hasTenant != null) {
-            mergedOptions.hasTenant = options.hasTenant
-        }
-        if (options.archived != null) {
-            mergedOptions.archived = options.archived
-        }
-        if (options.triggerData != null) {
-            mergedOptions.triggerData = options.triggerData
-        }
-
-        return mergedOptions
-    }
-}
 
 class FeedManager(
     client: Knock,
     private var feedId: String,
     options: FeedClientOptions = FeedClientOptions()
 ) {
-    private var api: KnockAPI = client.api
+    private var api: KnockAPIService = client.api
     private var socket: Socket
     private var feedChannel: Channel? = null
     private var userId: String = client.userId

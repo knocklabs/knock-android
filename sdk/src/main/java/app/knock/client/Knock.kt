@@ -3,6 +3,9 @@ package app.knock.client
 import android.content.Context
 import android.content.SharedPreferences
 import app.knock.client.modules.AuthenticationModule
+import app.knock.client.modules.ChannelModule
+import app.knock.client.modules.FeedManager
+import app.knock.client.modules.MessageModule
 import app.knock.client.modules.PreferenceModule
 import app.knock.client.modules.UserModule
 import kotlinx.coroutines.CoroutineScope
@@ -68,7 +71,7 @@ object Knock {
         logger.loggingDebugOptions = options?.loggingOptions ?: KnockLoggingOptions.ERRORS_ONLY
         environment.setPublishableKey(key = publishableKey)
         environment.setBaseUrl(baseUrl = options?.hostname)
-        environment.setPushChannelId(pushChannelId = pushChannelId)
+        environment.setPushChannelId(pushChannelId)
     }
 
 

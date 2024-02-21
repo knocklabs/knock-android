@@ -8,7 +8,7 @@ class KnockLogger {
     var loggingDebugOptions: KnockLoggingOptions = KnockLoggingOptions.ERRORS_ONLY
 
     fun log(
-        type: LogType,
+        type: LogType = LogType.DEBUG,
         category: LogCategory,
         message: String,
         description: String? = null,
@@ -57,7 +57,7 @@ class KnockLogger {
 
 // Extension function for easy logging within the Knock object
 fun Knock.log(
-    type: KnockLogger.LogType,
+    type: KnockLogger.LogType = KnockLogger.LogType.DEBUG,
     category: KnockLogger.LogCategory,
     message: String,
     description: String? = null,
