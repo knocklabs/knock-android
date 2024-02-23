@@ -1,4 +1,35 @@
 package app.knock.client.services
 
-class FeedService {
+import app.knock.client.models.feed.BulkChannelMessageStatusUpdateType
+import app.knock.client.models.feed.BulkOperation
+import app.knock.client.models.feed.Feed
+import app.knock.client.models.feed.FeedClientOptions
+import app.knock.client.models.feed.FeedItemScope
+import app.knock.client.models.networking.URLQueryItem
+
+internal class FeedService: KnockAPIService() {
+    suspend fun getUserFeedContent(userId: String, feedId: String, options: FeedClientOptions? = null, queryItems: List<URLQueryItem>): Feed {
+        return get<Feed>("/users/$userId/feeds/$feedId", queryItems)
+    }
+
+    suspend fun makeBulkStatusUpdate(userId: String, feedId: String, type: BulkChannelMessageStatusUpdateType, options: FeedClientOptions): BulkOperation {
+        val engagementStatus = if (options.status != null && options.status!! != FeedItemScope.ALL) {
+            serializeValueAsString(options.status!!)
+        } else {""}
+
+        val tenants = if (options.tenant != null) {
+            listOf(options.tenant!!)
+        }else { null }
+
+        val body = mapOf(
+            "user_ids" to listOf(userId),
+            "engagement_status" to engagementStatus,
+            "archived" to options.archived,
+            "has_tenant" to options.hasTenant,
+            "tenants" to tenants,
+        )
+
+        val typeValue = serializeValueAsString(type)
+        return post<BulkOperation>("/channels/$feedId/messages/bulk/$typeValue", body)
+    }
 }

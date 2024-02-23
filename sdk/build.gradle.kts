@@ -61,7 +61,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // Phoenix Socket
-    implementation("com.github.dsrees:JavaPhoenixClient:1.2.0")
+    api("com.github.dsrees:JavaPhoenixClient:1.2.0")
 
     // Jackson
     implementation ("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")

@@ -1,28 +1,6 @@
 package app.knock.client
 
 
-
-///**
-// * Gets the channel data for the current user.
-// *
-// * @param channelId the id of the channel
-// */
-//fun Knock.getUserChannelData(channelId: String, completionHandler: (Result<ChannelData>) -> Unit) {
-//    api.decodeFromGet("/users/$userId/channel_data/$channelId", null, completionHandler)
-//}
-//
-///**
-// * Gets the channel data for the current user.
-// *
-// * @param channelId the id of the channel
-// * @param data the shape of the payload varies depending on the channel. You can learn more about channel data schemas [here](https://docs.knock.app/send-notifications/setting-channel-data#provider-data-requirements).
-// */
-//fun Knock.updateUserChannelData(channelId: String, data: Any, completionHandler: (Result<ChannelData>) -> Unit) {
-//    val body = mapOf(
-//        "data" to data
-//    )
-//    api.decodeFromPut("/users/$userId/channel_data/$channelId", body, completionHandler)
-//}
 //
 ///**
 // * Registers an Apple Push Notification Service token so that the device can receive remote push notifications. This is a convenience method that internally gets the channel data and searches for the token. If it exists, then it's already registered and it returns. If the data does not exists or the token is missing from the array, it's added.

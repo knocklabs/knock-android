@@ -1,9 +1,13 @@
 package app.knock.client
 
+import android.content.Context
+import android.content.SharedPreferences
+import app.knock.client.models.KnockException
+
 class KnockEnvironment {
     companion object {
-        val defaultBaseUrl: String = "https://api.knock.app"
-        val appVersion: String = "1.0.0"
+        const val defaultBaseUrl: String = "https://api.knock.app"
+        const val clientVersion: String = "1.0.0"
     }
 
     private val userDevicePushTokenKey = "knock_push_device_token"
@@ -24,6 +28,22 @@ class KnockEnvironment {
     @Volatile
     private var baseUrl: String = defaultBaseUrl
 
+    @Volatile
+    private var sharedPreferences: SharedPreferences? = null
+
+    @Synchronized
+    fun getSharedPreferences(): SharedPreferences? = sharedPreferences
+
+    @Synchronized
+    @Throws(Exception::class)
+    fun getSafeSharedPreferences(): SharedPreferences = getSharedPreferences() ?: throw KnockException.UserIdNotSetError
+
+    @Synchronized
+    fun setSharedPreferences(context: Context) {
+        val appContext = context.applicationContext
+        sharedPreferences = appContext.getSharedPreferences("knock-android", Context.MODE_PRIVATE)
+    }
+
     @Synchronized
     fun getBaseUrl(): String = baseUrl
 
@@ -33,31 +53,32 @@ class KnockEnvironment {
     }
 
     @Synchronized
-    fun setUserInfo(userId: String?, userToken: String?) {
-        this.userId = userId
-        this.userToken = userToken
-    }
-
-    @Synchronized
     fun getUserId(): String? = userId
 
     @Synchronized
+    fun setUserId(userId: String?) {
+        this.userId = userId
+        this.userToken = userToken
+    }
+    @Synchronized
     @Throws(Exception::class)
-    fun getSafeUserId(): String = userId ?: throw Exception("UserID not set")
+    fun getSafeUserId(): String = getUserId() ?: throw KnockException.UserIdNotSetError
 
     @Synchronized
     fun getUserToken(): String? = userToken
 
     @Synchronized
-    @Throws(Exception::class)
-    fun getSafeUserToken(): String = userToken ?: throw Exception("User token not set")
+    fun setUserToken(userToken: String?) {
+        this.userToken = userToken
+    }
 
     @Synchronized
     @Throws(Exception::class)
-    fun setPublishableKey(key: String) {
-        if (key.startsWith("sk_")) {
-            throw Exception("Wrong key error")
-        }
+    fun getSafeUserToken(): String = userToken ?: throw KnockException.UserTokenNotSet
+
+    @Synchronized
+    @Throws(Exception::class)
+    fun setPublishableKey(key: String?) {
         this.publishableKey = key
     }
 
@@ -66,7 +87,7 @@ class KnockEnvironment {
 
     @Synchronized
     @Throws(Exception::class)
-    fun getSafePublishableKey(): String = publishableKey ?: throw Exception("Knock not setup")
+    fun getSafePublishableKey(): String = publishableKey ?: throw KnockException.KnockNotSetup
 
     @Synchronized
     fun setPushChannelId(newChannelId: String?) {
@@ -78,24 +99,28 @@ class KnockEnvironment {
 
     @Synchronized
     @Throws(Exception::class)
-    fun getSafePushChannelId(): String = pushChannelId ?: throw Exception("PushChannelID not set")
+    fun getSafePushChannelId(): String = pushChannelId ?: throw KnockException.PushChannelIdNotSetError
 
-    suspend fun setDeviceToken(token: String?) {
+    fun setDeviceToken(token: String?) {
         val previousTokens = getPreviousPushTokens()
         if (token != null && !previousTokens.contains(token)) {
             setPreviousPushTokens(tokens = previousTokens + token)
         }
-        Knock.getSharedPreferences().edit().putString(userDevicePushTokenKey, token).apply()
+        getSafeSharedPreferences().edit().putString(userDevicePushTokenKey, token).apply()
     }
 
-    fun getDeviceToken(): String? = Knock.getSharedPreferences().getString(userDevicePushTokenKey, null)
+    fun getDeviceToken(): String? = getSafeSharedPreferences().getString(userDevicePushTokenKey, null)
 
     @Throws(Exception::class)
-    fun getSafeDeviceToken(): String = getDeviceToken() ?: throw Exception("Device push token not set")
+    fun getSafeDeviceToken(): String = getDeviceToken() ?: throw KnockException.DevicePushTokenNotSet
 
     private fun setPreviousPushTokens(tokens: List<String>) {
-        Knock.getSharedPreferences().edit().putStringSet(previousPushTokensKey, tokens.toSet()).apply()
+        getSafeSharedPreferences().edit().putStringSet(previousPushTokensKey, tokens.toSet()).apply()
     }
 
-    fun getPreviousPushTokens(): List<String> = Knock.getSharedPreferences().getStringSet(previousPushTokensKey, setOf())?.toList() ?: emptyList()
+    fun clearPreviousPushTokens() {
+        getSafeSharedPreferences().edit().putStringSet(previousPushTokensKey, emptyList<String>().toSet()).apply()
+    }
+
+    fun getPreviousPushTokens(): List<String> = getSafeSharedPreferences().getStringSet(previousPushTokensKey, setOf())?.toList() ?: emptyList()
 }

@@ -1,4 +1,13 @@
 package app.knock.client.services
 
-class UserService {
+import app.knock.client.models.KnockUser
+
+internal class UserService: KnockAPIService() {
+    suspend fun getUser(userId: String): KnockUser {
+        return get("/users/$userId", null)
+    }
+
+    suspend fun updateUser(user: KnockUser): KnockUser {
+        return put("/users/${user.id}", user)
+    }
 }

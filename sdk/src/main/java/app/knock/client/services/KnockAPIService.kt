@@ -2,8 +2,10 @@ package app.knock.client.services
 
 import app.knock.client.Knock
 import app.knock.client.KnockEnvironment
-import app.knock.client.KnockLogger
-import app.knock.client.log
+import app.knock.client.KnockLogCategory
+import app.knock.client.logError
+import app.knock.client.logNetworking
+import app.knock.client.models.KnockException
 import app.knock.client.models.networking.HTTPMethod
 import app.knock.client.models.networking.URLQueryItem
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE
@@ -17,17 +19,16 @@ import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.IOException
 import java.net.URL
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 internal open class KnockAPIService {
-    private val httpClient = OkHttpClient()
     val mapper = jacksonObjectMapper()
 
     private val environmentBaseUrl: String
@@ -43,7 +44,7 @@ internal open class KnockAPIService {
         get() = Knock.environment.getPublishableKey()
 
     private val clientVersion: String
-        get() = KnockEnvironment.appVersion
+        get() = KnockEnvironment.clientVersion
 
     init {
         mapper.propertyNamingStrategy = SNAKE_CASE
@@ -51,40 +52,34 @@ internal open class KnockAPIService {
         mapper.registerKotlinModule()
     }
 
-    suspend inline fun <reified T: Any> get(path: String, queryItems: List<URLQueryItem>? = null): Result<T> {
+    suspend inline fun <reified T: Any> get(path: String, queryItems: List<URLQueryItem>? = null): T {
         val result = makeGeneralRequest(HTTPMethod.GET, path, queryItems)
         return decodeData(result)
     }
 
-    suspend inline fun <reified T: Any> post(path: String, body: Any?): Result<T> {
+    suspend inline fun <reified T: Any> post(path: String, body: Any? = null): T {
         val result = makeGeneralRequest(HTTPMethod.POST, path, body = body)
         return decodeData(result)
     }
 
-    suspend inline fun <reified T: Any> put(path: String, body: Any?): Result<T> {
+    suspend inline fun <reified T: Any> put(path: String, body: Any? = null): T {
         val result = makeGeneralRequest(HTTPMethod.PUT, path, body = body)
         return decodeData(result)
     }
 
-    suspend inline fun <reified T: Any> delete(path: String, body: Any? = null): Result<T> {
+    suspend inline fun <reified T: Any> delete(path: String, body: Any? = null): T {
         val result = makeGeneralRequest(HTTPMethod.DELETE, path, body = body)
         return decodeData(result)
     }
 
-    inline fun <reified T: Any> decodeData(result: Result<String>): Result<T> {
-        return result.fold(
-            onSuccess = {
-                try {
-                    Result.success(mapper.readValue(it))
-                } catch (e: Exception) {
-                    Knock.log(KnockLogger.LogType.ERROR, KnockLogger.LogCategory.NETWORKING, "Failed to decode object")
-                    Result.failure(e)
-                }
-            },
-            onFailure = {
-                Result.failure(it)
-            }
-        )
+    inline fun <reified T: Any> decodeData(result: String): T {
+        return try {
+            mapper.readValue(result)
+        } catch (e: Exception) {
+            val typeName = T::class.java.simpleName
+            Knock.logError(KnockLogCategory.NETWORKING, "Failed to decode object: $typeName", exception = e, additionalInfo = mapOf("RAW_JSON" to result))
+            throw KnockException.DecodingError(typeName)
+        }
     }
 
     /**
@@ -100,67 +95,24 @@ internal open class KnockAPIService {
         return mapper.valueToTree<TextNode>(value).textValue()
     }
 
-    // RequestBody? type
-//    private suspend fun makeGeneralRequest(method: HTTPMethod, path: String, queryItems: List<URLQueryItem>?, body: Any?): Result<String> {
-//        var url = URL("$apiBasePath$path").toHttpUrlOrNull()!!
-//
-//        queryItems?.let {
-//            var urlBuilder = url.newBuilder()
-//            for (item in queryItems) {
-//                item.value?.let { value ->
-//                    urlBuilder = urlBuilder.addQueryParameter(item.name, "$value")
-//                }
-//            }
-//            url = urlBuilder.build()
-//        }
-//
-//        var builder = Request.Builder()
-//            .addHeader("Authorization", "Bearer $publishableKey")
-//            .addHeader("User-Agent", "knock-kotlin@$clientVersion")
-//            .addHeader("Content-Type","application/json")
-//            .url(url)
-//
-//        userToken?.let {
-//            builder = builder.addHeader("X-Knock-User-Token", it)
-//        }
-//
-//        builder = addMethod(builder, method, body)
-//
-//        val request = builder.build()
-//
-//        httpClient.newCall(request).enqueue(object : Callback {
-//            override fun onFailure(call: Call, e: IOException) {
-//                Result.failure<IOException>(e)
-//            }
-//
-//            override fun onResponse(call: Call, response: Response) {
-//                response.use {
-//                    if (!response.isSuccessful) {
-//                        Result.failure<IOException>(IOException("Unexpected code $response"))
-//                    }
-//
-//                    try {
-//                        Result.success(response.body!!.string())
-//                    } catch (e: Exception) {
-//                        Result.failure(e)
-//                    }
-//                }
-//            }
-//        })
-//    }
-
     suspend fun makeGeneralRequest(
         method: HTTPMethod,
         path: String,
         queryItems: List<URLQueryItem>? = null,
         body: Any? = null
-    ): Result<String> = withContext(Dispatchers.IO) {
+    ): String = withContext(Dispatchers.IO) {
         suspendCoroutine { continuation ->
-
-            var url = URL("$apiBasePath$path").toHttpUrlOrNull()!!
+            val urlString = "$apiBasePath$path"
+            var url = URL(urlString).toHttpUrlOrNull()
+            if (url == null) {
+                val exception = KnockException.NetworkError("Invalid URL", 400, "Invalid URL: $urlString")
+                Knock.logNetworking("Invalid URL: $urlString", exception = exception)
+                continuation.resumeWithException(exception)
+                return@suspendCoroutine
+            }
 
             queryItems?.let {
-                var urlBuilder = url.newBuilder()
+                var urlBuilder = url!!.newBuilder()
                 for (item in queryItems) {
                     item.value?.let { value ->
                         urlBuilder = urlBuilder.addQueryParameter(item.name, "$value")
@@ -173,7 +125,7 @@ internal open class KnockAPIService {
                 .addHeader("Authorization", "Bearer $publishableKey")
                 .addHeader("User-Agent", "knock-kotlin@$clientVersion")
                 .addHeader("Content-Type","application/json")
-                .url(url)
+                .url(url!!)
 
             userToken?.let {
                 builder = builder.addHeader("X-Knock-User-Token", it)
@@ -184,20 +136,26 @@ internal open class KnockAPIService {
             val request = builder.build()
 
             // Execute the request
-            OkHttpClient().newCall(request).enqueue(object : Callback {
+            Knock.httpClient.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    continuation.resume(Result.failure(e))
+                    continuation.resumeWithException(e)
                 }
 
                 override fun onResponse(call: Call, response: Response) {
                     if (!response.isSuccessful) {
-                        continuation.resume(Result.failure(IOException("Unexpected code $response")))
-                        return
+                        val e = KnockException.NetworkError(code = response.code, description = "Api request failure", response = response, request = request)
+                        Knock.logNetworking("Api request failure", request = call.request(), response = response, exception = e)
+                        continuation.resumeWithException(e)
                     }
 
                     response.body?.string()?.let {
-                        continuation.resume(Result.success(it))
-                    } ?: continuation.resume(Result.failure(IOException("Null Response Body")))
+                        Knock.logNetworking("Api request successful", request = call.request(), response = response)
+                        continuation.resume(it)
+                    } ?: {
+                        val e = KnockException.NetworkError(code = response.code, description = "Null Response Body", response = response, request = request)
+                        Knock.logNetworking("Api request failure", request = call.request(), response = response, exception = e)
+                        continuation.resumeWithException(e)
+                    }
                 }
             })
         }

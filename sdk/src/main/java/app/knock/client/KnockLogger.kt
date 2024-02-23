@@ -1,6 +1,8 @@
 package app.knock.client
 
 import android.util.Log
+import okhttp3.Request
+import okhttp3.Response
 
 class KnockLogger {
     private companion object val loggingSubsystem = "knock-swift"
@@ -9,11 +11,10 @@ class KnockLogger {
 
     fun log(
         type: LogType = LogType.DEBUG,
-        category: LogCategory,
+        category: KnockLogCategory,
         message: String,
         description: String? = null,
-        status: LogStatus? = null,
-        errorMessage: String? = null,
+        exception: Exception? = null,
         additionalInfo: Map<String, String>? = null
     ) {
         when (loggingDebugOptions) {
@@ -25,14 +26,13 @@ class KnockLogger {
 
         var composedMessage = "[Knock] $message"
         description?.let { composedMessage += " | Description: $it" }
-        status?.let { composedMessage += " | Status: ${it.name}" }
-        errorMessage?.let { composedMessage += " | Error: $it" }
+        exception?.let { composedMessage += " | Error: ${it.localizedMessage}" }
         additionalInfo?.forEach { (key, value) ->
             composedMessage += " | $key: $value"
         }
 
         // Using Android Log API for logging
-        val tag = "${loggingSubsystem.capitalize()}:${category.name.capitalize()}"
+        val tag = "${loggingSubsystem}:${category.name}"
         when (type) {
             LogType.DEBUG -> Log.d(tag, composedMessage)
             LogType.INFO -> Log.i(tag, composedMessage)
@@ -42,28 +42,71 @@ class KnockLogger {
         }
     }
 
-    enum class LogStatus {
-        SUCCESS, FAIL
-    }
-
     enum class LogType {
         DEBUG, INFO, ERROR, WARNING, LOG
     }
 
-    enum class LogCategory {
-        USER, FEED, CHANNEL, PREFERENCES, NETWORKING, PUSH_NOTIFICATION, MESSAGE, GENERAL, APP_DELEGATE
-    }
+
 }
 
 // Extension function for easy logging within the Knock object
-fun Knock.log(
-    type: KnockLogger.LogType = KnockLogger.LogType.DEBUG,
-    category: KnockLogger.LogCategory,
+fun Knock.logDebug(
+    category: KnockLogCategory,
     message: String,
     description: String? = null,
-    status: KnockLogger.LogStatus? = null,
-    errorMessage: String? = null,
+    exception: Exception? = null,
     additionalInfo: Map<String, String>? = null
 ) {
-    logger.log(type, category, message, description, status, errorMessage, additionalInfo)
+    logger.log(KnockLogger.LogType.DEBUG, category, message, description, exception, additionalInfo)
+}
+
+fun Knock.logError(
+    category: KnockLogCategory,
+    message: String,
+    description: String? = null,
+    exception: Exception? = null,
+    additionalInfo: Map<String, String>? = null
+) {
+    logger.log(KnockLogger.LogType.ERROR, category, message, description, exception, additionalInfo)
+}
+
+fun Knock.logWarning(
+    category: KnockLogCategory,
+    message: String,
+    description: String? = null,
+    exception: Exception? = null,
+    additionalInfo: Map<String, String>? = null
+) {
+    logger.log(KnockLogger.LogType.WARNING, category, message, description, exception, additionalInfo)
+}
+
+fun Knock.logNetworking(
+    message: String,
+    description: String? = null,
+    exception: Exception? = null,
+    request: Request? = null,
+    response: Response? = null
+) {
+    val data: MutableMap<String, String> = mutableMapOf()
+
+    request?.let {
+        data["URL"] = it.url.toString()
+        data["METHOD"] = it.method
+        it.body?.let { body ->
+            data["BODY"] = body.toString()
+        }
+    }
+
+    response?.let {
+        data["STATUS"] = if (it.isSuccessful) "SUCCESS" else "FAIL"
+        data["CODE"] = "${it.code} : ${it.message}"
+        it.body?.let { body ->
+            data["RESPONSE_BODY"] = body.toString()
+        }
+    }
+    logger.log(KnockLogger.LogType.DEBUG, KnockLogCategory.NETWORKING, message, description, exception, data)
+}
+
+enum class KnockLogCategory {
+    USER, FEED, CHANNEL, PREFERENCES, NETWORKING, PUSH_NOTIFICATION, MESSAGE, GENERAL, APP_DELEGATE
 }
