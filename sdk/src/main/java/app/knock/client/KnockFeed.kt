@@ -18,11 +18,13 @@ data class Block(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class FeedItem(
     @JsonProperty("__cursor") var feedCursor: String,
-    var clickedAt: ZonedDateTime?,
+    var activities: List<KnockActivity>?,
+    var actors: List<KnockUser>,
     var blocks: List<Block>,
     var data: Map<String, Any> = hashMapOf(),
     var id: String,
     var insertedAt: ZonedDateTime?,
+    var clickedAt: ZonedDateTime?,
     var interactedAt: ZonedDateTime?,
     var linkClickedAt: ZonedDateTime?,
     var readAt: ZonedDateTime?,
@@ -31,6 +33,16 @@ data class FeedItem(
     var totalActivities: Int,
     var totalActors: Int,
     var updatedAt: ZonedDateTime?,
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class KnockActivity(
+    var id: String,
+    var actor: KnockUser?,
+    var recipient: KnockUser?,
+    var data: Map<String, Any> = hashMapOf(),
+    var insertedAt: ZonedDateTime?,
+    var updatedAt: ZonedDateTime?
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
