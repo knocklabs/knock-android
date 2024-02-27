@@ -1,6 +1,5 @@
 package app.knock.client.models.preferences
 
-import app.knock.client.Condition
 import arrow.core.Either
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.core.JsonGenerator
