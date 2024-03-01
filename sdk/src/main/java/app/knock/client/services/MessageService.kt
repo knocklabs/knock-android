@@ -1,7 +1,6 @@
 package app.knock.client.services
 
 import app.knock.client.models.messages.KnockMessage
-import app.knock.client.models.messages.KnockMessageStatusBatchUpdateType
 import app.knock.client.models.messages.KnockMessageStatusUpdateType
 
 internal class MessageService: KnockAPIService() {
@@ -19,11 +18,11 @@ internal class MessageService: KnockAPIService() {
         return delete<KnockMessage>("/messages/$messageId/$statusValue")
     }
 
-    suspend fun batchUpdateStatuses(messageIds: List<String>, status: KnockMessageStatusBatchUpdateType): List<KnockMessage> {
+    suspend fun batchUpdateStatuses(messageIds: List<String>, status: KnockMessageStatusUpdateType): List<KnockMessage> {
         val statusValue = serializeValueAsString(status)
         val body = mapOf(
             "message_ids" to messageIds
         )
-        return delete<List<KnockMessage>>("/messages/batch/$statusValue", body)
+        return post<List<KnockMessage>>("/messages/batch/$statusValue", body)
     }
 }

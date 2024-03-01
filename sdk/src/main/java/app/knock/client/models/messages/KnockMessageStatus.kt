@@ -10,4 +10,19 @@ enum class KnockMessageStatus {
     @JsonProperty("undelivered") UNDELIVERED,
     @JsonProperty("seen") SEEN,
     @JsonProperty("unseen") UNSEEN,
+    @JsonProperty("read") READ,
+    @JsonProperty("interacted") INTERACTED,
+    @JsonProperty("archived") ARCHIVED,
+    @JsonProperty("unread") UNREAD,
+    @JsonProperty("unarchived") UNARCHIVED,
+}
+
+enum class KnockMessageStatusUpdateType {
+    @JsonProperty("seen") SEEN,
+    @JsonProperty("read") READ,
+    @JsonProperty("interacted") INTERACTED,
+    @JsonProperty("archived") ARCHIVED,
+    @JsonProperty("unseen") UNSEEN,
+    @JsonProperty("unread") UNREAD,
+    @JsonProperty("unarchived") UNARCHIVED,
 }

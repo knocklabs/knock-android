@@ -2,11 +2,11 @@ package app.knock.client.modules
 
 import app.knock.client.Knock
 import app.knock.client.models.messages.KnockMessage
-import app.knock.client.models.messages.KnockMessageStatusBatchUpdateType
 import app.knock.client.models.messages.KnockMessageStatusUpdateType
 import app.knock.client.services.MessageService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class MessageModule {
 
@@ -23,7 +23,7 @@ internal class MessageModule {
         return messageService.deleteMessageStatus(messageId, status)
     }
 
-    suspend fun batchUpdateStatuses(messageIds: List<String>, status: KnockMessageStatusBatchUpdateType): List<KnockMessage> {
+    suspend fun batchUpdateStatuses(messageIds: List<String>, status: KnockMessageStatusUpdateType): List<KnockMessage> {
         return messageService.batchUpdateStatuses(messageIds, status)
     }
 }
@@ -42,7 +42,9 @@ suspend fun Knock.getMessage(messageId: String): KnockMessage {
 
 fun Knock.getMessage(messageId: String, completionHandler: (Result<KnockMessage>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
-        val message = getMessage(messageId)
+        val message = withContext(Dispatchers.IO) {
+            getMessage(messageId)
+        }
         completionHandler(Result.success(message))
     } catch (e: Exception) {
         completionHandler(Result.failure(e))
@@ -63,7 +65,9 @@ suspend fun Knock.updateMessageStatus(messageId: String, status: KnockMessageSta
 
 fun Knock.updateMessageStatus(messageId: String, status: KnockMessageStatusUpdateType, completionHandler: (Result<KnockMessage>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
-        val message = updateMessageStatus(messageId, status)
+        val message = withContext(Dispatchers.IO) {
+            updateMessageStatus(messageId, status)
+        }
         completionHandler(Result.success(message))
     } catch (e: Exception) {
         completionHandler(Result.failure(e))
@@ -84,7 +88,9 @@ suspend fun Knock.deleteMessageStatus(messageId: String, status: KnockMessageSta
 
 fun Knock.deleteMessageStatus(messageId: String, status: KnockMessageStatusUpdateType, completionHandler: (Result<KnockMessage>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
-        val message = deleteMessageStatus(messageId, status)
+        val message = withContext(Dispatchers.IO) {
+            deleteMessageStatus(messageId, status)
+        }
         completionHandler(Result.success(message))
     } catch (e: Exception) {
         completionHandler(Result.failure(e))
@@ -101,13 +107,15 @@ fun Knock.deleteMessageStatus(messageId: String, status: KnockMessageStatusUpdat
  *
  *  *Note:* Knock scopes this batch rate limit by message_ids and status. This allows for 1 update per second per message per status.
  */
-suspend fun Knock.batchUpdateStatuses(messageIds: List<String>, status: KnockMessageStatusBatchUpdateType): List<KnockMessage> {
+suspend fun Knock.batchUpdateStatuses(messageIds: List<String>, status: KnockMessageStatusUpdateType): List<KnockMessage> {
     return messageModule.batchUpdateStatuses(messageIds, status)
 }
 
-fun Knock.batchUpdateStatuses(messageIds: List<String>, status: KnockMessageStatusBatchUpdateType, completionHandler: (Result<List<KnockMessage>>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
+fun Knock.batchUpdateStatuses(messageIds: List<String>, status: KnockMessageStatusUpdateType, completionHandler: (Result<List<KnockMessage>>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
-        val messages = batchUpdateStatuses(messageIds, status)
+        val messages = withContext(Dispatchers.IO) {
+            batchUpdateStatuses(messageIds, status)
+        }
         completionHandler(Result.success(messages))
     } catch (e: Exception) {
         completionHandler(Result.failure(e))

@@ -23,11 +23,10 @@ data class ConditionsArray(
 
 object BooleanOrConditionsArrayDeserializer : JsonDeserializer<Either<Boolean, ConditionsArray>>() {
     override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Either<Boolean, ConditionsArray> {
-        try {
-            return Either.Left(p.readValueAs(Boolean::class.java))
-        }
-        catch (e: Exception) {
-            return Either.Right(p.readValueAs(ConditionsArray::class.java))
+        return try {
+            Either.Left(p.readValueAs(Boolean::class.java))
+        } catch (e: Exception) {
+            Either.Right(p.readValueAs(ConditionsArray::class.java))
         }
     }
 }

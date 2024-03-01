@@ -6,5 +6,5 @@ import com.fasterxml.jackson.annotation.JsonProperty
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class WorkflowSource(
     var key: String,
-    @JsonProperty("version_id") var versionId: String,
+    var versionId: String,
 )

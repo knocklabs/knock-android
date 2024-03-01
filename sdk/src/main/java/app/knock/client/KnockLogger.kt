@@ -5,7 +5,7 @@ import okhttp3.Request
 import okhttp3.Response
 
 class KnockLogger {
-    private companion object val loggingSubsystem = "knock-swift"
+    private companion object val loggingSubsystem = "knock-android"
 
     var loggingDebugOptions: KnockLoggingOptions = KnockLoggingOptions.ERRORS_ONLY
 

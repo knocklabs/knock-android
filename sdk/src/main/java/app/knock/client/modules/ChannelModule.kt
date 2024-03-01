@@ -7,10 +7,10 @@ import app.knock.client.logError
 import app.knock.client.logWarning
 import app.knock.client.models.ChannelData
 import app.knock.client.models.KnockException
-import app.knock.client.models.KnockUser
 import app.knock.client.services.ChannelService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class ChannelModule {
     private val channelService = ChannelService() // Assume existence
@@ -139,7 +139,9 @@ suspend fun Knock.getUserChannelData(channelId: String): ChannelData {
 fun Knock.getUserChannelData(channelId: String, completionHandler: (Result<ChannelData>) -> Unit) = coroutineScope.launch(
     Dispatchers.Main) {
     try {
-        val channel = getUserChannelData(channelId)
+        val channel = withContext(Dispatchers.IO) {
+            getUserChannelData(channelId)
+        }
         completionHandler(Result.success(channel))
     } catch (e: Exception) {
         completionHandler(Result.failure(e))
@@ -153,7 +155,9 @@ suspend fun Knock.updateUserChannelData(channelId: String, data: Any): ChannelDa
 fun Knock.updateUserChannelData(channelId: String, data: Any, completionHandler: (Result<ChannelData>) -> Unit) = coroutineScope.launch(
     Dispatchers.Main) {
     try {
-        val channel = updateUserChannelData(channelId, data)
+        val channel = withContext(Dispatchers.IO) {
+            updateUserChannelData(channelId, data)
+        }
         completionHandler(Result.success(channel))
     } catch (e: Exception) {
         completionHandler(Result.failure(e))
@@ -186,7 +190,9 @@ suspend fun Knock.registerTokenForFCM(channelId: String, token: String): Channel
 
 fun Knock.registerTokenForFCM(channelId: String, token: String, completionHandler: (Result<ChannelData>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
-        val channel = registerTokenForFCM(channelId, token)
+        val channel = withContext(Dispatchers.IO) {
+            registerTokenForFCM(channelId, token)
+        }
         completionHandler(Result.success(channel))
     } catch(e: Exception) {
         completionHandler(Result.failure(e))
@@ -199,7 +205,9 @@ suspend fun Knock.unregisterTokenForFCM(channelId: String, token: String): Chann
 
 fun Knock.unregisterTokenForFCM(channelId: String, token: String, completionHandler: (Result<ChannelData>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
-        val channel = unregisterTokenForFCM(channelId, token)
+        val channel = withContext(Dispatchers.IO) {
+            unregisterTokenForFCM(channelId, token)
+        }
         completionHandler(Result.success(channel))
     } catch(e: Exception) {
         completionHandler(Result.failure(e))

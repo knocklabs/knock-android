@@ -66,7 +66,7 @@ suspend fun Knock.signIn(userId: String, userToken: String?) {
     authenticationModule.signIn(userId, userToken)
 }
 
-fun Knock.signIn(userId: String, userToken: String?, completionHandler: (Result<Unit>) -> Void)= coroutineScope.launch(Dispatchers.Main) {
+fun Knock.signIn(userId: String, userToken: String?, completionHandler: (Result<Unit>) -> Unit)= coroutineScope.launch(Dispatchers.Main) {
     try {
         signIn(userId, userToken)
         completionHandler(Result.success(Unit))

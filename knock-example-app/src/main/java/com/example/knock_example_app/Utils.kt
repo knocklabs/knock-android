@@ -6,7 +6,4 @@ object Utils {
     val inAppChannelId = "3b97fa62-4d20-40ef-93c8-850b4e7e9734"
     val pushChannelId = "410c05ba-87bc-497c-a65f-5b40038e046c"
     val hostname = "https://api.knock-dev.app"
-    val teams = listOf(Team("team-a", "TeamA"), Team("team-b", "TeamB"))
 }
-
-data class Team(val id: String, val name: String)

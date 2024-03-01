@@ -4,10 +4,10 @@ import app.knock.client.Knock
 import app.knock.client.KnockLogCategory
 import app.knock.client.logDebug
 import app.knock.client.logError
-import app.knock.client.models.feed.BulkChannelMessageStatusUpdateType
 import app.knock.client.models.feed.BulkOperation
 import app.knock.client.models.feed.Feed
 import app.knock.client.models.feed.FeedClientOptions
+import app.knock.client.models.messages.KnockMessageStatusUpdateType
 import app.knock.client.models.networking.URLQueryItem
 import app.knock.client.services.FeedService
 import org.phoenixframework.Channel
@@ -55,7 +55,7 @@ internal class FeedModule(private val feedId: String, private val defaultOptions
         return feedService.getUserFeedContent(userId, feedId, mergedOptions, queryItems)
     }
 
-    suspend fun makeBulkStatusUpdate(type: BulkChannelMessageStatusUpdateType, options: FeedClientOptions? = null): BulkOperation {
+    suspend fun makeBulkStatusUpdate(type: KnockMessageStatusUpdateType, options: FeedClientOptions? = null): BulkOperation {
         val mergedOptions = defaultOptions.mergeOptions(options)
         return feedService.makeBulkStatusUpdate(userId, feedId, type, mergedOptions)
     }

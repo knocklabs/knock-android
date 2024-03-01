@@ -1,10 +1,10 @@
 package app.knock.client.services
 
-import app.knock.client.models.feed.BulkChannelMessageStatusUpdateType
 import app.knock.client.models.feed.BulkOperation
 import app.knock.client.models.feed.Feed
 import app.knock.client.models.feed.FeedClientOptions
 import app.knock.client.models.feed.FeedItemScope
+import app.knock.client.models.messages.KnockMessageStatusUpdateType
 import app.knock.client.models.networking.URLQueryItem
 
 internal class FeedService: KnockAPIService() {
@@ -12,7 +12,7 @@ internal class FeedService: KnockAPIService() {
         return get<Feed>("/users/$userId/feeds/$feedId", queryItems)
     }
 
-    suspend fun makeBulkStatusUpdate(userId: String, feedId: String, type: BulkChannelMessageStatusUpdateType, options: FeedClientOptions): BulkOperation {
+    suspend fun makeBulkStatusUpdate(userId: String, feedId: String, type: KnockMessageStatusUpdateType, options: FeedClientOptions): BulkOperation {
         val engagementStatus = if (options.status != null && options.status!! != FeedItemScope.ALL) {
             serializeValueAsString(options.status!!)
         } else {""}

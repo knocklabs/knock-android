@@ -23,9 +23,9 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 29
+        minSdk = 28
         aarMetadata {
-            minCompileSdk = 29
+            minCompileSdk = 28
         }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -68,7 +68,7 @@ dependencies {
     implementation ("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
 
     // Arrow
-    implementation("io.arrow-kt:arrow-core:1.2.0")
+    api("io.arrow-kt:arrow-core:1.2.0")
     implementation("io.arrow-kt:arrow-integrations-jackson-module:0.14.1")
 
     implementation("com.google.code.gson:gson:2.10.1")

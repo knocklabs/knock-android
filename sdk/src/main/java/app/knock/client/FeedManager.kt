@@ -1,12 +1,13 @@
 package app.knock.client
 
-import app.knock.client.models.feed.BulkChannelMessageStatusUpdateType
 import app.knock.client.models.feed.BulkOperation
 import app.knock.client.models.feed.Feed
 import app.knock.client.models.feed.FeedClientOptions
+import app.knock.client.models.messages.KnockMessageStatusUpdateType
 import app.knock.client.modules.FeedModule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.phoenixframework.Message
 
 class FeedManager(
@@ -51,10 +52,12 @@ class FeedManager(
         return feedModule.getUserFeedContent(options)
     }
 
-    fun getUserFeedContent(options: FeedClientOptions? = null, completionHandler: (Result<Feed>) -> Void)= Knock.coroutineScope.launch(
+    fun getUserFeedContent(options: FeedClientOptions? = null, completionHandler: (Result<Feed>) -> Unit)= Knock.coroutineScope.launch(
         Dispatchers.Main) {
         try {
-            val feed = getUserFeedContent(options)
+            val feed = withContext(Dispatchers.IO) {
+                getUserFeedContent(options)
+            }
             completionHandler(Result.success(feed))
         } catch (e: Exception) {
             completionHandler(Result.failure(e))
@@ -73,14 +76,16 @@ class FeedManager(
      * @param options all the options currently set on the feed to scope as much as possible the bulk update
      * @param completionHandler the code to execute when the response is received
      */
-    suspend fun makeBulkStatusUpdate(type: BulkChannelMessageStatusUpdateType, options: FeedClientOptions? = null): BulkOperation {
+    suspend fun makeBulkStatusUpdate(type: KnockMessageStatusUpdateType, options: FeedClientOptions? = null): BulkOperation {
         return feedModule.makeBulkStatusUpdate(type, options)
     }
 
-    fun makeBulkStatusUpdate(type: BulkChannelMessageStatusUpdateType, options: FeedClientOptions? = null, completionHandler: (Result<BulkOperation>) -> Void)= Knock.coroutineScope.launch(
+    fun makeBulkStatusUpdate(type: KnockMessageStatusUpdateType, options: FeedClientOptions? = null, completionHandler: (Result<BulkOperation>) -> Unit)= Knock.coroutineScope.launch(
         Dispatchers.Main) {
         try {
-            val batch = makeBulkStatusUpdate(type, options)
+            val batch = withContext(Dispatchers.IO) {
+                makeBulkStatusUpdate(type, options)
+            }
             completionHandler(Result.success(batch))
         } catch (e: Exception) {
             completionHandler(Result.failure(e))

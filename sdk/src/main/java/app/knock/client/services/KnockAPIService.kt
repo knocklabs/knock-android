@@ -15,6 +15,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.Callback
@@ -101,14 +102,14 @@ internal open class KnockAPIService {
         queryItems: List<URLQueryItem>? = null,
         body: Any? = null
     ): String = withContext(Dispatchers.IO) {
-        suspendCoroutine { continuation ->
+        suspendCancellableCoroutine { continuation ->
             val urlString = "$apiBasePath$path"
             var url = URL(urlString).toHttpUrlOrNull()
             if (url == null) {
                 val exception = KnockException.NetworkError("Invalid URL", 400, "Invalid URL: $urlString")
                 Knock.logNetworking("Invalid URL: $urlString", exception = exception)
                 continuation.resumeWithException(exception)
-                return@suspendCoroutine
+                return@suspendCancellableCoroutine
             }
 
             queryItems?.let {
@@ -138,19 +139,27 @@ internal open class KnockAPIService {
             // Execute the request
             Knock.httpClient.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    continuation.resumeWithException(e)
+                    if (!continuation.isCancelled) {
+                        continuation.resumeWithException(e)
+                    }
+                    return
                 }
 
                 override fun onResponse(call: Call, response: Response) {
                     if (!response.isSuccessful) {
                         val e = KnockException.NetworkError(code = response.code, description = "Api request failure", response = response, request = request)
                         Knock.logNetworking("Api request failure", request = call.request(), response = response, exception = e)
-                        continuation.resumeWithException(e)
+                        if (!continuation.isCancelled) {
+                            continuation.resumeWithException(e)
+                        }
+                        return
                     }
 
                     response.body?.string()?.let {
                         Knock.logNetworking("Api request successful", request = call.request(), response = response)
-                        continuation.resume(it)
+                        if (!continuation.isCancelled) {
+                            continuation.resume(it)
+                        }
                     } ?: {
                         val e = KnockException.NetworkError(code = response.code, description = "Null Response Body", response = response, request = request)
                         Knock.logNetworking("Api request failure", request = call.request(), response = response, exception = e)

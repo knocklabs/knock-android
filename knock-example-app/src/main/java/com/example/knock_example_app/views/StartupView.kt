@@ -13,11 +13,8 @@ import com.example.knock_example_app.ui.theme.KnockandroidTheme
 fun StartupView(authViewModel: AuthenticationViewModel = viewModel()) {
     val isSignedIn by authViewModel.isSignedIn.collectAsState(initial = false)
 
-//    LaunchedEffect(key1 = Unit) {
-//        authViewModel.signIn(userId = Utils.userId)
-//    }
     when (isSignedIn) {
-        true -> MainView()
+        true -> MainView(authViewModel)
         false -> SignInView(authViewModel)
         null -> Text("Loading...")
     }

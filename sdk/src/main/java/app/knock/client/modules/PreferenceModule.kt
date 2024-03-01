@@ -5,6 +5,7 @@ import app.knock.client.models.preferences.PreferenceSet
 import app.knock.client.services.PreferenceService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class PreferenceModule {
     private val preferenceService = PreferenceService() // Assume this exists
@@ -35,7 +36,9 @@ suspend fun Knock.getAllUserPreferences(): List<PreferenceSet> {
 
 fun Knock.getAllUserPreferences(completionHandler: (Result<List<PreferenceSet>>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
-        val preferences = getAllUserPreferences()
+        val preferences = withContext(Dispatchers.IO) {
+            getAllUserPreferences()
+        }
         completionHandler(Result.success(preferences))
     } catch (e: Exception) {
         completionHandler(Result.failure(e))
@@ -54,7 +57,9 @@ suspend fun Knock.getUserPreferences(preferenceId: String): PreferenceSet {
 
 fun Knock.getUserPreferences(preferenceId: String, completionHandler: (Result<PreferenceSet>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
-        val preferences = getUserPreferences(preferenceId)
+        val preferences = withContext(Dispatchers.IO) {
+            getUserPreferences(preferenceId)
+        }
         completionHandler(Result.success(preferences))
     } catch (e: Exception) {
         completionHandler(Result.failure(e))
@@ -79,7 +84,9 @@ suspend fun Knock.setUserPreferences(preferenceId: String, preferenceSet: Prefer
 
 fun Knock.setUserPreferences(preferenceId: String, preferenceSet: PreferenceSet, completionHandler: (Result<PreferenceSet>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
-        val preferences = setUserPreferences(preferenceId, preferenceSet)
+        val preferences = withContext(Dispatchers.IO) {
+            setUserPreferences(preferenceId, preferenceSet)
+        }
         completionHandler(Result.success(preferences))
     } catch (e: Exception) {
         completionHandler(Result.failure(e))
