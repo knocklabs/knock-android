@@ -72,4 +72,6 @@ dependencies {
     implementation("io.arrow-kt:arrow-integrations-jackson-module:0.14.1")
 
     implementation("com.google.code.gson:gson:2.10.1")
+
+    api("com.google.firebase:firebase-messaging-ktx:23.4.1")
 }

@@ -1,6 +1,8 @@
 package app.knock.client.modules
 
 import app.knock.client.Knock
+import app.knock.client.KnockLogCategory
+import app.knock.client.logWarning
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -10,14 +12,14 @@ internal class AuthenticationModule {
         Knock.environment.setUserId(userId)
         Knock.environment.setUserToken(userToken)
 
-        val token = Knock.environment.getDeviceToken()
+        val token = Knock.getCurrentFcmToken()
         val channelId = Knock.environment.getPushChannelId()
         if (token != null && channelId != null) {
-//            try {
-//                Knock.channelModule.registerTokenForAPNS(channelId, token)
-//            } catch (e: Exception) {
-//                Knock.logger.log(KnockLogger.LogType.WARNING, KnockLogger.LogCategory.USER, "signIn", "Successfully set user, however, unable to registerTokenForAPNS at this time.")
-//            }
+            try {
+                Knock.channelModule.registerTokenForFCM(channelId, token)
+            } catch (e: Exception) {
+                Knock.logWarning(KnockLogCategory.USER, "signIn", "Successfully set user, however, unable to registerTokenForAPNS at this time.")
+            }
         }
     }
 

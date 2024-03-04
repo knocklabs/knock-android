@@ -1,5 +1,11 @@
 package app.knock.client.modules
 
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.ActivityCompat
 import app.knock.client.Knock
 import app.knock.client.KnockLogCategory
 import app.knock.client.logDebug
@@ -8,9 +14,13 @@ import app.knock.client.logWarning
 import app.knock.client.models.ChannelData
 import app.knock.client.models.KnockException
 import app.knock.client.services.ChannelService
+import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 internal class ChannelModule {
     private val channelService = ChannelService() // Assume existence
@@ -97,7 +107,6 @@ internal class ChannelModule {
             @Suppress("UNCHECKED_CAST")
             val existingChannelTokens: List<String> = existingChannelData.data["tokens"] as? List<String> ?: emptyList()
 
-
             val previousTokens = Knock.environment.getPreviousPushTokens()
 
             val preparedTokens = getTokenDataForServer(token, previousTokens, existingChannelTokens)
@@ -129,6 +138,28 @@ internal class ChannelModule {
 
         Knock.logDebug(KnockLogCategory.PUSH_NOTIFICATION, "Device token registered on server")
         return newChannelData
+    }
+
+//    private val isFirebaseInitialized get() = FirebaseApp.getApps().isNotEmpty()
+
+    suspend fun getCurrentFcmToken(): String? {
+//        if (!isFirebaseInitialized) {
+//            Knock.logError(KnockLogCategory.PUSH_NOTIFICATION, "Firebase is not initialized. Knock will not be able to get the FCM token until Firebase is initialized.")
+//            return null
+//        }
+
+        val token = suspendCoroutine { continuation ->
+            // Get the current FCM token
+            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Knock.logError(KnockLogCategory.PUSH_NOTIFICATION, task.exception.toString())
+                    continuation.resume(null)
+                    return@addOnCompleteListener
+                }
+                continuation.resume(task.result)
+            }
+        }
+        return token
     }
 }
 
@@ -164,12 +195,8 @@ fun Knock.updateUserChannelData(channelId: String, data: Any, completionHandler:
     }
 }
 
-/**
- * Returns the apnsDeviceToken that was set from the Knock.shared.registerTokenForAPNS.
- * If you use our KnockAppDelegate, the token registration will be handled for you automatically.
- */
-fun Knock.getApnsDeviceToken(): String? {
-    return environment.getDeviceToken()
+suspend fun Knock.getCurrentFcmToken(): String? {
+    return channelModule.getCurrentFcmToken()
 }
 
 /**
@@ -211,5 +238,19 @@ fun Knock.unregisterTokenForFCM(channelId: String, token: String, completionHand
         completionHandler(Result.success(channel))
     } catch(e: Exception) {
         completionHandler(Result.failure(e))
+    }
+}
+
+fun Knock.requestNotificationPermission(activity: Activity, requestCode: Int = 1) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), requestCode)
+    }
+}
+
+fun Knock.isPushPermissionGranted(context: Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+    } else {
+        true
     }
 }
