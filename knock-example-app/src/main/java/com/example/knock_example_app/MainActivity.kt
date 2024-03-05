@@ -1,5 +1,6 @@
 package com.example.knock_example_app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,5 +26,10 @@ class MainActivity : KnockComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        print("test")
     }
 }
