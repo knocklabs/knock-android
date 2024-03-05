@@ -92,10 +92,9 @@ data class ChannelTypePreferences(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class WorkflowPreference(
-    @JsonSetter(nulls = Nulls.SKIP)
-    var channelTypes: ChannelTypePreferences = ChannelTypePreferences(),
+    var channelTypes: ChannelTypePreferences?,
 
-    @JsonSetter(nulls = Nulls.SKIP)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     var conditions: List<Condition> = listOf(),
 )
 
@@ -124,9 +123,7 @@ object BooleanOrWorkflowPreferenceSerializer : JsonSerializer<Either<Boolean, Wo
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PreferenceSet (
     var id: String? = "default", // default or tenant.id; TODO: check this, because the API allows any value to be used here, not only default and an existing tenant.id
-
-    @JsonSetter(nulls = Nulls.SKIP)
-    var channelTypes: ChannelTypePreferences = ChannelTypePreferences(),
+    var channelTypes: ChannelTypePreferences?,
 
     @JsonDeserialize(contentUsing = BooleanOrWorkflowPreferenceDeserializer::class)
     @JsonSerialize(contentUsing = BooleanOrWorkflowPreferenceSerializer::class)

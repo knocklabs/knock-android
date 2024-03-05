@@ -24,7 +24,7 @@ data class FeedItem(
     var actors: List<KnockUser>,
     var blocks: List<Block>,
 
-    @JsonSetter(nulls = Nulls.SKIP)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     var data: Map<String, Any> = hashMapOf(),
     var id: String,
     var insertedAt: ZonedDateTime?,
@@ -45,7 +45,7 @@ data class KnockActivity(
     var actor: KnockUser?,
     var recipient: KnockUser?,
 
-    @JsonSetter(nulls = Nulls.SKIP)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     var data: Map<String, Any> = hashMapOf(),
     var insertedAt: ZonedDateTime?,
     var updatedAt: ZonedDateTime?
@@ -67,7 +67,7 @@ data class FeedMetadata(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Feed(
-    @JsonSetter(nulls = Nulls.SKIP)
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     var entries: List<FeedItem> = listOf(),
     var meta: FeedMetadata = FeedMetadata(),
     var pageInfo: PageInfo = PageInfo(),
