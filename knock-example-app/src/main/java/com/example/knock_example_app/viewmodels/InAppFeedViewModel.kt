@@ -3,15 +3,13 @@ package com.example.knock_example_app.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.knock.client.FeedManager
+import app.knock.client.modules.FeedManager
 import app.knock.client.Knock
 import app.knock.client.models.feed.Feed
 import app.knock.client.models.feed.FeedClientOptions
 import app.knock.client.models.feed.FeedItem
 import app.knock.client.models.feed.FeedItemScope
-import app.knock.client.models.messages.KnockMessageStatus
 import app.knock.client.models.messages.KnockMessageStatusUpdateType
-import app.knock.client.modules.batchUpdateStatuses
 import app.knock.client.modules.updateMessageStatus
 import com.example.knock_example_app.Utils
 import kotlinx.coroutines.Dispatchers

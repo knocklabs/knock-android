@@ -3,6 +3,9 @@ package app.knock.client
 import android.content.Context
 import android.content.SharedPreferences
 import app.knock.client.models.KnockException
+import com.google.firebase.messaging.FirebaseMessaging
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class KnockEnvironment {
     companion object {
@@ -10,7 +13,7 @@ class KnockEnvironment {
         const val clientVersion: String = "1.0.0"
     }
 
-    private val userDevicePushTokenKey = "knock_push_device_token"
+//    private val userDevicePushTokenKey = "knock_push_device_token"
     private val previousPushTokensKey = "knock_previous_push_token"
 
     @Volatile
@@ -106,13 +109,27 @@ class KnockEnvironment {
         if (token != null && !previousTokens.contains(token)) {
             setPreviousPushTokens(tokens = previousTokens + token)
         }
-        getSafeSharedPreferences().edit().putString(userDevicePushTokenKey, token).apply()
     }
 
-    fun getDeviceToken(): String? = getSafeSharedPreferences().getString(userDevicePushTokenKey, null)
+    suspend fun getCurrentFcmToken(): String? {
+//        if (!isFirebaseInitialized) {
+//            Knock.logError(KnockLogCategory.PUSH_NOTIFICATION, "Firebase is not initialized. Knock will not be able to get the FCM token until Firebase is initialized.")
+//            return null
+//        }
 
-    @Throws(Exception::class)
-    fun getSafeDeviceToken(): String = getDeviceToken() ?: throw KnockException.DevicePushTokenNotSet
+        val token = suspendCoroutine { continuation ->
+            // Get the current FCM token
+            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Knock.logError(KnockLogCategory.PUSH_NOTIFICATION, task.exception.toString())
+                    continuation.resume(null)
+                    return@addOnCompleteListener
+                }
+                continuation.resume(task.result)
+            }
+        }
+        return token
+    }
 
     private fun setPreviousPushTokens(tokens: List<String>) {
         getSafeSharedPreferences().edit().putStringSet(previousPushTokensKey, tokens.toSet()).apply()

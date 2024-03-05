@@ -25,10 +25,10 @@ internal class AuthenticationModule {
 
     suspend fun signOut() {
         val channelId = Knock.environment.getPushChannelId()
-        val token = Knock.environment.getDeviceToken()
+        val token = Knock.getCurrentFcmToken()
         if (channelId != null && token != null) {
             try {
-//                Knock.channelModule.unregisterTokenForAPNS(channelId, token)
+                Knock.channelModule.unregisterTokenForFCM(channelId, token)
             } finally {
                 clearDataForSignOut()
             }

@@ -14,16 +14,11 @@ import app.knock.client.logWarning
 import app.knock.client.models.ChannelData
 import app.knock.client.models.KnockException
 import app.knock.client.services.ChannelService
-import com.google.firebase.FirebaseApp
-import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
-
 internal class ChannelModule {
-    private val channelService = ChannelService() // Assume existence
+    private val channelService = ChannelService()
     suspend fun getUserChannelData(channelId: String): ChannelData {
         val userId = Knock.environment.getSafeUserId()
         return channelService.getUserChannelData(userId, channelId)
@@ -139,28 +134,6 @@ internal class ChannelModule {
         Knock.logDebug(KnockLogCategory.PUSH_NOTIFICATION, "Device token registered on server")
         return newChannelData
     }
-
-//    private val isFirebaseInitialized get() = FirebaseApp.getApps().isNotEmpty()
-
-    suspend fun getCurrentFcmToken(): String? {
-//        if (!isFirebaseInitialized) {
-//            Knock.logError(KnockLogCategory.PUSH_NOTIFICATION, "Firebase is not initialized. Knock will not be able to get the FCM token until Firebase is initialized.")
-//            return null
-//        }
-
-        val token = suspendCoroutine { continuation ->
-            // Get the current FCM token
-            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-                if (!task.isSuccessful) {
-                    Knock.logError(KnockLogCategory.PUSH_NOTIFICATION, task.exception.toString())
-                    continuation.resume(null)
-                    return@addOnCompleteListener
-                }
-                continuation.resume(task.result)
-            }
-        }
-        return token
-    }
 }
 
 suspend fun Knock.getUserChannelData(channelId: String): ChannelData {
@@ -195,8 +168,15 @@ fun Knock.updateUserChannelData(channelId: String, data: Any, completionHandler:
     }
 }
 
-suspend fun Knock.getCurrentFcmToken(): String? {
-    return channelModule.getCurrentFcmToken()
+suspend fun Knock.getCurrentDeviceToken(): String? {
+    return environment.getCurrentFcmToken()
+}
+
+fun Knock.getCurrentDeviceToken(completionHandler: (String?) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
+    val token = withContext(Dispatchers.IO) {
+        getCurrentDeviceToken()
+    }
+    completionHandler(token)
 }
 
 /**

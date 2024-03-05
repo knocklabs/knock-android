@@ -1,10 +1,10 @@
-package app.knock.client
+package app.knock.client.modules
 
+import app.knock.client.Knock
 import app.knock.client.models.feed.BulkOperation
 import app.knock.client.models.feed.Feed
 import app.knock.client.models.feed.FeedClientOptions
 import app.knock.client.models.messages.KnockMessageStatusUpdateType
-import app.knock.client.modules.FeedModule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

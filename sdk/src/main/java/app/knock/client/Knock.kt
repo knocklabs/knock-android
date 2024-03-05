@@ -4,6 +4,7 @@ import android.content.Context
 import app.knock.client.models.KnockException
 import app.knock.client.modules.AuthenticationModule
 import app.knock.client.modules.ChannelModule
+import app.knock.client.modules.FeedManager
 import app.knock.client.modules.MessageModule
 import app.knock.client.modules.PreferenceModule
 import app.knock.client.modules.UserModule
@@ -15,6 +16,8 @@ object Knock {
 
     private val KNOCK_COROUTINE_CONTEXT by lazy { SupervisorJob() }
     internal val coroutineScope = CoroutineScope(KNOCK_COROUTINE_CONTEXT)
+
+    internal val KNOCK_PENDING_NOTIFICATION_KEY = "knock_pending_notification_key"
 
     internal val httpClient by lazy {
         OkHttpClient.Builder().build()
