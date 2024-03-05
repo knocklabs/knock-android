@@ -2,7 +2,6 @@ package app.knock.client
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
@@ -45,23 +44,7 @@ fun RemoteMessage.presentNotification(context: Context, handlingClass: Class<*>?
     }
 }
 
-internal class KnockIntent(private val context: Context, cls: Class<*>?, message: RemoteMessage) : Intent(context, cls) {
-    init {
-        putExtra(Knock.KNOCK_PENDING_NOTIFICATION_KEY, message)
-        addCategory(CATEGORY_LAUNCHER)
-        addFlags(FLAG_ACTIVITY_SINGLE_TOP)
-        action = ACTION_MAIN
-    }
-
-    internal val pendingIntent get() = PendingIntent.getActivity(
-        context,
-        0,
-        this,
-        PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
-    )
-}
-
-fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit) {
+fun Intent.getPushNotificationFromTap(completion: (message: RemoteMessage) -> Unit) {
     try {
         // Check to see if we have an intent to work
         val key = Knock.KNOCK_PENDING_NOTIFICATION_KEY
@@ -72,15 +55,14 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
             extras?.remove(key)
 
             // Track when the notification was tapped
-            Courier.shared.trackNotification(
-                message = message,
-                event = CourierPushEvent.CLICKED,
-                onSuccess = { Courier.log("Event tracked") },
-                onFailure = { Courier.error(it.toString()) }
-            )
+//            Courier.shared.trackNotification(
+//                message = message,
+//                event = CourierPushEvent.CLICKED,
+//                onSuccess = { Courier.log("Event tracked") },
+//                onFailure = { Courier.error(it.toString()) }
+//            )
 
-            onClick(message)
-
+            completion(message)
         }
 
     } catch (e: Exception) {

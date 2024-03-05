@@ -8,6 +8,7 @@ import com.google.firebase.messaging.RemoteMessage
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 open class KnockMessagingService: FirebaseMessagingService() {
 
+    // This will be called if user receives a push notification with the app in the foreground.
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         Knock.logDebug(KnockLogCategory.PUSH_NOTIFICATION, "onMessageReceived", "received message: $message")
