@@ -3,6 +3,8 @@ package app.knock.client
 import android.util.Log
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 import org.phoenixframework.Channel
 import org.phoenixframework.Message
 import org.phoenixframework.Socket
@@ -21,6 +23,8 @@ data class FeedItem(
     var activities: List<KnockActivity>?,
     var actors: List<KnockUser>,
     var blocks: List<Block>,
+
+    @JsonSetter(nulls = Nulls.SKIP)
     var data: Map<String, Any> = hashMapOf(),
     var id: String,
     var insertedAt: ZonedDateTime?,
@@ -40,6 +44,8 @@ data class KnockActivity(
     var id: String,
     var actor: KnockUser?,
     var recipient: KnockUser?,
+
+    @JsonSetter(nulls = Nulls.SKIP)
     var data: Map<String, Any> = hashMapOf(),
     var insertedAt: ZonedDateTime?,
     var updatedAt: ZonedDateTime?
@@ -61,6 +67,7 @@ data class FeedMetadata(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Feed(
+    @JsonSetter(nulls = Nulls.SKIP)
     var entries: List<FeedItem> = listOf(),
     var meta: FeedMetadata = FeedMetadata(),
     var pageInfo: PageInfo = PageInfo(),

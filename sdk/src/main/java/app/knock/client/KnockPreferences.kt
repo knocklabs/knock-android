@@ -3,6 +3,8 @@ package app.knock.client
 import arrow.core.Either
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
@@ -90,7 +92,10 @@ data class ChannelTypePreferences(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class WorkflowPreference(
+    @JsonSetter(nulls = Nulls.SKIP)
     var channelTypes: ChannelTypePreferences = ChannelTypePreferences(),
+
+    @JsonSetter(nulls = Nulls.SKIP)
     var conditions: List<Condition> = listOf(),
 )
 
@@ -119,6 +124,8 @@ object BooleanOrWorkflowPreferenceSerializer : JsonSerializer<Either<Boolean, Wo
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PreferenceSet (
     var id: String? = "default", // default or tenant.id; TODO: check this, because the API allows any value to be used here, not only default and an existing tenant.id
+
+    @JsonSetter(nulls = Nulls.SKIP)
     var channelTypes: ChannelTypePreferences = ChannelTypePreferences(),
 
     @JsonDeserialize(contentUsing = BooleanOrWorkflowPreferenceDeserializer::class)
