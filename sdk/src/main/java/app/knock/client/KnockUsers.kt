@@ -3,6 +3,8 @@ package app.knock.client
 import com.fasterxml.jackson.annotation.JsonAnyGetter
 import com.fasterxml.jackson.annotation.JsonAnySetter
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 
 // Users
 
@@ -11,12 +13,12 @@ data class KnockUser(
     var id: String,
     var name: String?,
     var email: String?,
-
     var avatar: String?,
     var phoneNumber: String?,
 
     @JsonAnySetter
     @get:JsonAnyGetter
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
     var properties: MutableMap<String, Any> = hashMapOf(),
 )
 
