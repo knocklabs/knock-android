@@ -3,6 +3,7 @@ package app.knock.client
 import arrow.core.Either
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.annotation.Nulls
 import com.fasterxml.jackson.core.JsonGenerator
@@ -14,14 +15,6 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 
-
-//enum class ChannelTypeKey {
-//    @JsonProperty("email") EMAIL,
-//    @JsonProperty("in_app_feed") IN_APP_FEED,
-//    @JsonProperty("sms") SMS,
-//    @JsonProperty("push") PUSH,
-//    @JsonProperty("chat") CHAT,
-//}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Condition(
@@ -88,7 +81,29 @@ data class ChannelTypePreferences(
     @JsonSerialize(using = BooleanOrConditionsArraySerializer::class)
     @JsonIgnoreProperties(ignoreUnknown = true)
     var chat: Either<Boolean, ConditionsArray>? = null,
+) {
+    fun asArrayOfPreferenceItems(): List<ChannelTypePreferenceItem> {
+        return listOfNotNull(
+            email?.let { ChannelTypePreferenceItem(ChannelTypeKey.EMAIL, it) },
+            inAppFeed?.let { ChannelTypePreferenceItem(ChannelTypeKey.IN_APP_FEED, it) },
+            sms?.let { ChannelTypePreferenceItem(ChannelTypeKey.SMS, it) },
+            push?.let { ChannelTypePreferenceItem(ChannelTypeKey.PUSH, it) },
+            chat?.let { ChannelTypePreferenceItem(ChannelTypeKey.CHAT, it) }
+        )
+    }
+}
+
+data class ChannelTypePreferenceItem(
+    val id: ChannelTypeKey,
+    var value: Either<Boolean, ConditionsArray>
 )
+enum class ChannelTypeKey {
+    @JsonProperty("email") EMAIL,
+    @JsonProperty("in_app_feed") IN_APP_FEED,
+    @JsonProperty("sms") SMS,
+    @JsonProperty("push") PUSH,
+    @JsonProperty("chat") CHAT,
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class WorkflowPreference(
