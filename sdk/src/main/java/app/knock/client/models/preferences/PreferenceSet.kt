@@ -13,15 +13,18 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 data class PreferenceSet (
     var id: String = "default",
 
-    var channelTypes: ChannelTypePreferences?,
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    var channelTypes: ChannelTypePreferences = ChannelTypePreferences(),
 
     @JsonDeserialize(contentUsing = BooleanOrWorkflowPreferenceDeserializer::class)
     @JsonSerialize(contentUsing = BooleanOrWorkflowPreferenceSerializer::class)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    var workflows: Map<String, Either<Boolean, WorkflowPreference>>?,
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    var workflows: Map<String, Either<Boolean, WorkflowPreference>> = mapOf(),
 
     @JsonDeserialize(contentUsing = BooleanOrWorkflowPreferenceDeserializer::class)
     @JsonSerialize(contentUsing = BooleanOrWorkflowPreferenceSerializer::class)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    var categories: Map<String, Either<Boolean, WorkflowPreference>>?,
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    var categories: Map<String, Either<Boolean, WorkflowPreference>>? = mapOf(),
 )

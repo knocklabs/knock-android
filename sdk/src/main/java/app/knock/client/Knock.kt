@@ -18,7 +18,7 @@ object Knock {
     internal val coroutineScope = CoroutineScope(KNOCK_COROUTINE_CONTEXT)
 
     internal val KNOCK_PENDING_NOTIFICATION_KEY = "knock_pending_notification_key"
-
+    internal val KNOCK_MESSAGE_ID_KEY = "knock_message_id"
     internal val httpClient by lazy {
         OkHttpClient.Builder().build()
     }

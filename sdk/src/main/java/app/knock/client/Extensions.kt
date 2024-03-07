@@ -10,8 +10,9 @@ import androidx.core.app.NotificationCompat
 import app.knock.client.models.KnockException
 import com.google.firebase.messaging.RemoteMessage
 
+// This is just an example of how you could present a notification with the app in the foreground.
+// You should customize this to fit your own app's needs.
 fun RemoteMessage.presentNotification(context: Context, handlingClass: Class<*>?, icon: Int, settingsTitle: String = "Notification settings") {
-
     try {
         val channelId = "default"
         val pendingIntent = KnockIntent(context, handlingClass, this).pendingIntent
@@ -29,44 +30,21 @@ fun RemoteMessage.presentNotification(context: Context, handlingClass: Class<*>?
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setContentIntent(pendingIntent)
 
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, settingsTitle, NotificationManager.IMPORTANCE_HIGH)
-            notificationManager.createNotificationChannel(channel)
-        }
+        val channel =
+            NotificationChannel(channelId, settingsTitle, NotificationManager.IMPORTANCE_HIGH)
+        notificationManager.createNotificationChannel(channel)
 
         val uuid = System.currentTimeMillis().toInt()
         notificationManager.notify(uuid, notificationBuilder.build())
 
     } catch (e: Exception) {
-        print(e)
+        Knock.logError(
+            KnockLogCategory.PUSH_NOTIFICATION,
+            "RemoteMessage.presentNotification",
+            exception = e
+        )
     }
-}
-
-fun Intent.getPushNotificationFromTap(completion: (message: RemoteMessage) -> Unit) {
-    try {
-        // Check to see if we have an intent to work
-        val key = Knock.KNOCK_PENDING_NOTIFICATION_KEY
-
-        (extras?.get(key) as? RemoteMessage)?.let { message ->
-
-            // Clear the intent extra
-            extras?.remove(key)
-
-            // Track when the notification was tapped
-//            Courier.shared.trackNotification(
-//                message = message,
-//                event = CourierPushEvent.CLICKED,
-//                onSuccess = { Courier.log("Event tracked") },
-//                onFailure = { Courier.error(it.toString()) }
-//            )
-
-            completion(message)
-        }
-
-    } catch (e: Exception) {
-        throw KnockException.RuntimeError(e.toString())
-    }
-
 }

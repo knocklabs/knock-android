@@ -2,63 +2,54 @@ package app.knock.client
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
+import app.knock.client.models.messages.KnockMessageStatusUpdateType
+import app.knock.client.modules.updateMessageStatus
 import com.google.firebase.messaging.RemoteMessage
-open class KnockActivity : AppCompatActivity() {
+open class KnockActivity : AppCompatActivity(), KnockActivityInterface {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // See if there is a pending click event
-        checkForPushNotificationClick(intent)
-
-        // Handle delivered messages on the main thread
-//        Courier.shared.getLastDeliveredMessage { message ->
-//            onPushNotificationDelivered(message)
-//        }
-
+        // See if there is a pending tap event from a PushNotification
+        checkForPushNotificationTap(intent)
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        checkForPushNotificationClick(intent)
+        checkForPushNotificationTap(intent)
     }
-
-    private fun checkForPushNotificationClick(intent: Intent?) {
-        intent?.getPushNotificationFromTap { message ->
-            onPushNotificationClicked(message)
-        }
-    }
-
-    open fun onPushNotificationClicked(message: RemoteMessage) {}
 }
 
-open class KnockComponentActivity : ComponentActivity() {
+open class KnockComponentActivity : ComponentActivity(), KnockActivityInterface {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // See if there is a pending click event
-        checkForPushNotificationClick(intent)
-
-        // Handle delivered messages on the main thread
-//        Courier.shared.getLastDeliveredMessage { message ->
-//            onPushNotificationDelivered(message)
-//        }
-
+        checkForPushNotificationTap(intent)
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        checkForPushNotificationClick(intent)
+        checkForPushNotificationTap(intent)
     }
+}
 
-    private fun checkForPushNotificationClick(intent: Intent?) {
-        intent?.getPushNotificationFromTap { message ->
-            onPushNotificationClicked(message)
+interface KnockActivityInterface {
+    open fun onKnockPushNotificationTappedInBackGround(intent: Intent) {}
+    open fun onKnockPushNotificationTappedInForeground(message: RemoteMessage) {}
+
+    fun checkForPushNotificationTap(intent: Intent?) {
+        intent?.extras?.getString(Knock.KNOCK_MESSAGE_ID_KEY)?.let {
+            Knock.updateMessageStatus(it, KnockMessageStatusUpdateType.INTERACTED) {}
+            onKnockPushNotificationTappedInBackGround(intent)
+        } ?: (intent?.extras?.get(Knock.KNOCK_PENDING_NOTIFICATION_KEY) as? RemoteMessage)?.let { message ->
+            // Clear the intent extra
+            intent.extras?.remove(Knock.KNOCK_PENDING_NOTIFICATION_KEY)
+            message.data[Knock.KNOCK_MESSAGE_ID_KEY]?.let {
+                Knock.updateMessageStatus(it, KnockMessageStatusUpdateType.INTERACTED) {}
+            }
+            onKnockPushNotificationTappedInForeground(message)
         }
     }
-
-    open fun onPushNotificationClicked(message: RemoteMessage) {}
 }
