@@ -107,7 +107,8 @@ enum class ChannelTypeKey {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class WorkflowPreference(
-    var channelTypes: ChannelTypePreferences?,
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    var channelTypes: ChannelTypePreferences = ChannelTypePreferences(),
 
     @JsonSetter(nulls = Nulls.AS_EMPTY)
     var conditions: List<Condition> = listOf(),
@@ -138,7 +139,9 @@ object BooleanOrWorkflowPreferenceSerializer : JsonSerializer<Either<Boolean, Wo
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PreferenceSet (
     var id: String? = "default", // default or tenant.id; TODO: check this, because the API allows any value to be used here, not only default and an existing tenant.id
-    var channelTypes: ChannelTypePreferences?,
+
+    @JsonSetter(nulls = Nulls.AS_EMPTY)
+    var channelTypes: ChannelTypePreferences = ChannelTypePreferences(),
 
     @JsonDeserialize(contentUsing = BooleanOrWorkflowPreferenceDeserializer::class)
     @JsonSerialize(contentUsing = BooleanOrWorkflowPreferenceSerializer::class)

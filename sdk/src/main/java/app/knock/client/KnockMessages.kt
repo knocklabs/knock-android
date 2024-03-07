@@ -64,7 +64,7 @@ data class KnockMessage(
     @JsonAnySetter
     @get:JsonAnyGetter
     @JsonSetter(nulls = Nulls.AS_EMPTY)
-    var data: Map<String, Any>
+    var data: Map<String, Any> = hashMapOf()
 )
 
 enum class KnockMessageStatusUpdateType {
