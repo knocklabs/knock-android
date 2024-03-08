@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.knock_example_app"
+    namespace = "your_app_id"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.knock_example_app"
+        applicationId = "your_app_id"
         minSdk = 28
         targetSdk = 34
         versionCode = 1
