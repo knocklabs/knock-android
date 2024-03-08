@@ -32,11 +32,11 @@ class MainActivity : KnockComponentActivity() {
 
     override fun onKnockPushNotificationTappedInBackGround(intent: Intent) {
         super.onKnockPushNotificationTappedInBackGround(intent)
-        Log.d("TAG", "tapped in background")
+        Log.d(Utils.loggingTag, "tapped in background")
     }
 
     override fun onKnockPushNotificationTappedInForeground(message: RemoteMessage) {
         super.onKnockPushNotificationTappedInForeground(message)
-        Log.d("TAG", "tapped in foreground")
+        Log.d(Utils.loggingTag, "tapped in foreground")
     }
 }

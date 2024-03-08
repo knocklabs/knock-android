@@ -39,7 +39,6 @@ fun MainView(authViewModel: AuthenticationViewModel) {
     var showingSheet by remember { mutableStateOf(false) }
     val feedState by feedViewModel.feed.collectAsState()
 
-    // Example implementation of LaunchedEffect for feed initialization
     LaunchedEffect(key1 = Unit) {
         feedViewModel.initializeFeed()
     }

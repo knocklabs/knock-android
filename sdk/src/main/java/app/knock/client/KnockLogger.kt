@@ -45,8 +45,6 @@ class KnockLogger {
     enum class LogType {
         DEBUG, INFO, ERROR, WARNING, LOG
     }
-
-
 }
 
 // Extension function for easy logging within the Knock object
@@ -109,4 +107,11 @@ fun Knock.logNetworking(
 
 enum class KnockLogCategory {
     USER, FEED, CHANNEL, PREFERENCES, NETWORKING, PUSH_NOTIFICATION, MESSAGE, GENERAL, APP_DELEGATE
+}
+
+enum class KnockLoggingOptions {
+    ERRORS_ONLY,
+    ERRORS_AND_WARNINGS_ONLY,
+    VERBOSE,
+    NONE
 }

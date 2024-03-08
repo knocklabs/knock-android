@@ -19,6 +19,7 @@ object Knock {
 
     internal val KNOCK_PENDING_NOTIFICATION_KEY = "knock_pending_notification_key"
     internal val KNOCK_MESSAGE_ID_KEY = "knock_message_id"
+
     internal val httpClient by lazy {
         OkHttpClient.Builder().build()
     }
@@ -58,7 +59,7 @@ object Knock {
      * Resets the current global Knock instance entirely.
      * After calling this, you will need to setup and sign in again.
      */
-    fun resetInstanceCompletely() {
+    fun resetInstance() {
         environment = KnockEnvironment()
     }
 }
@@ -68,9 +69,4 @@ data class KnockStartupOptions(
     val loggingOptions: KnockLoggingOptions = KnockLoggingOptions.ERRORS_ONLY
 )
 
-enum class KnockLoggingOptions {
-    ERRORS_ONLY,
-    ERRORS_AND_WARNINGS_ONLY,
-    VERBOSE,
-    NONE
-}
+

@@ -13,7 +13,6 @@ class KnockEnvironment {
         const val clientVersion: String = "1.0.0"
     }
 
-//    private val userDevicePushTokenKey = "knock_push_device_token"
     private val previousPushTokensKey = "knock_previous_push_token"
 
     @Volatile
@@ -112,11 +111,6 @@ class KnockEnvironment {
     }
 
     suspend fun getCurrentFcmToken(): String? {
-//        if (!isFirebaseInitialized) {
-//            Knock.logError(KnockLogCategory.PUSH_NOTIFICATION, "Firebase is not initialized. Knock will not be able to get the FCM token until Firebase is initialized.")
-//            return null
-//        }
-
         val token = suspendCoroutine { continuation ->
             // Get the current FCM token
             FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->

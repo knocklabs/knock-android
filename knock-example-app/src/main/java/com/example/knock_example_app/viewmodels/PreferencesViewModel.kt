@@ -11,6 +11,7 @@ import app.knock.client.models.preferences.ChannelTypePreferenceItem
 import app.knock.client.models.preferences.ConditionsArray
 import app.knock.client.modules.setUserPreferences
 import arrow.core.Either
+import com.example.knock_example_app.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +25,6 @@ class PreferencesViewModel: ViewModel() {
     private val _preferenceItems = MutableStateFlow<List<ChannelTypePreferenceItem>?>(null)
 
     val preferenceSet: StateFlow<PreferenceSet?> = _preferenceSet.asStateFlow()
-    val preferenceItems: StateFlow<List<ChannelTypePreferenceItem>?> = _preferenceItems.asStateFlow()
 
     init {
         loadDefaultUserPreferences()
@@ -39,7 +39,7 @@ class PreferencesViewModel: ViewModel() {
                 _preferenceSet.value = preferences
                 _preferenceItems.value = preferences.channelTypes.asArrayOfPreferenceItems()
             } catch (e: Exception) {
-                Log.e("PreferencesViewModel", "Error in loadDefaultUserPreferences: ${e.message}")
+                Log.e(Utils.loggingTag, "Error in loadDefaultUserPreferences: ${e.message}")
             }
         }
     }
