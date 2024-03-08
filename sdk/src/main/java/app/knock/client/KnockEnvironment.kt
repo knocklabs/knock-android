@@ -115,7 +115,7 @@ class KnockEnvironment {
             // Get the current FCM token
             FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                 if (!task.isSuccessful) {
-                    Knock.logError(KnockLogCategory.PUSH_NOTIFICATION, task.exception.toString())
+                    Knock.shared.logError(KnockLogCategory.PUSH_NOTIFICATION, task.exception.toString())
                     continuation.resume(null)
                     return@addOnCompleteListener
                 }

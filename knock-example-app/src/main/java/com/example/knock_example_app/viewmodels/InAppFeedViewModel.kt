@@ -26,22 +26,22 @@ class InAppFeedViewModel : ViewModel() {
     fun initializeFeed() {
         viewModelScope.launch {
             try {
-                Knock.feedManager = FeedManager(Utils.inAppChannelId, FeedClientOptions())
+                Knock.shared.feedManager = FeedManager(Utils.inAppChannelId, FeedClientOptions())
                 val userFeed = withContext(Dispatchers.IO) {
-                    Knock.feedManager?.getUserFeedContent(FeedClientOptions())
+                    Knock.shared.feedManager?.getUserFeedContent(FeedClientOptions())
                 }
                 userFeed?.let {
                     _feed.value = it
                     _feed.value?.pageInfo?.before = it.entries.firstOrNull()?.feedCursor
                 }
 
-                Knock.feedManager?.connectToFeed()
+                Knock.shared.feedManager?.connectToFeed()
 
-                Knock.feedManager?.on("new-message") {
+                Knock.shared.feedManager?.on("new-message") {
                     viewModelScope.launch {
                         val feedOptions = FeedClientOptions(before = feed.value?.pageInfo?.before)
                         val result = withContext(Dispatchers.IO) {
-                            Knock.feedManager?.getUserFeedContent(feedOptions)
+                            Knock.shared.feedManager?.getUserFeedContent(feedOptions)
                         }
                         result?.let { feedResult ->
                             _feed.value?.let { currentFeed ->
@@ -67,7 +67,7 @@ class InAppFeedViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val message = withContext(Dispatchers.IO) {
-                    Knock.updateMessageStatus(item.id, KnockMessageStatusUpdateType.ARCHIVED)
+                    Knock.shared.updateMessageStatus(item.id, KnockMessageStatusUpdateType.ARCHIVED)
                 }
 
                 val updatedEntries = _feed.value?.entries?.filterNot { it.id == message.id } ?: listOf()
@@ -84,7 +84,7 @@ class InAppFeedViewModel : ViewModel() {
                 try {
                     val feedOptions = FeedClientOptions(status = FeedItemScope.ALL)
                     withContext(Dispatchers.IO) {
-                        Knock.feedManager?.makeBulkStatusUpdate(type = KnockMessageStatusUpdateType.SEEN, options = feedOptions)
+                        Knock.shared.feedManager?.makeBulkStatusUpdate(type = KnockMessageStatusUpdateType.SEEN, options = feedOptions)
                     }
                     _feed.value?.meta?.unseenCount = 0
                     Log.d(Utils.loggingTag, "Marked all as seen")

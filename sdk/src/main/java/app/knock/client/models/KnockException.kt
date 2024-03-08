@@ -12,6 +12,7 @@ sealed class KnockException : Exception() {
     data object PushChannelIdNotSetError : KnockException()
     data object KnockNotSetup : KnockException()
     data object WrongKeyError : KnockException()
+    data object KnockSetupError : KnockException()
 
     data class NetworkError(
         val title: String = "Error",
@@ -32,5 +33,6 @@ sealed class KnockException : Exception() {
             DevicePushTokenNotSet -> "Device Push Notification token not found. Please setup with Knock.shared.registerTokenForAPNS()."
             KnockNotSetup -> "Knock instance still needs to be setup. Please setup with Knock.shared.setup()."
             WrongKeyError -> "You are using your secret API key on the client. Please use the public key."
+            KnockSetupError -> "Please call Knock.setup() before trying to use Knock.shared."
         }
 }

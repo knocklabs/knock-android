@@ -41,13 +41,13 @@ interface KnockActivityInterface {
 
     fun checkForPushNotificationTap(intent: Intent?) {
         intent?.extras?.getString(Knock.KNOCK_MESSAGE_ID_KEY)?.let {
-            Knock.updateMessageStatus(it, KnockMessageStatusUpdateType.INTERACTED) {}
+            Knock.shared.updateMessageStatus(it, KnockMessageStatusUpdateType.INTERACTED) {}
             onKnockPushNotificationTappedInBackGround(intent)
         } ?: (intent?.extras?.get(Knock.KNOCK_PENDING_NOTIFICATION_KEY) as? RemoteMessage)?.let { message ->
             // Clear the intent extra
             intent.extras?.remove(Knock.KNOCK_PENDING_NOTIFICATION_KEY)
             message.data[Knock.KNOCK_MESSAGE_ID_KEY]?.let {
-                Knock.updateMessageStatus(it, KnockMessageStatusUpdateType.INTERACTED) {}
+                Knock.shared.updateMessageStatus(it, KnockMessageStatusUpdateType.INTERACTED) {}
             }
             onKnockPushNotificationTappedInForeground(message)
         }

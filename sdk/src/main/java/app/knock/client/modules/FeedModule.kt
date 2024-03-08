@@ -23,17 +23,17 @@ internal class FeedModule(private val feedId: String, private val defaultOptions
     private val userId: String
 
     init {
-        val base = Knock.environment.getBaseUrl()
+        val base = Knock.shared.environment.getBaseUrl()
         val websocketHostname = base.replace(Regex("^http"), "ws") // default: wss://api.knock.app
         val websocketPath = "$websocketHostname/ws/v1/websocket" // default: wss://api.knock.app/ws/v1/websocket
         val params = hashMapOf(
             "vsn" to "2.0.0",
-            "api_key" to Knock.environment.getPublishableKey(),
-            "user_token" to (Knock.environment.getUserToken() ?: "")
+            "api_key" to Knock.shared.environment.getPublishableKey(),
+            "user_token" to (Knock.shared.environment.getUserToken() ?: "")
         )
 
         this.socket = Socket(websocketPath, params)
-        this.userId = Knock.environment.getSafeUserId()
+        this.userId = Knock.shared.environment.getSafeUserId()
         this.feedTopic = "feeds:$feedId:$userId"
     }
 
@@ -63,16 +63,16 @@ internal class FeedModule(private val feedId: String, private val defaultOptions
     fun connectToFeed(options: FeedClientOptions? = null) {
         // Setup the socket to receive open/close events
         socket.logger = {
-            Knock.logDebug(KnockLogCategory.FEED, it)
+            Knock.shared.logDebug(KnockLogCategory.FEED, it)
         }
         socket.onOpen {
-            Knock.logDebug(KnockLogCategory.FEED, "Socket Opened")
+            Knock.shared.logDebug(KnockLogCategory.FEED, "Socket Opened")
         }
         socket.onClose {
-            Knock.logDebug(KnockLogCategory.FEED, "Socket Closed")
+            Knock.shared.logDebug(KnockLogCategory.FEED, "Socket Closed")
         }
         socket.onError { throwable, response ->
-            Knock.logError(KnockLogCategory.FEED, "Socket Error ${response?.code}", description = throwable.message)
+            Knock.shared.logError(KnockLogCategory.FEED, "Socket Error ${response?.code}", description = throwable.message)
         }
 
         val mergedOptions = defaultOptions.mergeOptions(options)
@@ -84,16 +84,16 @@ internal class FeedModule(private val feedId: String, private val defaultOptions
         // Now connect the socket and join the channel
         this.feedChannel = channel
         this.feedChannel?.join()?.receive("ok") {
-            Knock.logDebug(KnockLogCategory.FEED, "CHANNEL: ${channel.topic} joined")
+            Knock.shared.logDebug(KnockLogCategory.FEED, "CHANNEL: ${channel.topic} joined")
         }?.receive("error") {
-            Knock.logError(KnockLogCategory.FEED, "CHANNEL: ${channel.topic} failed to join", description = it.payload.toString())
+            Knock.shared.logError(KnockLogCategory.FEED, "CHANNEL: ${channel.topic} failed to join", description = it.payload.toString())
         }
 
         socket.connect()
     }
 
     fun disconnectFromFeed() {
-        Knock.logDebug(KnockLogCategory.FEED, "Disconnecting from feed")
+        Knock.shared.logDebug(KnockLogCategory.FEED, "Disconnecting from feed")
 
         if (feedChannel != null) {
             val channel = feedChannel!!
@@ -109,7 +109,7 @@ internal class FeedModule(private val feedId: String, private val defaultOptions
             val channel = it
             channel.on(eventName, callback)
         } ?: {
-            Knock.logError(KnockLogCategory.FEED, "Feed channel is null. You should call first connectToFeed()")
+            Knock.shared.logError(KnockLogCategory.FEED, "Feed channel is null. You should call first connectToFeed()")
         }
     }
 

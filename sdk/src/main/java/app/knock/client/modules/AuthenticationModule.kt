@@ -1,6 +1,7 @@
 package app.knock.client.modules
 
 import app.knock.client.Knock
+import app.knock.client.Knock.Companion.coroutineScope
 import app.knock.client.KnockLogCategory
 import app.knock.client.logWarning
 import kotlinx.coroutines.Dispatchers
@@ -9,26 +10,26 @@ import kotlinx.coroutines.launch
 internal class AuthenticationModule {
 
     suspend fun signIn(userId: String, userToken: String?) {
-        Knock.environment.setUserId(userId)
-        Knock.environment.setUserToken(userToken)
+        Knock.shared.environment.setUserId(userId)
+        Knock.shared.environment.setUserToken(userToken)
 
-        val token = Knock.getCurrentDeviceToken()
-        val channelId = Knock.environment.getPushChannelId()
+        val token = Knock.shared.getCurrentDeviceToken()
+        val channelId = Knock.shared.environment.getPushChannelId()
         if (token != null && channelId != null) {
             try {
-                Knock.channelModule.registerTokenForFCM(channelId, token)
+                Knock.shared.channelModule.registerTokenForFCM(channelId, token)
             } catch (e: Exception) {
-                Knock.logWarning(KnockLogCategory.USER, "signIn", "Successfully set user, however, unable to registerTokenForAPNS at this time.")
+                Knock.shared.logWarning(KnockLogCategory.USER, "signIn", "Successfully set user, however, unable to registerTokenForAPNS at this time.")
             }
         }
     }
 
     suspend fun signOut() {
-        val channelId = Knock.environment.getPushChannelId()
-        val token = Knock.getCurrentDeviceToken()
+        val channelId = Knock.shared.environment.getPushChannelId()
+        val token = Knock.shared.getCurrentDeviceToken()
         if (channelId != null && token != null) {
             try {
-                Knock.channelModule.unregisterTokenForFCM(channelId, token)
+                Knock.shared.channelModule.unregisterTokenForFCM(channelId, token)
             } finally {
                 clearDataForSignOut()
             }
@@ -38,8 +39,8 @@ internal class AuthenticationModule {
     }
 
     private fun clearDataForSignOut() {
-        Knock.environment.setUserId(null)
-        Knock.environment.setUserToken(null)
+        Knock.shared.environment.setUserId(null)
+        Knock.shared.environment.setUserToken(null)
     }
 }
 

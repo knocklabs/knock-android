@@ -34,7 +34,7 @@ class PreferencesViewModel: ViewModel() {
         viewModelScope.launch {
             try {
                 val preferences = withContext(Dispatchers.IO) {
-                    Knock.getUserPreferences("default")
+                    Knock.shared.getUserPreferences("default")
                 }
                 _preferenceSet.value = preferences
                 _preferenceItems.value = preferences.channelTypes.asArrayOfPreferenceItems()
@@ -59,7 +59,7 @@ class PreferencesViewModel: ViewModel() {
                 _preferenceSet.value = updatedPreferenceSet
 
                 withContext(Dispatchers.IO) {
-                    Knock.setUserPreferences(currentPreferenceSet.id, updatedPreferenceSet)
+                    Knock.shared.setUserPreferences(currentPreferenceSet.id, updatedPreferenceSet)
                 }
             }
         }

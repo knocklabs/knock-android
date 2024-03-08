@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import app.knock.client.Knock
+import app.knock.client.Knock.Companion.coroutineScope
 import app.knock.client.KnockLogCategory
 import app.knock.client.logDebug
 import app.knock.client.logError
@@ -20,22 +21,22 @@ import kotlinx.coroutines.withContext
 internal class ChannelModule {
     private val channelService = ChannelService()
     suspend fun getUserChannelData(channelId: String): ChannelData {
-        val userId = Knock.environment.getSafeUserId()
+        val userId = Knock.shared.environment.getSafeUserId()
         return channelService.getUserChannelData(userId, channelId)
     }
 
     suspend fun updateUserChannelData(channelId: String, data: Any): ChannelData {
-        val userId = Knock.environment.getSafeUserId()
+        val userId = Knock.shared.environment.getSafeUserId()
         return channelService.updateUserChannelData(userId, channelId, data)
     }
 
     // FCM Device Token Registration
     suspend fun registerTokenForFCM(channelId: String?, token: String): ChannelData {
-        Knock.environment.setDeviceToken(token)
-        Knock.environment.setPushChannelId(channelId)
+        Knock.shared.environment.setDeviceToken(token)
+        Knock.shared.environment.setPushChannelId(channelId)
 
-        if (!Knock.isAuthenticated() || channelId == null) {
-            Knock.logWarning(KnockLogCategory.PUSH_NOTIFICATION, "ChannelId and deviceToken were saved. However, we cannot register for FCM until you have called Knock.signIn().")
+        if (!Knock.shared.isAuthenticated() || channelId == null) {
+            Knock.shared.logWarning(KnockLogCategory.PUSH_NOTIFICATION, "ChannelId and deviceToken were saved. However, we cannot register for FCM until you have called Knock.signIn().")
             return ChannelData(channelId ?: "", mutableMapOf("tokens" to listOf(token)))
         }
 
@@ -45,7 +46,7 @@ internal class ChannelModule {
     suspend fun unregisterTokenForFCM(channelId: String, token: String): ChannelData {
         try {
             val channelData = getUserChannelData(channelId)
-            val previousTokens = Knock.environment.getPreviousPushTokens()
+            val previousTokens = Knock.shared.environment.getPreviousPushTokens()
 
             @Suppress("UNCHECKED_CAST")
             val tokens: List<String> = channelData.data["tokens"] as? List<String> ?: emptyList()
@@ -57,20 +58,20 @@ internal class ChannelModule {
                 val data = mapOf("tokens" to newTokens)
 
                 val updatedData = updateUserChannelData(channelId, data)
-                Knock.environment.clearPreviousPushTokens()
+                Knock.shared.environment.clearPreviousPushTokens()
 
-                Knock.logDebug(KnockLogCategory.PUSH_NOTIFICATION, "Successful unregisterTokenForFCM()")
+                Knock.shared.logDebug(KnockLogCategory.PUSH_NOTIFICATION, "Successful unregisterTokenForFCM()")
                 updatedData
             } else {
-                Knock.logDebug(KnockLogCategory.PUSH_NOTIFICATION, "Failed unregisterTokenForFCM()", "Could not unregister user from channel $channelId. Reason: User doesn't have any device tokens associated to the provided channelId.")
+                Knock.shared.logDebug(KnockLogCategory.PUSH_NOTIFICATION, "Failed unregisterTokenForFCM()", "Could not unregister user from channel $channelId. Reason: User doesn't have any device tokens associated to the provided channelId.")
                 channelData
             }
         } catch (e: KnockException.NetworkError) {
             if (e.code == 404) {
-                Knock.logDebug(KnockLogCategory.PUSH_NOTIFICATION, "Failed unregisterTokenForFCM", "Could not unregister user from channel $channelId. Reason: User doesn't have any channel data associated to the provided channelId.")
+                Knock.shared.logDebug(KnockLogCategory.PUSH_NOTIFICATION, "Failed unregisterTokenForFCM", "Could not unregister user from channel $channelId. Reason: User doesn't have any channel data associated to the provided channelId.")
                 return ChannelData(channelId, mutableMapOf())
             } else {
-                Knock.logError(KnockLogCategory.PUSH_NOTIFICATION, "Failed unregisterTokenForFCM", "Could not unregister user from channel $channelId", e)
+                Knock.shared.logError(KnockLogCategory.PUSH_NOTIFICATION, "Failed unregisterTokenForFCM", "Could not unregister user from channel $channelId", e)
                 throw e
             }
         }
@@ -102,7 +103,7 @@ internal class ChannelModule {
             @Suppress("UNCHECKED_CAST")
             val existingChannelTokens: List<String> = existingChannelData.data["tokens"] as? List<String> ?: emptyList()
 
-            val previousTokens = Knock.environment.getPreviousPushTokens()
+            val previousTokens = Knock.shared.environment.getPreviousPushTokens()
 
             val preparedTokens = getTokenDataForServer(token, previousTokens, existingChannelTokens)
 
@@ -112,7 +113,7 @@ internal class ChannelModule {
                 existingChannelData
             }
         } catch (e: KnockException.UserIdNotSetError) {
-            Knock.logDebug(KnockLogCategory.PUSH_NOTIFICATION, "Cannot register for FCM until Knock.signIn() is called.")
+            Knock.shared.logDebug(KnockLogCategory.PUSH_NOTIFICATION, "Cannot register for FCM until Knock.signIn() is called.")
             return ChannelData(channelId, mutableMapOf("tokens" to listOf(token)))
         } catch (e: KnockException.NetworkError) {
             if (e.code == 404) {
@@ -129,9 +130,9 @@ internal class ChannelModule {
         val data = (mapOf("tokens" to tokens))
         val newChannelData = updateUserChannelData(channelId, data)
 
-        Knock.environment.clearPreviousPushTokens()
+        Knock.shared.environment.clearPreviousPushTokens()
 
-        Knock.logDebug(KnockLogCategory.PUSH_NOTIFICATION, "Device token registered on server")
+        Knock.shared.logDebug(KnockLogCategory.PUSH_NOTIFICATION, "Device token registered on server")
         return newChannelData
     }
 }

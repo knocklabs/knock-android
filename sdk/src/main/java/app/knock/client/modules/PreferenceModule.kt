@@ -1,6 +1,7 @@
 package app.knock.client.modules
 
 import app.knock.client.Knock
+import app.knock.client.Knock.Companion.coroutineScope
 import app.knock.client.models.preferences.PreferenceSet
 import app.knock.client.services.PreferenceService
 import kotlinx.coroutines.Dispatchers
@@ -11,17 +12,17 @@ internal class PreferenceModule {
     private val preferenceService = PreferenceService() // Assume this exists
 
     suspend fun getAllUserPreferences(): List<PreferenceSet> {
-        val userId = Knock.environment.getSafeUserId()
+        val userId = Knock.shared.environment.getSafeUserId()
         return preferenceService.getAllUserPreferences(userId)
     }
 
     suspend fun getUserPreferences(preferenceId: String): PreferenceSet {
-        val userId = Knock.environment.getSafeUserId()
+        val userId = Knock.shared.environment.getSafeUserId()
         return preferenceService.getUserPreferences(userId, preferenceId)
     }
 
     suspend fun setUserPreferences(preferenceId: String, preferenceSet: PreferenceSet): PreferenceSet {
-        val userId = Knock.environment.getSafeUserId()
+        val userId = Knock.shared.environment.getSafeUserId()
         return preferenceService.setUserPreferences(userId, preferenceId, preferenceSet)
     }
 }

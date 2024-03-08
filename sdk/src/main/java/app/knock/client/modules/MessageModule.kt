@@ -1,6 +1,7 @@
 package app.knock.client.modules
 
 import app.knock.client.Knock
+import app.knock.client.Knock.Companion.coroutineScope
 import app.knock.client.models.messages.KnockMessage
 import app.knock.client.models.messages.KnockMessageStatusUpdateType
 import app.knock.client.services.MessageService

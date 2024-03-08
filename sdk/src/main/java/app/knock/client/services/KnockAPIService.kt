@@ -33,16 +33,16 @@ internal open class KnockAPIService {
     val mapper = jacksonObjectMapper()
 
     private val environmentBaseUrl: String
-        get() = Knock.environment.getBaseUrl()
+        get() = Knock.shared.environment.getBaseUrl()
 
     private val apiBasePath: String
         get() = "$environmentBaseUrl/v1"
 
     private val userToken: String?
-        get() = Knock.environment.getUserToken()
+        get() = Knock.shared.environment.getUserToken()
 
     private val publishableKey: String
-        get() = Knock.environment.getPublishableKey()
+        get() = Knock.shared.environment.getPublishableKey()
 
     private val clientVersion: String
         get() = KnockEnvironment.clientVersion
@@ -78,7 +78,7 @@ internal open class KnockAPIService {
             mapper.readValue(result)
         } catch (e: Exception) {
             val typeName = T::class.java.simpleName
-            Knock.logError(KnockLogCategory.NETWORKING, "Failed to decode object: $typeName", exception = e, additionalInfo = mapOf("RAW_JSON" to result))
+            Knock.shared.logError(KnockLogCategory.NETWORKING, "Failed to decode object: $typeName", exception = e, additionalInfo = mapOf("RAW_JSON" to result))
             throw KnockException.DecodingError(typeName)
         }
     }
@@ -107,7 +107,7 @@ internal open class KnockAPIService {
             var url = URL(urlString).toHttpUrlOrNull()
             if (url == null) {
                 val exception = KnockException.NetworkError("Invalid URL", 400, "Invalid URL: $urlString")
-                Knock.logNetworking("Invalid URL: $urlString", exception = exception)
+                Knock.shared.logNetworking("Invalid URL: $urlString", exception = exception)
                 continuation.resumeWithException(exception)
                 return@suspendCancellableCoroutine
             }
@@ -137,7 +137,7 @@ internal open class KnockAPIService {
             val request = builder.build()
 
             // Execute the request
-            Knock.httpClient.newCall(request).enqueue(object : Callback {
+            Knock.shared.httpClient.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     if (!continuation.isCancelled) {
                         continuation.resumeWithException(e)
@@ -148,7 +148,7 @@ internal open class KnockAPIService {
                 override fun onResponse(call: Call, response: Response) {
                     if (!response.isSuccessful) {
                         val e = KnockException.NetworkError(code = response.code, description = "Api request failure", response = response, request = request)
-                        Knock.logNetworking("Api request failure", request = call.request(), response = response, exception = e)
+                        Knock.shared.logNetworking("Api request failure", request = call.request(), response = response, exception = e)
                         if (!continuation.isCancelled) {
                             continuation.resumeWithException(e)
                         }
@@ -156,13 +156,13 @@ internal open class KnockAPIService {
                     }
 
                     response.body?.string()?.let {
-                        Knock.logNetworking("Api request successful", request = call.request(), response = response)
+                        Knock.shared.logNetworking("Api request successful", request = call.request(), response = response)
                         if (!continuation.isCancelled) {
                             continuation.resume(it)
                         }
                     } ?: {
                         val e = KnockException.NetworkError(code = response.code, description = "Null Response Body", response = response, request = request)
-                        Knock.logNetworking("Api request failure", request = call.request(), response = response, exception = e)
+                        Knock.shared.logNetworking("Api request failure", request = call.request(), response = response, exception = e)
                         continuation.resumeWithException(e)
                     }
                 }

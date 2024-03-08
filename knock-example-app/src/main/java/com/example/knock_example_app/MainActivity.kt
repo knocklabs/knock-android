@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import app.knock.client.Knock
 import app.knock.client.KnockComponentActivity
+import app.knock.client.KnockLoggingOptions
+import app.knock.client.KnockStartupOptions
 import com.example.knock_example_app.ui.theme.KnockandroidTheme
 import com.example.knock_example_app.views.StartupView
 import com.google.firebase.messaging.RemoteMessage

@@ -1,6 +1,7 @@
 package app.knock.client.modules
 
 import app.knock.client.Knock
+import app.knock.client.Knock.Companion.coroutineScope
 import app.knock.client.models.KnockUser
 import app.knock.client.services.UserService
 import kotlinx.coroutines.Dispatchers
@@ -11,7 +12,7 @@ internal class UserModule {
     private val userService = UserService()
 
     suspend fun getUser(): KnockUser {
-        val userId = Knock.environment.getSafeUserId()
+        val userId = Knock.shared.environment.getSafeUserId()
         return userService.getUser(userId)
     }
 

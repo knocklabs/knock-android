@@ -22,21 +22,21 @@ class AuthenticationViewModel : ViewModel() {
 
     private fun checkAuthentication() {
         viewModelScope.launch {
-            val isAuthenticated = Knock.isAuthenticated()
+            val isAuthenticated = Knock.shared.isAuthenticated()
             _isSignedIn.value = isAuthenticated
         }
     }
 
     fun signIn(userId: String) {
         viewModelScope.launch {
-            Knock.signIn(userId = userId, userToken = null)
+            Knock.shared.signIn(userId = userId, userToken = null)
             _isSignedIn.value = true
         }
     }
 
     fun signOut() {
         viewModelScope.launch {
-            Knock.signOut()
+            Knock.shared.signOut()
             _isSignedIn.value = false
         }
     }
