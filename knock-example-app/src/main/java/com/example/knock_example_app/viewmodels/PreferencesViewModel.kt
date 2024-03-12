@@ -44,6 +44,7 @@ class PreferencesViewModel: ViewModel() {
         }
     }
 
+
     fun updatePreference(channelTypeKey: ChannelTypeKey, newValue: Either<Boolean, ConditionsArray>) {
         viewModelScope.launch {
             _preferenceSet.value?.let { currentPreferenceSet ->
