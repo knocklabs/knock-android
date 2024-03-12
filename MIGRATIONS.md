@@ -16,7 +16,7 @@ val knockClient = Knock(publishableKey = publishableKey, userId = userId)
 #### New in Version 1.0.0:
 ```swift
 // Step 1: Early initialization. Ideal place: Application().onCreate() or MainActivity.
-Knock.setup(context: "applicationContext", publishableKey: "your-pk, pushChannelId: "apns-channel-id")
+Knock.setup(context = "applicationContext", publishableKey = "your-pk", pushChannelId = "apns-channel-id")
 
 // Step 2: Sign in the user. Ideal timing: as soon as you have the userId.
 Knock.shared.signIn(userId = "userId", userToken = "userToken")

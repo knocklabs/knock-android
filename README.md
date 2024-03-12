@@ -1,39 +1,28 @@
-# Knock Android
+# Official Knock Android SDK
 
 A client-side Kotlin library to integrate Knock into Android applications.
 
-# Documentation
+[![GitHub Release](https://img.shields.io/github/v/release/knocklabs/knock-android?style=flat)](https://github.com/knocklabs/knock-swift/releases/latest)
+[![Jitpack compatible](https://img.shields.io/badge/Jitpack-compatible)](https://jitpack.io/#knocklabs/knock-android)
+![min Android SDK version](https://img.shields.io/badge/min%20Swift%20version-5.3-orange)
+[![GitHub license](https://img.shields.io/badge/license-MIT-lightgrey.svg?style=flat)](https://github.com/knocklabs/knock-android/blob/main/LICENSE)
 
-See the [documentation](https://docs.knock.app/in-app-ui/android/reference) for usage examples.
+---
 
-# Requirements & Support
+Knock is a flexible, reliable notifications infrastructure that's built to scale with you. Use our iOS SDK to engage users with in-app feeds, setup push notifications, and manage notification preferences.
 
-<table>
-    <thead>
-        <tr>
-            <th width="880px" align="left">Requirements</th>
-            <th width="120px" align="center"></th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr width="600px">
-            <td align="left">Knock Account</td>
-            <td align="center">
-                <a href="https://dashboard.knock.app/signup">
-                    <code>Sign Up</code>
-                </a>
-            </td>
-        </tr>
-        <tr width="600px">
-            <td align="left">Minimum Android SDK Version</td>
-            <td align="center">
-                <code>29</code>
-            </td>
-        </tr>
-    </tbody>
-</table>
+---
 
-&emsp;
+## Documentation
+
+See the [documentation](https://docs.knock.app/sdks/android/overview) for full documentation.
+
+## Migrations
+
+See the [Migration Guide](https://github.com/knocklabs/knock-android/blob/main/MIGRATIONS.md) if upgrading from a previous version.
+
+
+
 
 # Installation
 
@@ -65,74 +54,9 @@ dependencies {
 ### 3. Init the SDK and FeedManager
 
 ```kotlin
-val publishableKey = "<KNOCK_PUBLIC_KEY>"
-val userId = "<CURRENT_USER_ID>"
-val inAppChannelId = "<IN_APP_CHANNEL_ID"
+// Step 1: Early initialization. Ideal place: Application().onCreate() or MainActivity.
+Knock.setup(context = "applicationContext", publishableKey = "your-pk", pushChannelId = "apns-channel-id")
 
-val knockClient = Knock(publishableKey = publishableKey, userId = userId)
-val feedManager = FeedManager(client = knockClient, feedId = inAppChannelId)
-
-```
-# Usage
-
-### Connect to a feed and get new-messages events
-
-```kotlin
-
-val feedOptions = FeedClientOptions(tenant = "team-a", hasTenant = true)
-feedManager.connectToFeed(feedOptions)
-feedManager.on("new-message") {
-    println("new message")
-}
-
-```
-
-### Get feed content
-
-```kotlin
-
-feedManager.getUserFeedContent(feedOptions) { result ->
-    result.fold(
-        onSuccess = { feed ->
-            println("getUserFeedContent succeeded: $feed")
-        },
-        onFailure = { e ->
-            println("getUserFeedContent failed: $e")
-        }
-    )
-}
-
-```
-
-### Users
-
-```kotlin
-
-// Get a user
-knockClient.getUser { result ->
-    result.fold(
-        onSuccess = { user ->
-            println("getUser succeeded: $user")
-        },
-        onFailure = { e ->
-            println("getUser failed: $e")
-        }
-    )
-}
-
-// Update a user (and add extra fields)
-user.phoneNumber = "123-456"
-user.properties["extra-1"] = 234
-
-knockClient.updateUser(user) { result ->
-    result.fold(
-        onSuccess = {user ->
-            println("updateUser succeeded, user: $user")
-        },
-        onFailure = { e ->
-            println("updateUser failed: $e")
-        }
-    )
-}
-
+// Step 2: Sign in the user. Ideal timing: as soon as you have the userId.
+Knock.shared.signIn(userId = "userId", userToken = "userToken")
 ```
