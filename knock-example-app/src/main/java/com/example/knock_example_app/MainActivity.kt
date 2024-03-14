@@ -10,8 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import app.knock.client.Knock
 import app.knock.client.KnockComponentActivity
-import app.knock.client.KnockLoggingOptions
-import app.knock.client.KnockStartupOptions
+import app.knock.client.modules.requestNotificationPermission
 import com.example.knock_example_app.ui.theme.KnockandroidTheme
 import com.example.knock_example_app.views.StartupView
 import com.google.firebase.messaging.RemoteMessage
@@ -20,6 +19,8 @@ import com.google.firebase.messaging.RemoteMessage
 class MainActivity : KnockComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Knock.shared.requestNotificationPermission(this)
 
         setContent {
             KnockandroidTheme {

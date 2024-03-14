@@ -9,12 +9,12 @@ Version 1.0.0 of our Android SDK introduces significant improvements and moderni
 - **Refined Initialization Process**: We've redesigned the initialization process for the Knock instance, dividing it into two distinct phases. This change offers greater flexibility in integrating our SDK into your projects.
 
 #### Previous Initialization Approach:
-```swift
+```kotlin
 val knockClient = Knock(publishableKey = publishableKey, userId = userId)
 ```
 
 #### New in Version 1.0.0:
-```swift
+```kotlin
 // Step 1: Early initialization. Ideal place: Application().onCreate() or MainActivity.
 Knock.setup(context = "applicationContext", publishableKey = "your-pk", pushChannelId = "apns-channel-id")
 
