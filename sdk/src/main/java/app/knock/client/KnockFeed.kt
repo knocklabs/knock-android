@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.annotation.Nulls
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.phoenixframework.Channel
 import org.phoenixframework.Message
 import org.phoenixframework.Socket
@@ -274,6 +275,8 @@ class FeedManager(
      */
     fun getUserFeedContent(options: FeedClientOptions? = null, completionHandler: (Result<Feed>) -> Unit) {
         val mergedOptions = defaultFeedOptions.mergeOptions(options)
+        val mapper = jacksonObjectMapper()
+        val triggerDataJsonString = mergedOptions.triggerData?.let { mapper.writeValueAsString(it) }
 
         val queryItems: List<URLQueryItem> = listOf(
             URLQueryItem("page_size", mergedOptions.pageSize),
@@ -284,7 +287,7 @@ class FeedManager(
             URLQueryItem("has_tenant", mergedOptions.hasTenant),
             URLQueryItem("status", mergedOptions.status),
             URLQueryItem("archived", mergedOptions.archived),
-            URLQueryItem("trigger_data", mergedOptions.triggerData),
+            URLQueryItem("trigger_data", triggerDataJsonString)
         )
 
         api.decodeFromGet("/users/$userId/feeds/$feedId", queryItems, completionHandler)
