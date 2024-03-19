@@ -13,6 +13,7 @@ import app.knock.client.services.FeedService
 import org.phoenixframework.Channel
 import org.phoenixframework.Message
 import org.phoenixframework.Socket
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
 internal class FeedModule(private val feedId: String, private val defaultOptions: FeedClientOptions) {
     private val feedService = FeedService()
@@ -38,7 +39,10 @@ internal class FeedModule(private val feedId: String, private val defaultOptions
     }
 
     suspend fun getUserFeedContent(options: FeedClientOptions? = null): Feed {
+        val mapper = jacksonObjectMapper()
         val mergedOptions = defaultOptions.mergeOptions(options)
+
+        val triggerDataJsonString = mergedOptions.triggerData?.let { mapper.writeValueAsString(it) }
 
         val queryItems: List<URLQueryItem> = listOf(
             URLQueryItem("page_size", mergedOptions.pageSize),
@@ -49,7 +53,7 @@ internal class FeedModule(private val feedId: String, private val defaultOptions
             URLQueryItem("has_tenant", mergedOptions.hasTenant),
             URLQueryItem("status", mergedOptions.status),
             URLQueryItem("archived", mergedOptions.archived),
-            URLQueryItem("trigger_data", mergedOptions.triggerData),
+            URLQueryItem("trigger_data", triggerDataJsonString)
         )
 
         return feedService.getUserFeedContent(userId, feedId, mergedOptions, queryItems)

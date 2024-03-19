@@ -27,7 +27,6 @@ import java.io.IOException
 import java.net.URL
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 internal open class KnockAPIService {
     val mapper = jacksonObjectMapper()
