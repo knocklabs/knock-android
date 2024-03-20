@@ -277,6 +277,8 @@ class FeedManager(
         val mergedOptions = defaultFeedOptions.mergeOptions(options)
         val mapper = jacksonObjectMapper()
         val triggerDataJsonString = mergedOptions.triggerData?.let { mapper.writeValueAsString(it) }
+        val statusString = mergedOptions.status?.toString()?.lowercase()
+        val archivedString = mergedOptions.archived?.toString()?.lowercase()
 
         val queryItems: List<URLQueryItem> = listOf(
             URLQueryItem("page_size", mergedOptions.pageSize),
@@ -285,8 +287,8 @@ class FeedManager(
             URLQueryItem("source", mergedOptions.source),
             URLQueryItem("tenant", mergedOptions.tenant),
             URLQueryItem("has_tenant", mergedOptions.hasTenant),
-            URLQueryItem("status", mergedOptions.status),
-            URLQueryItem("archived", mergedOptions.archived),
+            URLQueryItem("status", statusString),
+            URLQueryItem("archived", archivedString),
             URLQueryItem("trigger_data", triggerDataJsonString)
         )
 
