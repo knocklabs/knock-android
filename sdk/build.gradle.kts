@@ -5,14 +5,14 @@ plugins {
 }
 
 group = "app.knock"
-version = "1.0.0"
+version = "1.0.3"
 
 publishing {
     publications {
         register<MavenPublication>("release") {
             artifactId = "knock-android"
             groupId = "app.knock"
-            version = "1.0.0"
+            version = "1.0.3"
             afterEvaluate {
                 from(components["release"])
             }
