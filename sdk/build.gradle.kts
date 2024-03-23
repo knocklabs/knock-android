@@ -1,19 +1,19 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("maven-publish")
+//    id("maven-publish")
 }
 
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            artifactId = "knock-android"
-            afterEvaluate {
-                from(components["release"])
-            }
-        }
-    }
-}
+//publishing {
+//    publications {
+//        register<MavenPublication>("release") {
+//            artifactId = "knock-android"
+//            afterEvaluate {
+//                from(components["release"])
+//            }
+//        }
+//    }
+//}
 
 android {
     namespace = "app.knock.client"
