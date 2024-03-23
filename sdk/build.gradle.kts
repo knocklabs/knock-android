@@ -4,9 +4,6 @@ plugins {
     id("maven-publish")
 }
 
-group = "app.knock.client"
-version = "1.0.2"
-
 publishing {
     publications {
         register<MavenPublication>("release") {

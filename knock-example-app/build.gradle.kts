@@ -5,20 +5,17 @@ plugins {
 }
 
 android {
-    namespace = "your_app_id"
+    namespace = "app.knock.example"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "your_app_id"
+        applicationId = "app.knock.example"
         minSdk = 28
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
     }
 
     buildTypes {
@@ -42,11 +39,6 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
     }
 }
 
