@@ -3,7 +3,6 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven(url = "https://jitpack.io")
     }
 }
 dependencyResolutionManagement {
@@ -14,6 +13,6 @@ dependencyResolutionManagement {
         maven(url = "https://jitpack.io")
     }
 }
-
+rootProject.name = "knock-android"
 include(":sdk")
 include(":knock-example-app")

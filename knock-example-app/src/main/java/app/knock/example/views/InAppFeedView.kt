@@ -1,4 +1,4 @@
-package com.example.knock_example_app.views
+package app.knock.example.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.knock.client.models.feed.FeedItem
-import com.example.knock_example_app.viewmodels.InAppFeedViewModel
+import app.knock.example.viewmodels.InAppFeedViewModel
 import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @OptIn(ExperimentalMaterial3Api::class)

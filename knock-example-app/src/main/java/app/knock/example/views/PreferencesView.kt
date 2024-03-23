@@ -1,4 +1,4 @@
-package com.example.knock_example_app.views
+package app.knock.example.views
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,8 +25,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.knock.client.models.preferences.ChannelTypePreferenceItem
-import com.example.knock_example_app.viewmodels.AuthenticationViewModel
-import com.example.knock_example_app.viewmodels.PreferencesViewModel
+import app.knock.example.viewmodels.AuthenticationViewModel
+import app.knock.example.viewmodels.PreferencesViewModel
 import arrow.core.Either
 
 @OptIn(ExperimentalMaterial3Api::class)

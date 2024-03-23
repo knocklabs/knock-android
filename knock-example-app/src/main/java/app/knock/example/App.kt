@@ -1,4 +1,4 @@
-package com.example.knock_example_app
+package app.knock.example
 
 import android.app.Application
 import app.knock.client.Knock

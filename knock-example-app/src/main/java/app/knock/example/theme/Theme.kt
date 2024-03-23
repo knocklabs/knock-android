@@ -1,4 +1,4 @@
-package com.example.knock_example_app.ui.theme
+package app.knock.example.theme
 
 import android.app.Activity
 import android.os.Build

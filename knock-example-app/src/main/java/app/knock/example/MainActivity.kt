@@ -1,4 +1,4 @@
-package com.example.knock_example_app
+package app.knock.example
 
 import android.content.Intent
 import android.os.Bundle
@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import app.knock.client.Knock
 import app.knock.client.KnockComponentActivity
 import app.knock.client.modules.requestNotificationPermission
-import com.example.knock_example_app.ui.theme.KnockandroidTheme
-import com.example.knock_example_app.views.StartupView
+import app.knock.example.theme.KnockandroidTheme
+import app.knock.example.views.StartupView
 import com.google.firebase.messaging.RemoteMessage
 
 

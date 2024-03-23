@@ -1,4 +1,4 @@
-package com.example.knock_example_app.views
+package app.knock.example.views
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.knock_example_app.viewmodels.AuthenticationViewModel
-import com.example.knock_example_app.ui.theme.KnockandroidTheme
+import app.knock.example.viewmodels.AuthenticationViewModel
+import app.knock.example.theme.KnockandroidTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

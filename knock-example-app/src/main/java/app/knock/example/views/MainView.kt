@@ -1,4 +1,4 @@
-package com.example.knock_example_app.views
+package app.knock.example.views
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.padding
@@ -27,8 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.knock_example_app.viewmodels.AuthenticationViewModel
-import com.example.knock_example_app.viewmodels.InAppFeedViewModel
+import app.knock.example.viewmodels.AuthenticationViewModel
+import app.knock.example.viewmodels.InAppFeedViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)

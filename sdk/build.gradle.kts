@@ -1,24 +1,37 @@
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    kotlin("android")
     id("maven-publish")
 }
 
 group = "app.knock"
 version = "1.0.2"
 
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            artifactId = "knock-android"
-            groupId = "app.knock"
-            version = "1.0.2"
-            afterEvaluate {
-                from(components["release"])
+
+//afterEvaluate {
+    publishing {
+        publications {
+            register<MavenPublication>("release") {
+                artifactId = "knock-android"
+                groupId = "app.knock"
+                version = "1.0.2"
+                afterEvaluate {
+                    from(components["release"])
+                }
             }
         }
     }
-}
+//}
+//publishing {
+//    publications {
+//        create<MavenPublication>("mavenJava") {
+//            from(components["release"])
+//            groupId = "app.knock"
+//            artifactId = "knock-android"
+//            version = "1.0.2"
+//        }
+//    }
+//}
 
 android {
     namespace = "app.knock.client"
@@ -42,6 +55,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8

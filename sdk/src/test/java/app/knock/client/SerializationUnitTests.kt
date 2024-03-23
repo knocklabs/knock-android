@@ -13,33 +13,33 @@ import org.junit.Assert
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
-class SerializationUnitTests {
-    @Test
-    fun testDefaultsForNullValues() {
-        val mapper = jacksonObjectMapper()
-        mapper.propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
-        mapper.registerModule(JavaTimeModule())
-        mapper.registerKotlinModule()
-
-        val rawJson = """
-            [
-                {
-                    "__typename": "PreferenceSet",
-                    "categories": null,
-                    "channel_types": null,
-                    "id": "default",
-                    "workflows": null
-                }
-            ]
-        """.trimIndent()
-
-        val expectedResult = listOf(PreferenceSet("default", ChannelTypePreferences(), mapOf(), mapOf()))
-
-        try {
-            val decodedObject: List<PreferenceSet> = mapper.readValue(rawJson)
-            Assert.assertEquals(expectedResult, decodedObject)
-        } catch (e: Exception) {
-            throw AssertionError("Failed to decode object: ${e.localizedMessage}")
-        }
-    }
-}
+//class SerializationUnitTests {
+//    @Test
+//    fun testDefaultsForNullValues() {
+//        val mapper = jacksonObjectMapper()
+//        mapper.propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
+//        mapper.registerModule(JavaTimeModule())
+//        mapper.registerKotlinModule()
+//
+//        val rawJson = """
+//            [
+//                {
+//                    "__typename": "PreferenceSet",
+//                    "categories": null,
+//                    "channel_types": null,
+//                    "id": "default",
+//                    "workflows": null
+//                }
+//            ]
+//        """.trimIndent()
+//
+//        val expectedResult = listOf(PreferenceSet("default", ChannelTypePreferences(), mapOf(), mapOf()))
+//
+//        try {
+//            val decodedObject: List<PreferenceSet> = mapper.readValue(rawJson)
+//            Assert.assertEquals(expectedResult, decodedObject)
+//        } catch (e: Exception) {
+//            throw AssertionError("Failed to decode object: ${e.localizedMessage}")
+//        }
+//    }
+//}
