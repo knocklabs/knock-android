@@ -5,33 +5,20 @@ plugins {
 }
 
 group = "app.knock"
-version = "1.0.2"
+version = "1.0.0"
 
-
-//afterEvaluate {
-    publishing {
-        publications {
-            register<MavenPublication>("release") {
-                artifactId = "knock-android"
-                groupId = "app.knock"
-                version = "1.0.2"
-                afterEvaluate {
-                    from(components["release"])
-                }
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            artifactId = "knock-android"
+            groupId = "app.knock"
+            version = "1.0.0"
+            afterEvaluate {
+                from(components["release"])
             }
         }
     }
-//}
-//publishing {
-//    publications {
-//        create<MavenPublication>("mavenJava") {
-//            from(components["release"])
-//            groupId = "app.knock"
-//            artifactId = "knock-android"
-//            version = "1.0.2"
-//        }
-//    }
-//}
+}
 
 android {
     namespace = "app.knock.client"
