@@ -1,4 +1,4 @@
-package com.example.knock_example_app
+package app.knock.example
 
 object Utils {
     val publishableKey = ""

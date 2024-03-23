@@ -1,4 +1,4 @@
-package com.example.knock_example_app.viewmodels
+package app.knock.example.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,7 +6,7 @@ import app.knock.client.Knock
 import app.knock.client.modules.isAuthenticated
 import app.knock.client.modules.signIn
 import app.knock.client.modules.signOut
-import com.example.knock_example_app.Utils
+import app.knock.example.Utils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch

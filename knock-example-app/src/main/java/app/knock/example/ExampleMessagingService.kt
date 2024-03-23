@@ -1,7 +1,6 @@
-package com.example.knock_example_app
+package app.knock.example
 
 import android.annotation.SuppressLint
-import android.util.Log
 import app.knock.client.KnockMessagingService
 import app.knock.client.presentNotification
 import com.google.firebase.messaging.RemoteMessage

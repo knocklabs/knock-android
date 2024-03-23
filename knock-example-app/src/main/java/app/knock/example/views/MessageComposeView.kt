@@ -1,4 +1,4 @@
-package com.example.knock_example_app.views
+package app.knock.example.views
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

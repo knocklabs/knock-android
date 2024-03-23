@@ -1,4 +1,4 @@
-package com.example.knock_example_app.views
+package app.knock.example.views
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -6,8 +6,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.knock_example_app.viewmodels.AuthenticationViewModel
-import com.example.knock_example_app.ui.theme.KnockandroidTheme
+import app.knock.example.viewmodels.AuthenticationViewModel
+import app.knock.example.theme.KnockandroidTheme
 
 @Composable
 fun StartupView(authViewModel: AuthenticationViewModel = viewModel()) {

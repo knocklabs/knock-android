@@ -13,5 +13,5 @@
 .cxx
 local.properties
 .DS_Store
-knock-example-app/google-services.json
-knock-example-app/release/app-release.aab
+#knock-example-app/google-services.json
+#knock-example-app/release/app-release.aab

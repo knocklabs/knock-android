@@ -1,4 +1,4 @@
-package com.example.knock_example_app.viewmodels
+package app.knock.example.viewmodels
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -11,7 +11,7 @@ import app.knock.client.models.feed.FeedItem
 import app.knock.client.models.feed.FeedItemScope
 import app.knock.client.models.messages.KnockMessageStatusUpdateType
 import app.knock.client.modules.updateMessageStatus
-import com.example.knock_example_app.Utils
+import app.knock.example.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
