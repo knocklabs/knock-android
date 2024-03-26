@@ -1,10 +1,44 @@
 package app.knock.client.models.feed
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id
+import com.fasterxml.jackson.annotation.JsonTypeName
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Block(
-    var content: String,
-    var name: String,
-    var rendered: String,
+@JsonTypeInfo(
+    use = Id.NAME,
+    include = As.PROPERTY,
+    property = "type"
+)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = MarkdownContentBlock::class, name = "markdown"),
+    JsonSubTypes.Type(value = TextContentBlock::class, name = "text"),
+    JsonSubTypes.Type(value = ButtonSetContentBlock::class, name = "button_set")
+)
+sealed class ContentBlockBase
+
+@JsonTypeName("markdown")
+data class MarkdownContentBlock(
+    val name: String,
+    val content: String,
+    val rendered: String
+) : ContentBlockBase()
+
+@JsonTypeName("text")
+data class TextContentBlock(
+    val name: String,
+    val content: String
+) : ContentBlockBase()
+
+@JsonTypeName("button_set")
+data class ButtonSetContentBlock(
+    val name: String,
+    val buttons: List<BlockActionButton>
+) : ContentBlockBase()
+
+data class BlockActionButton(
+    val label: String,
+    val name: String,
+    val action: String
 )
