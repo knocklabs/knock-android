@@ -69,6 +69,7 @@ class SerializationUnitTests {
                     {
                         "content": "asdf",
                         "name": "body",
+                        "rendered": "asdf",
                         "type": "text"
                     },
                     {

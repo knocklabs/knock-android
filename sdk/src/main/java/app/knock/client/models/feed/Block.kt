@@ -1,5 +1,6 @@
 package app.knock.client.models.feed
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As
@@ -18,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 )
 sealed class ContentBlockBase
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeName("markdown")
 data class MarkdownContentBlock(
     val name: String,
@@ -25,18 +27,22 @@ data class MarkdownContentBlock(
     val rendered: String
 ) : ContentBlockBase()
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeName("text")
 data class TextContentBlock(
     val name: String,
-    val content: String
+    val content: String,
+    val rendered: String
 ) : ContentBlockBase()
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeName("button_set")
 data class ButtonSetContentBlock(
     val name: String,
     val buttons: List<BlockActionButton>
 ) : ContentBlockBase()
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class BlockActionButton(
     val label: String,
     val name: String,
