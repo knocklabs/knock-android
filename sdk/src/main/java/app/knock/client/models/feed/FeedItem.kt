@@ -12,7 +12,7 @@ data class FeedItem(
     @JsonProperty("__cursor") var feedCursor: String,
     var activities: List<FeedActivity>?,
     var actors: List<KnockUser>,
-    var blocks: List<Block>,
+    var blocks: List<ContentBlockBase>,
 
     @JsonSetter(nulls = Nulls.AS_EMPTY)
     var data: Map<String, Any> = hashMapOf(),

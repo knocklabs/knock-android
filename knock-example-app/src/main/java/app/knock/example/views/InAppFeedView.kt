@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -31,7 +32,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.knock.client.models.feed.ButtonSetContentBlock
 import app.knock.client.models.feed.FeedItem
+import app.knock.client.models.feed.MarkdownContentBlock
 import app.knock.example.viewmodels.InAppFeedViewModel
 import dev.jeziellago.compose.markdowntext.MarkdownText
 
@@ -81,13 +84,11 @@ fun InAppFeedView(inAppFeedViewModel: InAppFeedViewModel, onDismiss: () -> Unit)
 
 @Composable
 fun NotificationRow(item: FeedItem, onArchive: (item: FeedItem) -> Unit) {
-    val markdown = item.blocks.firstOrNull { it.name == "body" }?.rendered ?: ""
-
     Column(verticalArrangement = Arrangement.Center) {
-
-        Row(Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp),
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
@@ -99,10 +100,15 @@ fun NotificationRow(item: FeedItem, onArchive: (item: FeedItem) -> Unit) {
                     .align(Alignment.CenterVertically))
             }
 
-            MarkdownText(
-                markdown = markdown,
-                modifier = Modifier.weight(1f).padding(horizontal = 16.dp).align(Alignment.CenterVertically)
-            )
+            Column(modifier = Modifier.weight(1f).padding(horizontal = 16.dp).align(Alignment.CenterVertically)) {
+                item.blocks.forEach { block ->
+                    when(block) {
+                        is MarkdownContentBlock -> MarkdownContent(block)
+                        is ButtonSetContentBlock -> ButtonSetContent(block)
+                        else -> {}
+                    }
+                }
+            }
 
             IconButton(modifier = Modifier
                 .size(24.dp),
@@ -118,6 +124,23 @@ fun NotificationRow(item: FeedItem, onArchive: (item: FeedItem) -> Unit) {
         HorizontalDivider()
     }
 }
+
+@Composable
+fun MarkdownContent(block: MarkdownContentBlock) {
+    MarkdownText(block.rendered)
+}
+
+@Composable
+fun ButtonSetContent(block: ButtonSetContentBlock) {
+    Row {
+        block.buttons.forEach { button ->
+            Button(onClick = {}) {
+                Text(button.label)
+            }
+        }
+    }
+}
+
 
 @Preview(showBackground = true, device = "id:pixel_5")
 @Composable
