@@ -5,7 +5,7 @@ object Utils {
     val userId = ""
     val inAppChannelId = ""
     val pushChannelId = ""
-    val hostname = "https://api.knock-dev.app"
+    val hostname = "https://api.knock.app"
 
     val loggingTag = "KNOCK_EXAMPLE_APP"
 }
