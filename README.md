@@ -2,14 +2,14 @@
 
 A client-side Kotlin library to integrate Knock into Android applications.
 
-[![GitHub Release](https://img.shields.io/github/v/release/knocklabs/knock-android?style=flat)](https://github.com/knocklabs/knock-swift/releases/latest)
+[![GitHub Release](https://img.shields.io/github/v/release/knocklabs/knock-android?style=flat)](https://github.com/knocklabs/knock-android/releases/latest)
 [![Jitpack compatible](https://img.shields.io/badge/Jitpack-compatible)](https://jitpack.io/#knocklabs/knock-android)
-![min Android SDK version](https://img.shields.io/badge/min%20Swift%20version-5.3-orange)
+![min Android SDK version](https://img.shields.io/badge/min%20sdk%20version-28-orange)
 [![GitHub license](https://img.shields.io/badge/license-MIT-lightgrey.svg?style=flat)](https://github.com/knocklabs/knock-android/blob/main/LICENSE)
 
 ---
 
-Knock is a flexible, reliable notifications infrastructure that's built to scale with you. Use our iOS SDK to engage users with in-app feeds, setup push notifications, and manage notification preferences.
+Knock is a flexible, reliable notifications infrastructure that's built to scale with you. Use our Android SDK to engage users with in-app feeds, setup push notifications, and manage notification preferences.
 
 ---
 
