@@ -6,6 +6,8 @@ enum class FeedItemScope {
     @JsonProperty("all") ALL,
     @JsonProperty("unread") UNREAD,
     @JsonProperty("read") READ,
-    @JsonProperty("unseen") UNSEEN,
     @JsonProperty("seen") SEEN,
+    @JsonProperty("unseen") UNSEEN,
+    @JsonProperty("archived") ARCHIVED,
+    @JsonProperty("interacted") INTERACTED
 }
