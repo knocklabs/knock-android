@@ -16,10 +16,10 @@ open class KnockActivity : AppCompatActivity(), KnockActivityInterface {
         checkForPushNotificationTap(intent)
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        checkForPushNotificationTap(intent)
-    }
+//    override fun onNewIntent(intent: Intent?) {
+//        super.onNewIntent(intent)
+//        checkForPushNotificationTap(intent)
+//    }
 }
 
 open class KnockComponentActivity : ComponentActivity(), KnockActivityInterface {
@@ -29,10 +29,10 @@ open class KnockComponentActivity : ComponentActivity(), KnockActivityInterface 
         checkForPushNotificationTap(intent)
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        checkForPushNotificationTap(intent)
-    }
+//    override fun onNewIntent(intent: Intent?) {
+//        super.onNewIntent(intent)
+//        checkForPushNotificationTap(intent)
+//    }
 }
 
 interface KnockActivityInterface {

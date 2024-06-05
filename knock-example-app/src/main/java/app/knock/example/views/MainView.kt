@@ -24,23 +24,31 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import app.knock.client.Knock
+import app.knock.client.components.InAppFeedViewModel
+import app.knock.client.components.InAppFeedViewModelFactory
+import app.knock.client.components.views.InAppFeedView
+import app.knock.client.modules.FeedManager
+import app.knock.example.Utils
 import app.knock.example.viewmodels.AuthenticationViewModel
-import app.knock.example.viewmodels.InAppFeedViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainView(authViewModel: AuthenticationViewModel) {
     var selectedTab by remember { mutableIntStateOf(0) }
-    val feedViewModel: InAppFeedViewModel = viewModel()
+    val feedViewModel: InAppFeedViewModel = viewModel(factory = InAppFeedViewModelFactory())
     var showingSheet by remember { mutableStateOf(false) }
-    val feedState by feedViewModel.feed.collectAsState()
 
     LaunchedEffect(key1 = Unit) {
-        feedViewModel.initializeFeed()
+        if (Knock.shared.feedManager == null) {
+            Knock.shared.feedManager = FeedManager(feedId = Utils.inAppChannelId)
+            feedViewModel.connectFeedAndObserveNewMessages()
+        }
     }
 
     Scaffold(
@@ -48,7 +56,8 @@ fun MainView(authViewModel: AuthenticationViewModel) {
             TopAppBar(
                 title = { Text(if(selectedTab == 0) "Messages" else "Preferences") },
                 actions = {
-                    val unseenCount = feedState?.meta?.unseenCount ?: 0
+//                    val unseenCount = feedState?.meta?.unseenCount ?: 0
+                    val unseenCount = 0
 
                     IconButton(modifier = Modifier.padding(horizontal = 16.dp), onClick = { showingSheet = true }) {
                         if (unseenCount > 0) {
@@ -80,9 +89,7 @@ fun MainView(authViewModel: AuthenticationViewModel) {
     }
 
     if (showingSheet) {
-        InAppFeedView(feedViewModel) {
-            showingSheet = false
-        }
+        InAppFeedView(feedViewModel)
     }
 }
 
