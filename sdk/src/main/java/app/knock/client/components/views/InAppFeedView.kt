@@ -6,14 +6,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.knock.client.R
 import app.knock.client.components.InAppFeedViewModel
@@ -29,6 +35,7 @@ import app.knock.client.models.feed.MarkdownContentBlock
 import app.knock.client.models.messages.KnockMessageStatusUpdateType
 import java.time.ZonedDateTime
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun InAppFeedView(viewModel: InAppFeedViewModel, theme: InAppFeedTheme = InAppFeedTheme(LocalContext.current)) {
     var selectedItemId by remember { mutableStateOf<String?>(null) }
@@ -37,6 +44,9 @@ fun InAppFeedView(viewModel: InAppFeedViewModel, theme: InAppFeedTheme = InAppFe
     val feed by viewModel.feed.collectAsState()
     val showRefreshIndicator by viewModel.showRefreshIndicator.collectAsState()
     val brandingRequired by viewModel.brandingRequired.collectAsState()
+    val refreshingFromPull by viewModel.isRefreshingFromPull.collectAsState()
+
+    val pullRefreshState = rememberPullRefreshState(refreshingFromPull, { viewModel.pullToRefresh() })
 
     Column(
         modifier = Modifier
@@ -61,7 +71,9 @@ fun InAppFeedView(viewModel: InAppFeedViewModel, theme: InAppFeedTheme = InAppFe
             HorizontalDivider(color = KnockColor.Gray.gray4(LocalContext.current), thickness = 1.dp)
         }
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier
+            .pullRefresh(pullRefreshState)
+            .fillMaxSize()) {
             when {
                 showRefreshIndicator -> {
                     Column(
@@ -76,22 +88,21 @@ fun InAppFeedView(viewModel: InAppFeedViewModel, theme: InAppFeedTheme = InAppFe
                 }
 
                 feed.entries.isEmpty() -> {
-                    EmptyFeedView(InAppFeedFilter.defaultEmptyViewConfig(LocalContext.current, currentFilter.scope)) {
-                        viewModel.refreshFeed()
-                    }
+                    EmptyFeedView(InAppFeedFilter.defaultEmptyViewConfig(LocalContext.current, currentFilter.scope))
                 }
                 else -> {
                     LazyColumn(
                         modifier = Modifier.background(theme.lowerBackgroundColor)
                     ) {
                         items(feed.entries) { item ->
-                            FeedNotificationRow(item, theme.rowTheme) { buttonTapString ->
+                            FeedNotificationRow(
+                                Modifier.background(if (selectedItemId == item.id) Color.Gray.copy(alpha = 0.4f) else theme.rowTheme.backgroundColor),
+                                item,
+                                theme.rowTheme
+                            ) { buttonTapString ->
                                 selectedItemId = item.id
                                 viewModel.feedItemButtonTapped(item, buttonTapString)
                             }
-//                            .background(
-//                                if (selectedItemId == item.id) Color.Gray.copy(alpha = 0.4f) else Color.Transparent
-//                            )
                         }
                         if (viewModel.isMoreContentAvailable()) {
                             item { LastRowView(theme) }
@@ -100,6 +111,12 @@ fun InAppFeedView(viewModel: InAppFeedViewModel, theme: InAppFeedTheme = InAppFe
                     }
                 }
             }
+
+            PullRefreshIndicator(
+                refreshing = refreshingFromPull,
+                state = pullRefreshState,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
 
             if (brandingRequired) {
                 Image(
@@ -131,7 +148,10 @@ fun TopActionButtonsView(viewModel: InAppFeedViewModel) {
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         viewModel.topButtonActions.forEach { action ->
-            ActionButton(Modifier.fillMaxWidth().weight(1f), action.title, ActionButtonStyle.Secondary.defaultConfig(LocalContext.current), action = {
+            ActionButton(
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f), action.title, ActionButtonStyle.Secondary.defaultConfig(LocalContext.current), action = {
                 viewModel.topActionButtonTapped(action)
             })
         }

@@ -25,7 +25,7 @@ import app.knock.client.components.KnockColor
 import app.knock.client.R
 
 @Composable
-fun EmptyFeedView(config: EmptyFeedViewConfig, refreshAction: () -> Unit) {
+fun EmptyFeedView(config: EmptyFeedViewConfig) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -80,7 +80,7 @@ fun PreviewEmptyFeedView() {
         icon = null,
         iconResId = R.drawable.archive
     )
-    EmptyFeedView(config = config) {}
+    EmptyFeedView(config = config)
 }
 
 data class EmptyFeedViewConfig(

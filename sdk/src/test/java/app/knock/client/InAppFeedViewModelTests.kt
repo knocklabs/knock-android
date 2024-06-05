@@ -31,6 +31,7 @@ class InAppFeedViewModelTests {
 
     private val mainDispatcher = StandardTestDispatcher()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() {
         Dispatchers.setMain(mainDispatcher)
@@ -59,6 +60,7 @@ class InAppFeedViewModelTests {
         )[InAppFeedViewModel::class.java]
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @After
     fun tearDown() {
         // Reset the Main dispatcher
@@ -172,6 +174,20 @@ class InAppFeedViewModelTests {
         viewModel.optimisticallyBulkUpdateStatus(KnockMessageStatusUpdateType.ARCHIVED)
         assertTrue(viewModel.feed.value.meta.unreadCount == 0)
         assertTrue(viewModel.feed.value.entries.isEmpty())
+    }
+
+    @Test
+    fun testOptimisticBulkMarkItemAsArchivedAndShouldHideArchived() = runTest {
+        val item = generateTestFeedItem(FeedItemScope.UNREAD)
+        val item2 = generateTestFeedItem(FeedItemScope.SEEN)
+        val item3 = generateTestFeedItem(FeedItemScope.UNREAD)
+        val item4 = generateTestFeedItem(FeedItemScope.READ)
+
+        viewModel.feed.value.entries = listOf(item, item2, item3, item4)
+        viewModel.feedClientOptions.archived = FeedItemArchivedScope.INCLUDE
+        viewModel.optimisticallyBulkUpdateStatus(KnockMessageStatusUpdateType.ARCHIVED)
+        assertTrue(viewModel.feed.value.meta.unreadCount == 0)
+        assertTrue(viewModel.feed.value.entries.size == 4)
     }
 
     @Test

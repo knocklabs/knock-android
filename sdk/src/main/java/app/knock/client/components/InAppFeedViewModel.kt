@@ -40,6 +40,10 @@ class InAppFeedViewModel(
     val brandingRequired = MutableStateFlow(true) // Controls whether to show the Knock icon on the feed interface.
     val showRefreshIndicator = MutableStateFlow(false)
 
+    private val _isRefreshingFromPull = MutableStateFlow(false)
+    val isRefreshingFromPull: StateFlow<Boolean>
+        get() = _isRefreshingFromPull.asStateFlow()
+
     // Publisher for feed item button tap events.
     private val _didTapFeedItemButtonPublisher = MutableSharedFlow<String>()
     val didTapFeedItemButtonPublisher = _didTapFeedItemButtonPublisher.asSharedFlow()
@@ -87,31 +91,37 @@ class InAppFeedViewModel(
         }
     }
 
-    fun refreshFeed(showIndicator: Boolean = false) {
+    fun pullToRefresh() {
         viewModelScope.launch {
-            if (showIndicator) showRefreshIndicator.value = true
-            val originalStatus = feedClientOptions.status
-            val archived = if (feedClientOptions.status == FeedItemScope.ARCHIVED) FeedItemArchivedScope.ONLY else null
-            val status = if (feedClientOptions.status == FeedItemScope.ARCHIVED) FeedItemScope.ALL else feedClientOptions.status
-            feedClientOptions.archived = archived
-            feedClientOptions.status = status
-            feedClientOptions.before = null
-            feedClientOptions.after = null
+            _isRefreshingFromPull.value = true // No need to switch to Dispatchers.Main for this
+            refreshFeed()
+            _isRefreshingFromPull.value = false
+        }
+    }
 
-            val userFeed = withContext(Dispatchers.IO) {
-                try {
-                    Knock.shared.feedManager?.getUserFeedContent(feedClientOptions)
-                } catch (e: Exception) {
-                    null
-                }
-            }
+    suspend fun refreshFeed(showIndicator: Boolean = false) {
+        if (showIndicator) showRefreshIndicator.value = true
+        val originalStatus = feedClientOptions.status
+        val archived = if (feedClientOptions.status == FeedItemScope.ARCHIVED) FeedItemArchivedScope.ONLY else null
+        val status = if (feedClientOptions.status == FeedItemScope.ARCHIVED) FeedItemScope.ALL else feedClientOptions.status
+        feedClientOptions.archived = archived
+        feedClientOptions.status = status
+        feedClientOptions.before = null
+        feedClientOptions.after = null
 
-            userFeed?.let {
-                feed.value = it
-                feed.value.pageInfo.before = feed.value.entries.firstOrNull()?.feedCursor
-                feedClientOptions.status = originalStatus
-                showRefreshIndicator.value = false
+        val userFeed = withContext(Dispatchers.IO) {
+            try {
+                Knock.shared.feedManager?.getUserFeedContent(feedClientOptions)
+            } catch (e: Exception) {
+                null
             }
+        }
+
+        userFeed?.let {
+            feed.value = it
+            feed.value.pageInfo.before = feed.value.entries.firstOrNull()?.feedCursor
+            feedClientOptions.status = originalStatus
+            showRefreshIndicator.value = false
         }
     }
 
@@ -387,20 +397,24 @@ class InAppFeedViewModel(
         }
     }
 
-    private fun mergeFeedsForNewMessageReceived(newFeed: Feed) {
-        feed.value = feed.value.copy(
-            entries = newFeed.entries + feed.value.entries, // TODO: Test this to ensure new values are being inserted correctly
-            meta = newFeed.meta,
-            pageInfo = feed.value.pageInfo.copy(before = newFeed.entries.firstOrNull()?.feedCursor)
-        )
+    private suspend fun mergeFeedsForNewMessageReceived(newFeed: Feed) {
+        withContext(Dispatchers.Main) {
+            feed.value = feed.value.copy(
+                entries = newFeed.entries + feed.value.entries,
+                meta = newFeed.meta,
+                pageInfo = feed.value.pageInfo.copy(before = newFeed.entries.firstOrNull()?.feedCursor)
+            )
+        }
     }
 
-    private fun mergeFeedsForNewPageOfFeed(newFeed: Feed) {
-        feed.value = feed.value.copy(
-            entries = feed.value.entries + newFeed.entries, // TODO: Test this to ensure new values are being inserted correctly
-            meta = newFeed.meta,
-            pageInfo = feed.value.pageInfo.copy(after = newFeed.pageInfo.after)
-        )
+    private suspend fun mergeFeedsForNewPageOfFeed(newFeed: Feed) {
+        withContext(Dispatchers.Main) {
+            feed.value = feed.value.copy(
+                entries = feed.value.entries + newFeed.entries, // TODO: Test this to ensure new values are being inserted correctly
+                meta = newFeed.meta,
+                pageInfo = feed.value.pageInfo.copy(after = newFeed.pageInfo.after)
+            )
+        }
     }
 
     private fun getBrandingRequired(): Boolean {
