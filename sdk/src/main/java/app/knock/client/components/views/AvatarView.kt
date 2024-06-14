@@ -1,6 +1,5 @@
 package app.knock.client.components.views
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -8,37 +7,33 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import app.knock.client.components.KnockColor
+import app.knock.client.components.themes.AvatarViewTheme
 import coil.compose.AsyncImage
 
 @Composable
 fun AvatarView(
     imageURLString: String? = null,
     name: String? = null,
-    backgroundColor: Color = KnockColor.Gray.gray5(LocalContext.current),
-    size: Int = 32,
-    style: TextStyle = defaultAvatarViewTextStyle(LocalContext.current)
+    theme: AvatarViewTheme = AvatarViewTheme(LocalContext.current)
 ) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .size(size.dp)
-            .background(backgroundColor, CircleShape)
+            .size(theme.avatarViewSize.dp)
+            .background(theme.avatarViewBackgroundColor, CircleShape)
     ) {
         if (imageURLString != null) {
             AsyncImage(
                 model = imageURLString,
                 contentDescription = null,
-                modifier = Modifier.size(size.dp),
+                modifier = Modifier
+                    .size(theme.avatarViewSize.dp)
+                    .clip(CircleShape),
                 contentScale = ContentScale.Crop
             )
         } else {
@@ -46,20 +41,11 @@ fun AvatarView(
             if (initials != null) {
                 Text(
                     text = initials,
-                    style = style
+                    style = theme.avatarInitialsTextStyle
                 )
             }
         }
     }
-}
-
-private fun defaultAvatarViewTextStyle(context: Context): TextStyle {
-    return TextStyle(
-        color = KnockColor.Gray.gray11(context),
-        fontSize = 16.sp,
-        fontWeight = FontWeight.Medium,
-        textAlign = TextAlign.Center
-    )
 }
 
 private fun generateInitials(name: String?): String? {
@@ -71,7 +57,5 @@ private fun generateInitials(name: String?): String? {
 @Preview(showBackground = true, device = "id:pixel_5")
 @Composable
 private fun AvatarPreviewView() {
-//    AvatarView("https://xsgames.co/randomusers/assets/avatars/male/2.jpg", name = "Matt Gardner")
     AvatarView(name = "Matt Gardner")
-
 }

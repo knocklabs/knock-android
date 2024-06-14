@@ -19,14 +19,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.knock.client.R
 import app.knock.client.components.InAppFeedViewModel
 import app.knock.client.components.InAppFeedViewModelFactory
 import app.knock.client.components.KnockColor
 import app.knock.client.components.models.InAppFeedFilter
-import app.knock.client.components.themes.InAppFeedTheme
+import app.knock.client.components.themes.InAppFeedViewTheme
 import app.knock.client.models.KnockUser
 import app.knock.client.models.feed.BlockActionButton
 import app.knock.client.models.feed.ButtonSetContentBlock
@@ -37,7 +36,7 @@ import java.time.ZonedDateTime
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun InAppFeedView(viewModel: InAppFeedViewModel, theme: InAppFeedTheme = InAppFeedTheme(LocalContext.current)) {
+fun InAppFeedView(viewModel: InAppFeedViewModel, theme: InAppFeedViewTheme = InAppFeedViewTheme(LocalContext.current)) {
     var selectedItemId by remember { mutableStateOf<String?>(null) }
     val filterOptions by viewModel.filterOptions.collectAsState()
     val currentFilter by viewModel.currentFilter.collectAsState()
@@ -158,7 +157,7 @@ fun TopActionButtonsView(viewModel: InAppFeedViewModel) {
     }
 }
 @Composable
-fun LastRowView(theme: InAppFeedTheme) {
+fun LastRowView(theme: InAppFeedViewTheme) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

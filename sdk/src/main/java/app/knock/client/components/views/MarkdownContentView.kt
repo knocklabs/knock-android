@@ -1,85 +1,53 @@
 package app.knock.client.components.views
 
-import android.text.Html
+import android.text.util.Linkify
 import android.widget.TextView
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import app.knock.client.components.KnockColor
-import com.mohamedrejeb.richeditor.model.rememberRichTextState
-import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
+import app.knock.client.models.feed.MarkdownContentBlock
+import com.google.android.material.textview.MaterialTextView
 import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @Composable
-fun MarkdownContentView(html: String, cssString: String? = null) {
-    val state = rememberRichTextState()
+fun MarkdownContentView(html: String) {
 
-    val defaultCss = """
-        * {
-            font-family: -apple-system, sans-serif;
-            font-size: 16px;
-            color: #1c2024;
-        }
-        p {
-            margin-top: 0px;
-            margin-bottom: 10px;
-        }
-        blockquote p {
-            color: #60646c;
-            margin-top: 0px;
-            margin-bottom: 10px;
-        }
-    """.trimIndent()
+    val style = TextStyle(
+        color = KnockColor.Gray.gray12(LocalContext.current),
+        fontSize = 16.sp
+    )
 
-    val css = cssString ?: defaultCss
-
-    val htmlContent = """
-        <html>
-            <head>
-                <style>
-                    $css
-                </style>
-            </head>
-            <body>
-                $html
-            </body>
-        </html>
-    """.trimIndent()
-
-//    state.setHtml(htmlContent)
-//
-//    RichTextEditor(
-//        state = state,
+//    AndroidView(
+//        factory = {
+//            MaterialTextView(it).apply {
+//                // links
+//                autoLinkMask = Linkify.WEB_URLS
+//                linksClickable = true
+////                setLinkTextColor(Color.White.toArgb())
+//            }
+//        },
+//        update = {
+//            it.text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_BLOCKQUOTE)
+//        }
 //    )
 
-    MarkdownText(html)
+//    AndroidView(
+//        factory = { context -> TextView(context) },
+//        update = { it.text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_BLOCKQUOTE) }
+//    )
+
+    MarkdownText(markdown = html, style = style)
 }
 
-//MarkdownText(
-//html,
-//style = TextStyle(fontSize = 16.sp, color = KnockColor.Accent.accent9(LocalContext.current))
-//)
-
-fun getCssString(): String {
-    val textColor = "#1c2024"
-    val blockquoteColor = "#60646c"
-    return """
-        * {
-            font-family: -apple-system, sans-serif;
-            font-size: 16px;
-            color: $textColor;
-        }
-        p {
-            margin-top: 0px;
-            margin-bottom: 10px;
-        }
-        blockquote p {
-            color: $blockquoteColor;
-            margin-top: 0px;
-            margin-bottom: 10px;
-        }
-    """.trimIndent()
+@Preview(showBackground = true)
+@Composable
+fun PreviewMarkdownContentView() {
+    val markdown1 = "<p>Hey <strong>Dennis</strong> 👋 - Ian Malcolm completed an activity.</p>"
+    val markdown2 = "<p>Here's a new notification from <strong>Eleanor Price</strong>:</p><blockquote><p>test message test message test message test message test message test message test message test message test message </p></blockquote>"
+    MarkdownContentView(html = markdown2)
 }

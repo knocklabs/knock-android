@@ -77,7 +77,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.1")
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("com.github.jeziellago:compose-markdown:0.4.1")
-    implementation("com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-rc04")
     implementation("androidx.test:core-ktx:1.5.0")
     implementation("androidx.test.ext:junit-ktx:1.1.5")
     implementation("androidx.test:runner:1.5.2")
