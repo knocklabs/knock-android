@@ -4,6 +4,7 @@ import app.knock.client.Knock
 import app.knock.client.models.feed.BulkOperation
 import app.knock.client.models.feed.Feed
 import app.knock.client.models.feed.FeedClientOptions
+import app.knock.client.models.feed.FeedSettings
 import app.knock.client.models.messages.KnockMessageStatusUpdateType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,6 +44,9 @@ class FeedManager(
         feedModule.on(eventName, callback)
     }
 
+    suspend fun getFeedSettings(): FeedSettings {
+        return feedModule.getFeedSettings()
+    }
 
     /**
      * Retrieves a feed of items in reverse chronological order

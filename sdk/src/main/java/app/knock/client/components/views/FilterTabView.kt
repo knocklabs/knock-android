@@ -21,11 +21,11 @@ import app.knock.client.components.InAppFeedViewModelFactory
 import app.knock.client.components.KnockColor
 
 @Composable
-fun FilterTabView(viewModel: InAppFeedViewModel) {
+fun FilterTabView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel) {
     val filterOptions by viewModel.filterOptions.collectAsState()
     val currentFilter by viewModel.currentFilter.collectAsState()
 
-    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
+    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
         HorizontalDivider(color = KnockColor.Gray.gray4(LocalContext.current), thickness = 1.dp)
 
         Row(

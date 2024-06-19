@@ -4,6 +4,7 @@ import app.knock.client.models.feed.BulkOperation
 import app.knock.client.models.feed.Feed
 import app.knock.client.models.feed.FeedClientOptions
 import app.knock.client.models.feed.FeedItemScope
+import app.knock.client.models.feed.FeedSettings
 import app.knock.client.models.messages.KnockMessageStatusUpdateType
 import app.knock.client.models.networking.URLQueryItem
 
@@ -19,7 +20,7 @@ internal class FeedService: KnockAPIService() {
 
         val tenants = if (options.tenant != null) {
             listOf(options.tenant!!)
-        }else { null }
+        } else { null }
 
         val body = mapOf(
             "user_ids" to listOf(userId),
@@ -31,5 +32,9 @@ internal class FeedService: KnockAPIService() {
 
         val typeValue = serializeValueAsString(type)
         return post<BulkOperation>("/channels/$feedId/messages/bulk/$typeValue", body)
+    }
+
+    suspend fun getFeedSettings(userId: String, feedId: String) : FeedSettings {
+        return get<FeedSettings>("/users/$userId/feeds/$feedId/settings")
     }
 }

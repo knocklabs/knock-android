@@ -3,6 +3,7 @@ package app.knock.client.components.views
 import FeedNotificationRow
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,17 +27,20 @@ import app.knock.client.components.InAppFeedViewModelFactory
 import app.knock.client.components.KnockColor
 import app.knock.client.components.models.InAppFeedFilter
 import app.knock.client.components.themes.InAppFeedViewTheme
+import app.knock.client.components.themes.SwipeConfig
 import app.knock.client.models.KnockUser
 import app.knock.client.models.feed.BlockActionButton
 import app.knock.client.models.feed.ButtonSetContentBlock
 import app.knock.client.models.feed.FeedItem
 import app.knock.client.models.feed.MarkdownContentBlock
 import app.knock.client.models.messages.KnockMessageStatusUpdateType
+import me.saket.swipe.SwipeAction
+import me.saket.swipe.SwipeableActionsBox
 import java.time.ZonedDateTime
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun InAppFeedView(viewModel: InAppFeedViewModel, theme: InAppFeedViewTheme = InAppFeedViewTheme(LocalContext.current)) {
+fun InAppFeedView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel, theme: InAppFeedViewTheme = InAppFeedViewTheme(LocalContext.current)) {
     var selectedItemId by remember { mutableStateOf<String?>(null) }
     val filterOptions by viewModel.filterOptions.collectAsState()
     val currentFilter by viewModel.currentFilter.collectAsState()
@@ -47,8 +51,23 @@ fun InAppFeedView(viewModel: InAppFeedViewModel, theme: InAppFeedViewTheme = InA
 
     val pullRefreshState = rememberPullRefreshState(refreshingFromPull, { viewModel.pullToRefresh() })
 
+    fun generateSwipeAction(item: FeedItem, config: SwipeConfig, useInverse: Boolean): SwipeAction {
+        return SwipeAction(
+            icon = {
+                ImageWithText(
+                    Modifier.padding(horizontal = 20.dp),
+                    image = (if(useInverse) config.inverseImageId else config.imageId)?.let { painterResource(id = it) },
+                    contentDescription = if(useInverse) config.inverseTitle else config.title,
+                    text = if(useInverse) config.inverseTitle else config.title,
+                )
+                   },
+            background = config.swipeColor,
+            onSwipe = { viewModel.didSwipeRow(item, config.action, useInverse) }
+        )
+    }
+
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(theme.upperBackgroundColor)
     ) {
@@ -57,12 +76,13 @@ fun InAppFeedView(viewModel: InAppFeedViewModel, theme: InAppFeedViewTheme = InA
                 text = it,
                 style = theme.titleStyle,
                 modifier = Modifier
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
+                    .padding(horizontal = 24.dp)
+                    .padding(top = 16.dp)
             )
         }
 
         if (filterOptions.size > 1) {
-            FilterTabView(viewModel)
+            FilterTabView(Modifier.padding(top = 16.dp), viewModel)
         }
 
         if (viewModel.topButtonActions.isNotEmpty()) {
@@ -94,17 +114,30 @@ fun InAppFeedView(viewModel: InAppFeedViewModel, theme: InAppFeedViewTheme = InA
                         modifier = Modifier.background(theme.lowerBackgroundColor)
                     ) {
                         items(feed.entries) { item ->
-                            FeedNotificationRow(
-                                Modifier.background(if (selectedItemId == item.id) Color.Gray.copy(alpha = 0.4f) else theme.rowTheme.backgroundColor),
-                                item,
-                                theme.rowTheme
-                            ) { buttonTapString ->
-                                selectedItemId = item.id
-                                viewModel.feedItemButtonTapped(item, buttonTapString)
+                            val markAsReadAction: List<SwipeAction> = theme.rowTheme.markAsReadSwipeConfig?.let {
+                                listOf(generateSwipeAction(item, it, item.readAt != null))
+                            } ?: listOf()
+
+                            val archiveSwipeAction: List<SwipeAction> = theme.rowTheme.archiveSwipeConfig?.let {
+                                listOf(generateSwipeAction(item, it, item.archivedAt != null))
+                            } ?: listOf()
+
+                            SwipeableActionsBox(
+                                startActions = markAsReadAction,
+                                endActions = archiveSwipeAction
+                            ) {
+                                FeedNotificationRow(
+                                    Modifier.background(if (selectedItemId == item.id) Color.Gray.copy(alpha = 0.4f) else theme.rowTheme.backgroundColor),
+                                    item,
+                                    theme.rowTheme
+                                ) { buttonTapString ->
+                                    selectedItemId = item.id
+                                    viewModel.feedItemButtonTapped(item, buttonTapString)
+                                }
                             }
                         }
                         if (viewModel.isMoreContentAvailable()) {
-                            item { LastRowView(theme) }
+                            item { LastRowView(theme, viewModel) }
                         }
                         item { Spacer(modifier = Modifier.height(40.dp)) }
                     }
@@ -122,7 +155,6 @@ fun InAppFeedView(viewModel: InAppFeedViewModel, theme: InAppFeedViewTheme = InA
                     painter = painterResource(R.drawable.powered_by_knock),
                     contentDescription = null,
                     modifier = Modifier
-                        .padding(16.dp)
                         .align(Alignment.BottomCenter)
                 )
             }
@@ -157,7 +189,7 @@ fun TopActionButtonsView(viewModel: InAppFeedViewModel) {
     }
 }
 @Composable
-fun LastRowView(theme: InAppFeedViewTheme) {
+fun LastRowView(theme: InAppFeedViewTheme, viewModel: InAppFeedViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -167,6 +199,10 @@ fun LastRowView(theme: InAppFeedViewTheme) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         CircularProgressIndicator()
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchNewPageOfFeedItems()
     }
 }
 
@@ -195,5 +231,6 @@ fun PreviewInAppFeedView() {
         totalActors = 1
     )
     viewModel.feed.value.entries = listOf(item, item, item, item, item)
+
     InAppFeedView(viewModel = viewModel)
 }

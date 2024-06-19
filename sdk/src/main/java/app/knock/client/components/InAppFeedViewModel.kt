@@ -5,9 +5,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import app.knock.client.Knock
 import app.knock.client.KnockLogCategory
-import app.knock.client.components.models.FeedNotificationRowSwipeAction
 import app.knock.client.components.models.FeedTopActionButtonType
 import app.knock.client.components.models.InAppFeedFilter
+import app.knock.client.components.themes.FeedNotificationRowSwipeAction
 import app.knock.client.logError
 import app.knock.client.models.feed.Feed
 import app.knock.client.models.feed.FeedClientOptions
@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.ZonedDateTime
 
-// TODO: determine where to use suspend vs viewModelScope
 class InAppFeedViewModel(
     var feedClientOptions: FeedClientOptions,
     initialCurrentFilter: InAppFeedFilter,
@@ -212,12 +211,11 @@ class InAppFeedViewModel(
     // MARK: Button/Swipe Interactions
 
     // Called when a user performs a horizontal swipe action on a row item.
-    fun didSwipeRow(item: FeedItem, swipeAction: FeedNotificationRowSwipeAction) {
+    fun didSwipeRow(item: FeedItem, swipeAction: FeedNotificationRowSwipeAction, useInverse: Boolean) {
         viewModelScope.launch {
             when (swipeAction) {
-                FeedNotificationRowSwipeAction.Archive -> updateMessageEngagementStatus(item, KnockMessageStatusUpdateType.ARCHIVED)
-                FeedNotificationRowSwipeAction.MarkAsRead -> updateMessageEngagementStatus(item, KnockMessageStatusUpdateType.READ)
-                FeedNotificationRowSwipeAction.MarkAsUnread -> updateMessageEngagementStatus(item, KnockMessageStatusUpdateType.UNREAD)
+                FeedNotificationRowSwipeAction.ARCHIVE -> updateMessageEngagementStatus(item, if (useInverse) KnockMessageStatusUpdateType.UNARCHIVED else KnockMessageStatusUpdateType.ARCHIVED)
+                FeedNotificationRowSwipeAction.MARK_AS_READ -> updateMessageEngagementStatus(item, if (useInverse) KnockMessageStatusUpdateType.UNREAD else KnockMessageStatusUpdateType.READ)
             }
         }
     }
@@ -410,16 +408,15 @@ class InAppFeedViewModel(
     private suspend fun mergeFeedsForNewPageOfFeed(newFeed: Feed) {
         withContext(Dispatchers.Main) {
             feed.value = feed.value.copy(
-                entries = feed.value.entries + newFeed.entries, // TODO: Test this to ensure new values are being inserted correctly
+                entries = feed.value.entries + newFeed.entries,
                 meta = newFeed.meta,
                 pageInfo = feed.value.pageInfo.copy(after = newFeed.pageInfo.after)
             )
         }
     }
 
-    private fun getBrandingRequired(): Boolean {
-        return true
-//        return Knock.shared.feedManager.getFeedSettings()?.brandingRequired ?: false
+    private suspend fun getBrandingRequired(): Boolean {
+        return Knock.shared.feedManager?.getFeedSettings()?.features?.brandingRequired ?: true
     }
 
     private fun logError(message: String, error: Exception?) {

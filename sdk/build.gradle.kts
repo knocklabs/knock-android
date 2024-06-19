@@ -71,7 +71,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material:material:1.6.7")
+    implementation("androidx.compose.material:material:1.6.8")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.1")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.1")
@@ -106,7 +106,10 @@ dependencies {
     api("io.arrow-kt:arrow-core:1.2.0")
     implementation("io.arrow-kt:arrow-integrations-jackson-module:0.14.1")
 
+    // Swipable Rows
+    implementation("me.saket.swipe:swipe:1.3.0")
+
     implementation("com.google.code.gson:gson:2.10.1")
 
-    api("com.google.firebase:firebase-messaging-ktx:23.4.1")
+    api("com.google.firebase:firebase-messaging-ktx:24.0.0")
 }

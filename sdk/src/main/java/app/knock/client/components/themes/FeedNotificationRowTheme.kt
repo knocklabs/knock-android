@@ -20,7 +20,6 @@ data class FeedNotificationRowTheme(
     val secondaryActionButtonConfig: ActionButtonConfig = ActionButtonStyle.Secondary.defaultConfig(context), // Styling for secondary action buttons
     val sentAtDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d 'at' h:mm a", Locale.getDefault()),
     val sentAtDateTextStyle: TextStyle = TextStyle(fontSize = 12.sp, color = Color.Gray),
+    val markAsReadSwipeConfig: SwipeConfig? = FeedNotificationRowSwipeAction.MARK_AS_READ.getDefaultConfig(context), // Set this to null to remove the left swipe action
+    val archiveSwipeConfig: SwipeConfig? = FeedNotificationRowSwipeAction.ARCHIVE.getDefaultConfig(context) // Set this to null to remove the right swipe action
 )
-
-//public var swipeRightConfig: SwipeButtonConfig? // Set this to nil to remove the right swipe action
-//public var swipeLeftConfig: SwipeButtonConfig? // Set this to nil to remove the left swipe action
