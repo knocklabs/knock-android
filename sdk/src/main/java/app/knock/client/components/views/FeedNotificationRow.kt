@@ -1,10 +1,8 @@
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.DraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,16 +23,13 @@ import app.knock.client.models.feed.MarkdownContentBlock
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun FeedNotificationRow(
     modifier: Modifier = Modifier,
     item: FeedItem,
     theme: FeedNotificationRowTheme = FeedNotificationRowTheme(LocalContext.current),
-    buttonTapAction: (String) -> Unit
+    buttonTapAction: (BlockActionButton) -> Unit
 ) {
-    val isRead = item.readAt != null
-
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -48,7 +43,7 @@ fun FeedNotificationRow(
             Row(
                 verticalAlignment = Alignment.Top
             ) {
-                if (!isRead) {
+                if (item.readAt == null) {
                     Box(
                         modifier = Modifier
                             .size(8.dp)
@@ -90,7 +85,7 @@ fun MarkdownContent(block: MarkdownContentBlock) {
 fun ActionButtonsContent(
     block: ButtonSetContentBlock,
     theme: FeedNotificationRowTheme,
-    buttonTapAction: (String) -> Unit
+    buttonTapAction: (BlockActionButton) -> Unit
 ) {
     Row(
         modifier = Modifier.padding(vertical = 8.dp),
@@ -99,7 +94,7 @@ fun ActionButtonsContent(
         block.buttons.forEach { button ->
             val config = if (button.name == "primary") theme.primaryActionButtonConfig else theme.secondaryActionButtonConfig
             ActionButton(title = button.label, config = config) {
-                buttonTapAction(button.action)
+                buttonTapAction(button)
             }
         }
     }

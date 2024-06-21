@@ -2,14 +2,10 @@ package app.knock.example.views
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -43,8 +39,6 @@ import app.knock.client.components.views.InAppFeedView
 import app.knock.client.modules.FeedManager
 import app.knock.example.Utils
 import app.knock.example.viewmodels.AuthenticationViewModel
-import kotlinx.coroutines.flow.collectLatest
-import kotlin.math.log
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,15 +57,13 @@ fun MainView(authViewModel: AuthenticationViewModel) {
         }
 
         feedViewModel.didTapFeedItemRowPublisher.collect { feedItem ->
-            // Handle the feed item tap event
-            Log.d("TAG", "Did Tap Feed Item Row: ")
+            // Handle the feed item row tap event
         }
     }
 
     LaunchedEffect(Unit) {
-        feedViewModel.didTapFeedItemButtonPublisher.collect { feedItem ->
-            // Handle the feed item tap event
-            Log.d("TAG", "Did Tap Feed Item Button: ")
+        feedViewModel.didTapFeedItemButtonPublisher.collect { feedItemButtonEvent ->
+            // Handle the feed item button block tap event
         }
     }
 

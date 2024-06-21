@@ -113,7 +113,23 @@ fun InAppFeedView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel, 
                     LazyColumn(
                         modifier = Modifier.background(theme.lowerBackgroundColor)
                     ) {
-                        items(feed.entries) { item ->
+                        items(feed.entries) { item1 ->
+                            var mutable = item1.blocks.toMutableList()
+                            val block = ButtonSetContentBlock(
+                                name = "buttons",
+                                buttons = listOf(
+                                    BlockActionButton("Primary", "primary", ""),
+                                    BlockActionButton("Secondary", "secondary", "")
+                                )
+                            )
+
+                            mutable.add(1, block)
+
+                            val item = item1.copy(blocks = mutable)
+                            val rowTapAction: () -> Unit = {
+
+                            }
+
                             val markAsReadAction: List<SwipeAction> = theme.rowTheme.markAsReadSwipeConfig?.let {
                                 listOf(generateSwipeAction(item, it, item.readAt != null))
                             } ?: listOf()
@@ -123,18 +139,21 @@ fun InAppFeedView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel, 
                             } ?: listOf()
 
                             SwipeableActionsBox(
+                                Modifier.clickable {
+                                    selectedItemId = item.id
+                                },
                                 startActions = markAsReadAction,
                                 endActions = archiveSwipeAction
                             ) {
                                 FeedNotificationRow(
-                                    Modifier.background(if (selectedItemId == item.id) Color.Gray.copy(alpha = 0.4f) else theme.rowTheme.backgroundColor),
+                                    Modifier.background(theme.rowTheme.backgroundColor),
                                     item,
                                     theme.rowTheme
-                                ) { buttonTapString ->
-                                    selectedItemId = item.id
-                                    viewModel.feedItemButtonTapped(item, buttonTapString)
+                                ) { button ->
+                                    viewModel.feedItemButtonTapped(item, button)
                                 }
                             }
+
                         }
                         if (viewModel.isMoreContentAvailable()) {
                             item { LastRowView(theme, viewModel) }

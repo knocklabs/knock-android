@@ -5,10 +5,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import app.knock.client.Knock
 import app.knock.client.KnockLogCategory
+import app.knock.client.components.models.FeedItemButtonEvent
 import app.knock.client.components.models.FeedTopActionButtonType
 import app.knock.client.components.models.InAppFeedFilter
 import app.knock.client.components.themes.FeedNotificationRowSwipeAction
 import app.knock.client.logError
+import app.knock.client.models.feed.BlockActionButton
 import app.knock.client.models.feed.Feed
 import app.knock.client.models.feed.FeedClientOptions
 import app.knock.client.models.feed.FeedItem
@@ -35,16 +37,20 @@ class InAppFeedViewModel(
     private val _currentFilter = MutableStateFlow(initialCurrentFilter)
     val currentFilter: StateFlow<InAppFeedFilter> = _currentFilter.asStateFlow()
 
-    var feed = MutableStateFlow(Feed()) // The current feed data.
-    val brandingRequired = MutableStateFlow(true) // Controls whether to show the Knock icon on the feed interface.
-    val showRefreshIndicator = MutableStateFlow(false)
+    private val _feed = MutableStateFlow(Feed()) // The current feed data.
+    val feed: StateFlow<Feed> = _feed.asStateFlow()
+
+    private val _brandingRequired = MutableStateFlow(true) // Controls whether to show the Knock icon on the feed interface.
+    val brandingRequired: StateFlow<Boolean> = _brandingRequired.asStateFlow()
+
+    private val _showRefreshIndicator = MutableStateFlow(false)
+    val showRefreshIndicator: StateFlow<Boolean> = _showRefreshIndicator.asStateFlow()
 
     private val _isRefreshingFromPull = MutableStateFlow(false)
-    val isRefreshingFromPull: StateFlow<Boolean>
-        get() = _isRefreshingFromPull.asStateFlow()
+    val isRefreshingFromPull: StateFlow<Boolean> = _isRefreshingFromPull.asStateFlow()
 
     // Publisher for feed item button tap events.
-    private val _didTapFeedItemButtonPublisher = MutableSharedFlow<String>()
+    private val _didTapFeedItemButtonPublisher = MutableSharedFlow<FeedItemButtonEvent>()
     val didTapFeedItemButtonPublisher = _didTapFeedItemButtonPublisher.asSharedFlow()
 
     private val _didTapFeedItemRowPublisher = MutableSharedFlow<FeedItem>()
@@ -85,7 +91,7 @@ class InAppFeedViewModel(
                 }
             }
             val isBrandingRequired = getBrandingRequired()
-            brandingRequired.value = isBrandingRequired
+            _brandingRequired.emit(isBrandingRequired)
             refreshFeed(showIndicator = true)
         }
     }
@@ -99,7 +105,7 @@ class InAppFeedViewModel(
     }
 
     suspend fun refreshFeed(showIndicator: Boolean = false) {
-        if (showIndicator) showRefreshIndicator.value = true
+        if (showIndicator) _showRefreshIndicator.emit(true)
         val originalStatus = feedClientOptions.status
         val archived = if (feedClientOptions.status == FeedItemScope.ARCHIVED) FeedItemArchivedScope.ONLY else null
         val status = if (feedClientOptions.status == FeedItemScope.ARCHIVED) FeedItemScope.ALL else feedClientOptions.status
@@ -117,10 +123,10 @@ class InAppFeedViewModel(
         }
 
         userFeed?.let {
-            feed.value = it
+            _feed.emit(it)
             feed.value.pageInfo.before = feed.value.entries.firstOrNull()?.feedCursor
             feedClientOptions.status = originalStatus
-            showRefreshIndicator.value = false
+            _showRefreshIndicator.emit(false)
         }
     }
 
@@ -162,8 +168,10 @@ class InAppFeedViewModel(
             val feedOptionsForUpdate = feedClientOptions.copy(status = archivedScope)
 
             try {
-                Knock.shared.feedManager?.makeBulkStatusUpdate(updatedStatus, feedOptionsForUpdate)?.let {
-                    optimisticallyBulkUpdateStatus(updatedStatus, archivedScope)
+                withContext(Dispatchers.IO) {
+                    Knock.shared.feedManager?.makeBulkStatusUpdate(updatedStatus, feedOptionsForUpdate)?.let {
+                        optimisticallyBulkUpdateStatus(updatedStatus, archivedScope)
+                    }
                 }
             } catch (e: Exception) {
                 logError("Failed: bulkUpdateMessageStatus for status: $updatedStatus", e)
@@ -183,9 +191,11 @@ class InAppFeedViewModel(
                 KnockMessageStatusUpdateType.UNARCHIVED -> if (item.archivedAt == null) return@launch
             }
             try {
-                Knock.shared.messageModule.updateMessageStatus(item.id, updatedStatus).let {
-                    optimisticallyUpdateStatusForItem(item, updatedStatus)
-                    fetchNewMetaData()
+                withContext(Dispatchers.IO) {
+                    Knock.shared.messageModule.updateMessageStatus(item.id, updatedStatus).let {
+                        optimisticallyUpdateStatusForItem(item, updatedStatus)
+                        fetchNewMetaData()
+                    }
                 }
             } catch (e: Exception) {
                 logError("Failed: updateMessageStatus for status: $updatedStatus", e)
@@ -195,9 +205,9 @@ class InAppFeedViewModel(
 
     // MARK: FeedItemRow Interactions
 
-    fun feedItemButtonTapped(item: FeedItem, actionString: String) {
+    fun feedItemButtonTapped(item: FeedItem, actionButton: BlockActionButton) {
         viewModelScope.launch {
-            _didTapFeedItemButtonPublisher.emit(actionString)
+            _didTapFeedItemButtonPublisher.emit(FeedItemButtonEvent(item, actionButton))
         }
     }
 
@@ -248,7 +258,7 @@ class InAppFeedViewModel(
         }
 
         withContext(Dispatchers.Main) {
-            feed.value = feed.value.copy(entries = filteredEntries)
+            _feed.emit(feed.value.copy(entries = filteredEntries))
             optimisticallyUpdateMetaCounts(updatedStatus)
         }
     }
@@ -320,62 +330,63 @@ class InAppFeedViewModel(
     internal suspend fun optimisticallyUpdateStatusForItem(item: FeedItem, status: KnockMessageStatusUpdateType) {
         val index = feed.value.entries.indexOfFirst { it.id == item.id }
         if (index != -1) {
-            withContext(Dispatchers.Main) {
-                val mutableEntries = feed.value.entries.toMutableList()
-                when (status) {
-                    KnockMessageStatusUpdateType.READ -> {
+            val mutableEntries = feed.value.entries.toMutableList()
+            when (status) {
+                KnockMessageStatusUpdateType.READ -> {
+                    mutableEntries[index].readAt = ZonedDateTime.now()
+                    if (feed.value.meta.unreadCount > 0) {
+                        feed.value.meta.unreadCount -= 1
+                    }
+                    if (feedClientOptions.status == FeedItemScope.UNREAD) {
+                        mutableEntries.removeAt(index)
+                    }
+                }
+                KnockMessageStatusUpdateType.UNREAD -> {
+                    mutableEntries[index].readAt = null
+                    feed.value.meta.unreadCount += 1
+                    if (feedClientOptions.status == FeedItemScope.READ) {
+                        mutableEntries.removeAt(index)
+                    }
+                }
+                KnockMessageStatusUpdateType.SEEN -> {
+                    mutableEntries[index].seenAt = ZonedDateTime.now()
+                    if (feed.value.meta.unseenCount > 0) {
+                        feed.value.meta.unseenCount -= 1
+                    }
+                    if (feedClientOptions.status == FeedItemScope.UNSEEN) {
+                        mutableEntries.removeAt(index)
+                    }
+                }
+                KnockMessageStatusUpdateType.UNSEEN -> {
+                    mutableEntries[index].seenAt = null
+                    feed.value.meta.unseenCount += 1
+                    if (feedClientOptions.status == FeedItemScope.SEEN) {
+                        mutableEntries.removeAt(index)
+                    }
+                }
+                KnockMessageStatusUpdateType.INTERACTED -> {
+                    if (item.readAt == null) {
                         mutableEntries[index].readAt = ZonedDateTime.now()
                         if (feed.value.meta.unreadCount > 0) {
                             feed.value.meta.unreadCount -= 1
                         }
-                        if (feedClientOptions.status == FeedItemScope.UNREAD) {
-                            mutableEntries.removeAt(index)
-                        }
                     }
-                    KnockMessageStatusUpdateType.UNREAD -> {
-                        mutableEntries[index].readAt = null
-                        feed.value.meta.unreadCount += 1
-                        if (feedClientOptions.status == FeedItemScope.READ) {
-                            mutableEntries.removeAt(index)
-                        }
+                    mutableEntries[index].interactedAt = ZonedDateTime.now()
+                    if (feedClientOptions.status == FeedItemScope.READ) {
+                        mutableEntries.removeAt(index)
                     }
-                    KnockMessageStatusUpdateType.SEEN -> {
-                        mutableEntries[index].seenAt = ZonedDateTime.now()
-                        if (feed.value.meta.unseenCount > 0) {
-                            feed.value.meta.unseenCount -= 1
-                        }
-                        if (feedClientOptions.status == FeedItemScope.UNSEEN) {
-                            mutableEntries.removeAt(index)
-                        }
-                    }
-                    KnockMessageStatusUpdateType.UNSEEN -> {
-                        mutableEntries[index].seenAt = null
-                        feed.value.meta.unseenCount += 1
-                        if (feedClientOptions.status == FeedItemScope.SEEN) {
-                            mutableEntries.removeAt(index)
-                        }
-                    }
-                    KnockMessageStatusUpdateType.INTERACTED -> {
-                        if (item.readAt == null) {
-                            mutableEntries[index].readAt = ZonedDateTime.now()
-                            if (feed.value.meta.unreadCount > 0) {
-                                feed.value.meta.unreadCount -= 1
-                            }
-                        }
-                        mutableEntries[index].interactedAt = ZonedDateTime.now()
-                        if (feedClientOptions.status == FeedItemScope.READ) {
-                            mutableEntries.removeAt(index)
-                        }
-                    }
-                    KnockMessageStatusUpdateType.ARCHIVED -> {
-                        mutableEntries[index].archivedAt = ZonedDateTime.now()
-                        if (shouldHideArchived) {
-                            mutableEntries.removeAt(index)
-                        }
-                    }
-                    else -> {}
                 }
-                feed.value.entries = mutableEntries
+                KnockMessageStatusUpdateType.ARCHIVED -> {
+                    mutableEntries[index].archivedAt = ZonedDateTime.now()
+                    if (shouldHideArchived) {
+                        mutableEntries.removeAt(index)
+                    }
+                }
+                else -> {}
+            }
+
+            withContext(Dispatchers.Main) {
+                _feed.emit(feed.value.copy(entries = mutableEntries))
             }
         }
     }
@@ -397,20 +408,24 @@ class InAppFeedViewModel(
 
     private suspend fun mergeFeedsForNewMessageReceived(newFeed: Feed) {
         withContext(Dispatchers.Main) {
-            feed.value = feed.value.copy(
-                entries = newFeed.entries + feed.value.entries,
-                meta = newFeed.meta,
-                pageInfo = feed.value.pageInfo.copy(before = newFeed.entries.firstOrNull()?.feedCursor)
+            _feed.emit(
+                feed.value.copy(
+                    entries = newFeed.entries + feed.value.entries,
+                    meta = newFeed.meta,
+                    pageInfo = feed.value.pageInfo.copy(before = newFeed.entries.firstOrNull()?.feedCursor)
+                )
             )
         }
     }
 
     private suspend fun mergeFeedsForNewPageOfFeed(newFeed: Feed) {
         withContext(Dispatchers.Main) {
-            feed.value = feed.value.copy(
-                entries = feed.value.entries + newFeed.entries,
-                meta = newFeed.meta,
-                pageInfo = feed.value.pageInfo.copy(after = newFeed.pageInfo.after)
+            _feed.emit(
+                feed.value.copy(
+                    entries = feed.value.entries + newFeed.entries,
+                    meta = newFeed.meta,
+                    pageInfo = feed.value.pageInfo.copy(after = newFeed.pageInfo.after)
+                )
             )
         }
     }
