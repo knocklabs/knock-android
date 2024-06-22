@@ -187,10 +187,10 @@ class InAppFeedViewModel(
         val feedOptionsForUpdate = feedClientOptions.copy(status = archivedScope)
 
         try {
+            optimisticallyBulkUpdateStatus(updatedStatus, archivedScope)
             withContext(Dispatchers.IO) {
                 Knock.shared.feedManager?.makeBulkStatusUpdate(updatedStatus, feedOptionsForUpdate)
             }
-            optimisticallyBulkUpdateStatus(updatedStatus, archivedScope)
         } catch (e: Exception) {
             logError("Failed: bulkUpdateMessageStatus for status: $updatedStatus", e)
         }
@@ -207,11 +207,10 @@ class InAppFeedViewModel(
             KnockMessageStatusUpdateType.UNARCHIVED -> if (item.archivedAt == null) return
         }
         try {
-//            withContext(Dispatchers.IO) {
-//                Knock.shared.messageModule.updateMessageStatus(item.id, updatedStatus)
-//            }
             optimisticallyUpdateStatusForItem(item, updatedStatus)
-            fetchNewMetaData()
+            withContext(Dispatchers.IO) {
+                Knock.shared.messageModule.updateMessageStatus(item.id, updatedStatus)
+            }
         } catch (e: Exception) {
             logError("Failed: updateMessageStatus for status: $updatedStatus", e)
         }
@@ -393,11 +392,7 @@ class InAppFeedViewModel(
                     }
                 }
                 KnockMessageStatusUpdateType.ARCHIVED -> {
-                    item.copy(archivedAt = ZonedDateTime.now()).also {
-                        if (shouldHideArchived) {
-                            mutableEntries.removeAt(index)
-                        }
-                    }
+                    item.copy(archivedAt = ZonedDateTime.now())
                 }
                 else -> item
             }

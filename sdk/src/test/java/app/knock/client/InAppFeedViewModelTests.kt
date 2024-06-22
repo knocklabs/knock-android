@@ -67,7 +67,7 @@ class InAppFeedViewModelTests {
         Dispatchers.resetMain()
     }
 
-    private fun generateTestFeedItem(status: FeedItemScope): FeedItem {
+    private fun generateTestFeedItem(status: KnockMessageStatusUpdateType): FeedItem {
         val item = FeedItem(
             id = "",
             seenAt = null,
@@ -83,19 +83,20 @@ class InAppFeedViewModelTests {
             totalActivities = 0
         )
         return when (status) {
-            FeedItemScope.ARCHIVED -> item.copy(archivedAt = ZonedDateTime.now())
-            FeedItemScope.INTERACTED -> item.copy(interactedAt = ZonedDateTime.now(), readAt = ZonedDateTime.now())
-            FeedItemScope.UNREAD -> item.copy(readAt = null)
-            FeedItemScope.READ -> item.copy(readAt = ZonedDateTime.now())
-            FeedItemScope.UNSEEN -> item.copy(seenAt = null)
-            FeedItemScope.SEEN -> item.copy(seenAt = ZonedDateTime.now())
+            KnockMessageStatusUpdateType.ARCHIVED -> item.copy(archivedAt = ZonedDateTime.now())
+            KnockMessageStatusUpdateType.UNARCHIVED -> item.copy(archivedAt = null)
+            KnockMessageStatusUpdateType.INTERACTED -> item.copy(interactedAt = ZonedDateTime.now(), readAt = ZonedDateTime.now())
+            KnockMessageStatusUpdateType.UNREAD -> item.copy(readAt = null)
+            KnockMessageStatusUpdateType.READ -> item.copy(readAt = ZonedDateTime.now())
+            KnockMessageStatusUpdateType.UNSEEN -> item.copy(seenAt = null)
+            KnockMessageStatusUpdateType.SEEN -> item.copy(seenAt = ZonedDateTime.now())
             else -> item
         }
     }
 
     @Test
     fun testOptimisticMarkItemAsRead() = runTest {
-        val item = generateTestFeedItem(FeedItemScope.READ)
+        val item = generateTestFeedItem(KnockMessageStatusUpdateType.UNREAD)
         viewModel.feed.value.entries = listOf(item)
         viewModel.feed.value.meta.unreadCount = 1
         viewModel.optimisticallyUpdateStatusForItem(item, KnockMessageStatusUpdateType.READ)
@@ -106,7 +107,7 @@ class InAppFeedViewModelTests {
     @Test
     fun testOptimisticMarkItemAsReadWithUnreadFilter() = runTest {
         viewModel.feedClientOptions.status = FeedItemScope.UNREAD
-        val item = generateTestFeedItem(FeedItemScope.READ)
+        val item = generateTestFeedItem(KnockMessageStatusUpdateType.READ)
         viewModel.feed.value.entries = listOf(item)
         viewModel.optimisticallyUpdateStatusForItem(item, KnockMessageStatusUpdateType.READ)
         assertTrue(viewModel.feed.value.entries.isEmpty())
@@ -114,7 +115,7 @@ class InAppFeedViewModelTests {
 
     @Test
     fun testOptimisticMarkItemAsSeen() = runTest {
-        val item = generateTestFeedItem(FeedItemScope.SEEN)
+        val item = generateTestFeedItem(KnockMessageStatusUpdateType.UNSEEN)
         viewModel.feed.value.entries = listOf(item)
         viewModel.feed.value.meta.unseenCount = 1
         viewModel.optimisticallyUpdateStatusForItem(item, KnockMessageStatusUpdateType.SEEN)
@@ -125,7 +126,7 @@ class InAppFeedViewModelTests {
     @Test
     fun testOptimisticMarkItemAsSeenWithUnseenFilter() = runTest {
         viewModel.feedClientOptions.status = FeedItemScope.UNSEEN
-        val item = generateTestFeedItem(FeedItemScope.SEEN)
+        val item = generateTestFeedItem(KnockMessageStatusUpdateType.SEEN)
         viewModel.feed.value.entries = listOf(item)
         viewModel.optimisticallyUpdateStatusForItem(item, KnockMessageStatusUpdateType.SEEN)
         assertTrue(viewModel.feed.value.entries.isEmpty())
@@ -133,7 +134,7 @@ class InAppFeedViewModelTests {
 
     @Test
     fun testOptimisticMarkItemAsArchived() = runTest {
-        val item = generateTestFeedItem(FeedItemScope.ARCHIVED)
+        val item = generateTestFeedItem(KnockMessageStatusUpdateType.ARCHIVED)
         viewModel.feed.value.entries = listOf(item)
         viewModel.optimisticallyUpdateStatusForItem(item, KnockMessageStatusUpdateType.SEEN)
         assertTrue(viewModel.feed.value.entries.first().archivedAt != null)
@@ -143,7 +144,7 @@ class InAppFeedViewModelTests {
     fun testOptimisticMarkItemAsArchivedWithNoArchivedFilter() = runTest {
         viewModel.feedClientOptions.status = FeedItemScope.ALL
         viewModel.feedClientOptions.archived = FeedItemArchivedScope.EXCLUDE
-        val item = generateTestFeedItem(FeedItemScope.ARCHIVED)
+        val item = generateTestFeedItem(KnockMessageStatusUpdateType.UNARCHIVED)
         viewModel.feed.value.entries = listOf(item)
         viewModel.optimisticallyUpdateStatusForItem(item, KnockMessageStatusUpdateType.ARCHIVED)
         assertTrue(viewModel.feed.value.entries.isEmpty())
@@ -151,10 +152,10 @@ class InAppFeedViewModelTests {
 
     @Test
     fun testOptimisticBulkMarkItemsAsRead() = runTest {
-        val item = generateTestFeedItem(FeedItemScope.UNREAD)
-        val item2 = generateTestFeedItem(FeedItemScope.SEEN)
-        val item3 = generateTestFeedItem(FeedItemScope.UNREAD)
-        val item4 = generateTestFeedItem(FeedItemScope.READ)
+        val item = generateTestFeedItem(KnockMessageStatusUpdateType.UNREAD)
+        val item2 = generateTestFeedItem(KnockMessageStatusUpdateType.SEEN)
+        val item3 = generateTestFeedItem(KnockMessageStatusUpdateType.UNREAD)
+        val item4 = generateTestFeedItem(KnockMessageStatusUpdateType.READ)
 
         viewModel.feed.value.entries = listOf(item, item2, item3, item4)
         viewModel.feed.value.meta.unreadCount = 3
@@ -165,10 +166,10 @@ class InAppFeedViewModelTests {
 
     @Test
     fun testOptimisticBulkMarkItemAsArchived() = runTest {
-        val item = generateTestFeedItem(FeedItemScope.UNREAD)
-        val item2 = generateTestFeedItem(FeedItemScope.SEEN)
-        val item3 = generateTestFeedItem(FeedItemScope.UNREAD)
-        val item4 = generateTestFeedItem(FeedItemScope.READ)
+        val item = generateTestFeedItem(KnockMessageStatusUpdateType.UNREAD)
+        val item2 = generateTestFeedItem(KnockMessageStatusUpdateType.SEEN)
+        val item3 = generateTestFeedItem(KnockMessageStatusUpdateType.UNREAD)
+        val item4 = generateTestFeedItem(KnockMessageStatusUpdateType.READ)
 
         viewModel.feed.value.entries = listOf(item, item2, item3, item4)
         viewModel.optimisticallyBulkUpdateStatus(KnockMessageStatusUpdateType.ARCHIVED)
@@ -178,10 +179,10 @@ class InAppFeedViewModelTests {
 
     @Test
     fun testOptimisticBulkMarkItemAsArchivedAndShouldHideArchived() = runTest {
-        val item = generateTestFeedItem(FeedItemScope.UNREAD)
-        val item2 = generateTestFeedItem(FeedItemScope.SEEN)
-        val item3 = generateTestFeedItem(FeedItemScope.UNREAD)
-        val item4 = generateTestFeedItem(FeedItemScope.READ)
+        val item = generateTestFeedItem(KnockMessageStatusUpdateType.UNREAD)
+        val item2 = generateTestFeedItem(KnockMessageStatusUpdateType.SEEN)
+        val item3 = generateTestFeedItem(KnockMessageStatusUpdateType.UNREAD)
+        val item4 = generateTestFeedItem(KnockMessageStatusUpdateType.READ)
 
         viewModel.feed.value.entries = listOf(item, item2, item3, item4)
         viewModel.feedClientOptions.archived = FeedItemArchivedScope.INCLUDE
@@ -192,10 +193,10 @@ class InAppFeedViewModelTests {
 
     @Test
     fun testOptimisticBulkMarkItemAsArchivedWithReadScope() = runTest {
-        val item = generateTestFeedItem(FeedItemScope.UNREAD)
-        val item2 = generateTestFeedItem(FeedItemScope.UNREAD)
-        val item3 = generateTestFeedItem(FeedItemScope.UNREAD)
-        val item4 = generateTestFeedItem(FeedItemScope.READ)
+        val item = generateTestFeedItem(KnockMessageStatusUpdateType.UNREAD)
+        val item2 = generateTestFeedItem(KnockMessageStatusUpdateType.UNREAD)
+        val item3 = generateTestFeedItem(KnockMessageStatusUpdateType.UNREAD)
+        val item4 = generateTestFeedItem(KnockMessageStatusUpdateType.READ)
 
         viewModel.feed.value.entries = listOf(item, item2, item3, item4)
         viewModel.optimisticallyBulkUpdateStatus(KnockMessageStatusUpdateType.ARCHIVED, FeedItemScope.READ)

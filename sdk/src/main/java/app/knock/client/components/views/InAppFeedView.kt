@@ -15,11 +15,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.knock.client.R
 import app.knock.client.components.InAppFeedViewModel
@@ -34,6 +34,7 @@ import app.knock.client.models.feed.ButtonSetContentBlock
 import app.knock.client.models.feed.FeedItem
 import app.knock.client.models.feed.MarkdownContentBlock
 import app.knock.client.models.messages.KnockMessageStatusUpdateType
+import kotlinx.coroutines.launch
 import me.saket.swipe.SwipeAction
 import me.saket.swipe.SwipeableActionsBox
 import java.time.ZonedDateTime
@@ -113,22 +114,19 @@ fun InAppFeedView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel, 
                     LazyColumn(
                         modifier = Modifier.background(theme.lowerBackgroundColor)
                     ) {
-                        items(feed.entries) { item1 ->
-                            var mutable = item1.blocks.toMutableList()
-                            val block = ButtonSetContentBlock(
-                                name = "buttons",
-                                buttons = listOf(
-                                    BlockActionButton("Primary", "primary", ""),
-                                    BlockActionButton("Secondary", "secondary", "")
-                                )
-                            )
-
-                            mutable.add(1, block)
-
-                            val item = item1.copy(blocks = mutable)
-                            val rowTapAction: () -> Unit = {
-
-                            }
+                        items(feed.entries) { item ->
+//                            var mutable = item1.blocks.toMutableList()
+//                            val block = ButtonSetContentBlock(
+//                                name = "buttons",
+//                                buttons = listOf(
+//                                    BlockActionButton("Primary", "primary", ""),
+//                                    BlockActionButton("Secondary", "secondary", "")
+//                                )
+//                            )
+//
+//                            mutable.add(1, block)
+//
+//                            val item = item1.copy(blocks = mutable)
 
                             val markAsReadAction: List<SwipeAction> = theme.rowTheme.markAsReadSwipeConfig?.let {
                                 listOf(generateSwipeAction(item, it, item.readAt != null))
@@ -175,6 +173,7 @@ fun InAppFeedView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel, 
                     contentDescription = null,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
+                        .padding(bottom = 12.dp)
                 )
             }
         }
@@ -186,7 +185,9 @@ fun InAppFeedView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel, 
 
     DisposableEffect(Unit) {
         onDispose {
-            viewModel.bulkUpdateMessageEngagementStatus(KnockMessageStatusUpdateType.SEEN)
+            viewModel.viewModelScope.launch {
+                viewModel.bulkUpdateMessageEngagementStatus(KnockMessageStatusUpdateType.SEEN)
+            }
         }
     }
 }
