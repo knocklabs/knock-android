@@ -114,19 +114,6 @@ fun InAppFeedView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel, 
                         modifier = Modifier.background(theme.lowerBackgroundColor)
                     ) {
                         items(feed.entries) { item ->
-//                            var mutable = item1.blocks.toMutableList()
-//                            val block = ButtonSetContentBlock(
-//                                name = "buttons",
-//                                buttons = listOf(
-//                                    BlockActionButton("Primary", "primary", ""),
-//                                    BlockActionButton("Secondary", "secondary", "")
-//                                )
-//                            )
-//
-//                            mutable.add(1, block)
-//
-//                            val item = item1.copy(blocks = mutable)
-
                             val markAsReadAction: List<SwipeAction> = theme.rowTheme.markAsReadSwipeConfig?.let {
                                 listOf(generateSwipeAction(item, it, item.readAt != null))
                             } ?: listOf()

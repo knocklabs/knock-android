@@ -3,6 +3,7 @@ package app.knock.client.components.views
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,7 +30,7 @@ data class ActionButtonConfig(
     companion object {
         val defaultTextStyle = TextStyle(
             color = Color.Gray,
-            fontSize = 16.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
         )
     }
@@ -64,12 +65,13 @@ fun ActionButton(
     Button(
         onClick = action,
         colors = ButtonDefaults.buttonColors(containerColor = config.backgroundColor),
-        modifier = modifier
-            .padding(horizontal = 0.dp, vertical = 0.dp),
+        modifier = modifier.padding(0.dp),
         shape = RoundedCornerShape(config.cornerRadius.dp),
-        border = BorderStroke(config.borderWidth.dp, config.borderColor)
+        border = BorderStroke(config.borderWidth.dp, config.borderColor),
+        contentPadding = PaddingValues(horizontal = 12.dp)
     ) {
         Text(
+            modifier = Modifier.padding(0.dp),
             text = title,
             style = config.textStyle,
         )

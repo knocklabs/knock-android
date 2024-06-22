@@ -14,7 +14,7 @@ data class AvatarViewTheme(
     val avatarViewSize: Int = 32,
     val avatarInitialsTextStyle: TextStyle = TextStyle(
         color = KnockColor.Gray.gray11(context),
-        fontSize = 16.sp,
+        fontSize = 12.sp,
         fontWeight = FontWeight.Medium,
         textAlign = TextAlign.Center
     )
