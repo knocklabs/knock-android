@@ -1,5 +1,6 @@
 package app.knock.example
 
+@Suppress("SpellCheckingInspection")
 object Utils {
     val publishableKey = "pk_test_d0dB4Brd4GpuGd4_9JkMoUuDfPbQ-X-om2gKCROMQ9M"
     val userId = "dnedry@ingen.net"

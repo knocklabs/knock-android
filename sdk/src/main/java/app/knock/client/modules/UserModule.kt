@@ -24,6 +24,7 @@ internal class UserModule {
 /**
  * Returns the userId that was set from the Knock.shared.signIn method.
  */
+@Suppress("unused")
 fun Knock.getUserId(): String? {
     return environment.getUserId()
 }
@@ -36,6 +37,7 @@ suspend fun Knock.getUser(): KnockUser {
     return userModule.getUser()
 }
 
+@Suppress("unused")
 fun Knock.getUser(completionHandler: (Result<KnockUser>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         val user = getUser()
@@ -52,6 +54,7 @@ suspend fun Knock.updateUser(user: KnockUser): KnockUser {
     return userModule.updateUser(user)
 }
 
+@Suppress("unused")
 fun Knock.updateUser(user: KnockUser, completionHandler: (Result<KnockUser>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         val newUser = updateUser(user)

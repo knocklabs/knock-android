@@ -7,6 +7,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+@Suppress("unused")
 class KnockEnvironment {
     companion object {
         const val defaultBaseUrl: String = "https://api.knock.app"
@@ -60,7 +61,6 @@ class KnockEnvironment {
     @Synchronized
     fun setUserId(userId: String?) {
         this.userId = userId
-        this.userToken = userToken
     }
     @Synchronized
     @Throws(Exception::class)

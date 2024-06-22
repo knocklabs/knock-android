@@ -1,3 +1,5 @@
+package app.knock.client.components.views
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,9 +14,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.knock.client.components.KnockColor
 import app.knock.client.components.themes.FeedNotificationRowTheme
-import app.knock.client.components.views.ActionButton
-import app.knock.client.components.views.AvatarView
-import app.knock.client.components.views.MarkdownContentView
 import app.knock.client.models.KnockUser
 import app.knock.client.models.feed.BlockActionButton
 import app.knock.client.models.feed.ButtonSetContentBlock

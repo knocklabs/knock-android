@@ -24,7 +24,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.knock.example.viewmodels.AuthenticationViewModel
-import app.knock.example.theme.KnockandroidTheme
+import app.knock.example.theme.KnockAndroidTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,7 +74,7 @@ fun SignInView(authViewModel: AuthenticationViewModel) {
 @Preview(showBackground = true, device = "id:pixel_5")
 @Composable
 fun PreviewSignInView() {
-    KnockandroidTheme {
+    KnockAndroidTheme {
         SignInView(AuthenticationViewModel())
     }
 }

@@ -12,7 +12,7 @@ import java.util.Locale
 
 data class FeedNotificationRowTheme(
     val context: Context,
-    val backgroundColor: Color = KnockColor.Surface.surface1(context), // Background color of the FeedNoticationRow
+    val backgroundColor: Color = KnockColor.Surface.surface1(context), // Background color of the FeedNotificationRow
     val notificationContentCSS: String? = null, // Customize the css of the markdown html of the notification body
     val unreadNotificationCircleColor: Color = KnockColor.Blue.blue9(context), // Color of the unread circle indicator in the top left of the row
     val showAvatarView: Boolean = true, // Show or hide the avatar/initials view in the upper left corner of the row

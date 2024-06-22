@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import app.knock.client.R
 
+@Suppress("unused")
 object KnockColor {
     object Gray {
         fun gray3(context: Context) = getColorFromResource(context, R.color.gray3)

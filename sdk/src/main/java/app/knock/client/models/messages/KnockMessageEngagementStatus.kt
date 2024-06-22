@@ -2,6 +2,7 @@ package app.knock.client.models.messages
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
+@Suppress("unused")
 enum class KnockMessageEngagementStatus {
     @JsonProperty("seen") SEEN,
     @JsonProperty("read") READ,

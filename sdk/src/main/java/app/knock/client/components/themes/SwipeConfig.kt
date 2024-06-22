@@ -41,6 +41,7 @@ enum class FeedNotificationRowSwipeAction(
         defaultInverseImage = R.drawable.mail_closed
     );
 
+    @Suppress("MemberVisibilityCanBePrivate")
     fun getDefaultSwipeColor(context: Context): Color {
         return when (this) {
             ARCHIVE -> KnockColor.Green.green9(context)

@@ -7,7 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.knock.example.viewmodels.AuthenticationViewModel
-import app.knock.example.theme.KnockandroidTheme
+import app.knock.example.theme.KnockAndroidTheme
 
 @Composable
 fun StartupView(authViewModel: AuthenticationViewModel = viewModel()) {
@@ -23,7 +23,7 @@ fun StartupView(authViewModel: AuthenticationViewModel = viewModel()) {
 @Preview(showBackground = true, device = "id:pixel_5")
 @Composable
 fun PreviewStartupView() {
-    KnockandroidTheme {
+    KnockAndroidTheme {
         StartupView()
     }
 }

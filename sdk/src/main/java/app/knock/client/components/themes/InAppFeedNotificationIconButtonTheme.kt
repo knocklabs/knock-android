@@ -20,6 +20,7 @@ data class InAppFeedNotificationIconButtonTheme(
     val notificationCountType: ReadStatusType = ReadStatusType.UNREAD
 )
 
+@Suppress("unused")
 enum class ReadStatusType {
     UNREAD,
     UNSEEN

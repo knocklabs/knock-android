@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.ZonedDateTime
 
+@Suppress("unused")
 class InAppFeedViewModel(
     var feedClientOptions: FeedClientOptions,
     initialCurrentFilter: InAppFeedFilter,
@@ -167,7 +168,7 @@ class InAppFeedViewModel(
         }
     }
 
-    /// Determines whether there is another page of content to fetch when paginaating the feedItem list
+    /// Determines whether there is another page of content to fetch when paginating the feedItem list
     fun isMoreContentAvailable(): Boolean {
         return _feed.value.pageInfo.after != null
     }
@@ -196,6 +197,7 @@ class InAppFeedViewModel(
         }
     }
 
+    @Suppress("MemberVisibilityCanBePrivate")
     suspend fun updateMessageEngagementStatus(item: FeedItem, updatedStatus: KnockMessageStatusUpdateType) {
         when (updatedStatus) {
             KnockMessageStatusUpdateType.SEEN -> if (item.seenAt != null) return

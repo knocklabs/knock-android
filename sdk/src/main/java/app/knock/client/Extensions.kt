@@ -3,11 +3,8 @@ package app.knock.client
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Intent
 import android.media.RingtoneManager
-import android.os.Build
 import androidx.core.app.NotificationCompat
-import app.knock.client.models.KnockException
 import com.google.firebase.messaging.RemoteMessage
 
 // This is just an example of how you could present a notification with the app in the foreground.

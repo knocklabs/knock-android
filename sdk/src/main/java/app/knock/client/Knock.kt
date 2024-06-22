@@ -6,8 +6,6 @@ import android.app.Application
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.appcompat.app.AppCompatActivity
 import app.knock.client.models.KnockException
 import app.knock.client.modules.AuthenticationModule
 import app.knock.client.modules.ChannelModule

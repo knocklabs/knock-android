@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.phoenixframework.Message
 
+@Suppress("unused")
 class FeedManager(
     feedId: String,
     options: FeedClientOptions = FeedClientOptions()
@@ -50,7 +51,7 @@ class FeedManager(
 
     /**
      * Retrieves a feed of items in reverse chronological order
-     * @param options: [optional] Options of type `FeedClientOptions` to merge with the default ones (set on the constructor) and scope as much as possible the results
+     * @param options: (optional) Options of type `FeedClientOptions` to merge with the default ones (set on the constructor) and scope as much as possible the results
      */
     suspend fun getUserFeedContent(options: FeedClientOptions? = null): Feed {
         return feedModule.getUserFeedContent(options)
@@ -78,7 +79,6 @@ class FeedManager(
      *
      * @param type the kind of update
      * @param options all the options currently set on the feed to scope as much as possible the bulk update
-     * @param completionHandler the code to execute when the response is received
      */
     suspend fun makeBulkStatusUpdate(type: KnockMessageStatusUpdateType, options: FeedClientOptions? = null): BulkOperation {
         return feedModule.makeBulkStatusUpdate(type, options)
