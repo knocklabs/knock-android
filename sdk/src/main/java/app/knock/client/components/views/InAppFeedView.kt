@@ -77,12 +77,12 @@ fun InAppFeedView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel, 
                 style = theme.titleStyle,
                 modifier = Modifier
                     .padding(horizontal = 24.dp)
-                    .padding(top = 16.dp)
+                    .padding(vertical = 16.dp)
             )
         }
 
         if (filterOptions.size > 1) {
-            FilterTabView(Modifier.padding(top = 16.dp), viewModel)
+            FilterTabView(Modifier, viewModel)
         }
 
         if (viewModel.topButtonActions.isNotEmpty()) {

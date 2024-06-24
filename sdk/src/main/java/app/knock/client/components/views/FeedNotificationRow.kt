@@ -110,7 +110,7 @@ fun PreviewFeedNotificationRow() {
         feedCursor = "test",
         actors = listOf(KnockUser("fake id", "John Doe", email = null, phoneNumber = null, avatar = null)),
         blocks = listOf(
-            markdown2,
+            markdown1,
             ButtonSetContentBlock(
                 name = "buttons",
                 buttons = listOf(
