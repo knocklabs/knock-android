@@ -1,7 +1,6 @@
 package app.knock.example.views
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -39,6 +38,8 @@ import app.knock.client.components.views.InAppFeedView
 import app.knock.client.modules.FeedManager
 import app.knock.example.Utils
 import app.knock.example.viewmodels.AuthenticationViewModel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,15 +57,17 @@ fun MainView(authViewModel: AuthenticationViewModel) {
             feedViewModel.connectFeedAndObserveNewMessages()
         }
 
-        feedViewModel.didTapFeedItemRowPublisher.collect { feedItem ->
-            // Handle the feed item row tap event
-        }
-    }
+        feedViewModel.didTapFeedItemRowPublisher
+            .onEach { feedItem ->
+                // Handle the feed item row tap event
+            }
+            .launchIn(this)
 
-    LaunchedEffect(Unit) {
-        feedViewModel.didTapFeedItemButtonPublisher.collect { feedItemButtonEvent ->
-            // Handle the feed item button block tap event
-        }
+        feedViewModel.didTapFeedItemButtonPublisher
+            .onEach { feedItemButtonEvent ->
+                // Handle the feed item button block tap event
+            }
+            .launchIn(this)
     }
 
     Scaffold(
