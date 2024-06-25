@@ -57,5 +57,5 @@ private fun generateInitials(name: String?): String? {
 @Preview(showBackground = true, device = "id:pixel_5")
 @Composable
 private fun AvatarPreviewView() {
-    AvatarView(name = "Matt Gardner")
+    AvatarView(name = "John Doe")
 }

@@ -87,7 +87,7 @@ fun ActionButtonsContent(
     buttonTapAction: (BlockActionButton) -> Unit
 ) {
     Row(
-        modifier = Modifier.padding(vertical = 8.dp),
+        modifier = Modifier.padding(bottom = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         block.buttons.forEach { button ->

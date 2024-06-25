@@ -82,7 +82,7 @@ fun InAppFeedView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel, 
         }
 
         if (filterOptions.size > 1) {
-            FilterTabView(Modifier, viewModel)
+            FilterTabView(Modifier, viewModel, theme.filterTabTheme)
         }
 
         if (viewModel.topButtonActions.isNotEmpty()) {

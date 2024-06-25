@@ -19,9 +19,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import app.knock.client.components.InAppFeedViewModel
 import app.knock.client.components.InAppFeedViewModelFactory
 import app.knock.client.components.KnockColor
+import app.knock.client.components.themes.FilterTabTheme
 
 @Composable
-fun FilterTabView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel) {
+fun FilterTabView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel, theme: FilterTabTheme) {
     val filterOptions by viewModel.filterOptions.collectAsState()
     val currentFilter by viewModel.currentFilter.collectAsState()
 
@@ -37,11 +38,11 @@ fun FilterTabView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel) 
             filterOptions.forEach { option ->
                 val isSelected = option == currentFilter
                 val textColor by animateColorAsState(
-                    targetValue = if (isSelected) KnockColor.Accent.accent11(LocalContext.current) else KnockColor.Gray.gray11(LocalContext.current),
+                    targetValue = if (isSelected) theme.selectedColor else theme.unselectedColor,
                     label = ""
                 )
                 val underlineColor by animateColorAsState(
-                    targetValue = if (isSelected) KnockColor.Accent.accent11(LocalContext.current) else Color.Transparent,
+                    targetValue = if (isSelected) theme.selectedColor else Color.Transparent,
                     label = ""
                 )
 
@@ -58,8 +59,7 @@ fun FilterTabView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel) 
                     Text(
                         text = option.title,
                         color = textColor,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
+                        style = theme.textStyle,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
@@ -80,5 +80,5 @@ fun PreviewFilterTabView() {
     val viewModel: InAppFeedViewModel = viewModel(
     factory = InAppFeedViewModelFactory()
     )
-    FilterTabView(viewModel = viewModel)
+    FilterTabView(viewModel = viewModel, theme = FilterTabTheme(LocalContext.current))
 }

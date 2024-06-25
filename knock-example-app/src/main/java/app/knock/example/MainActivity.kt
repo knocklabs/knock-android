@@ -34,8 +34,8 @@ class MainActivity : KnockComponentActivity() {
         }
     }
 
-    override fun onKnockPushNotificationTappedInBackGround(intent: Intent) {
-        super.onKnockPushNotificationTappedInBackGround(intent)
+    override fun onKnockPushNotificationTappedInBackground(intent: Intent) {
+        super.onKnockPushNotificationTappedInBackground(intent)
         Log.d(Utils.loggingTag, "tapped in background")
     }
 

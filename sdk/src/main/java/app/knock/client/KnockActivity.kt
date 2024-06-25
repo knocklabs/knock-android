@@ -25,13 +25,13 @@ open class KnockComponentActivity : ComponentActivity(), KnockActivityInterface 
 }
 
 interface KnockActivityInterface {
-    fun onKnockPushNotificationTappedInBackGround(intent: Intent) {}
+    fun onKnockPushNotificationTappedInBackground(intent: Intent) {}
     fun onKnockPushNotificationTappedInForeground(message: RemoteMessage) {}
 
     fun checkForPushNotificationTap(intent: Intent?) {
         intent?.extras?.getString(Knock.KNOCK_MESSAGE_ID_KEY)?.let {
             Knock.shared.updateMessageStatus(it, KnockMessageStatusUpdateType.INTERACTED) {}
-            onKnockPushNotificationTappedInBackGround(intent)
+            onKnockPushNotificationTappedInBackground(intent)
         } ?: (intent?.extras?.get(Knock.KNOCK_PENDING_NOTIFICATION_KEY) as? RemoteMessage)?.let { message ->
             // Clear the intent extra
             intent.extras?.remove(Knock.KNOCK_PENDING_NOTIFICATION_KEY)

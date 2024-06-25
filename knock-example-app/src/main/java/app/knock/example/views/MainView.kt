@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,7 +36,6 @@ import app.knock.client.Knock
 import app.knock.client.components.InAppFeedViewModel
 import app.knock.client.components.InAppFeedViewModelFactory
 import app.knock.client.components.themes.InAppFeedViewTheme
-import app.knock.client.components.views.InAppFeedNotificationIconButton
 import app.knock.client.components.views.InAppFeedView
 import app.knock.client.modules.FeedManager
 import app.knock.example.Utils
@@ -75,7 +77,15 @@ fun MainView(authViewModel: AuthenticationViewModel) {
             TopAppBar(
                 title = { Text(if(selectedTab == 0) "Messages" else "Preferences") },
                 actions = {
-                    InAppFeedNotificationIconButton(count = 90, action = { showingSheet = true })
+                    val unreadCount = feed.meta.unreadCount
+
+                    IconButton(modifier = Modifier.padding(horizontal = 16.dp), onClick = { showingSheet = true }) {
+                        if (unreadCount > 0) {
+                            NotificationIconWithBadge(unreadCount)
+                        } else {
+                            Icon(Icons.Filled.Notifications, contentDescription = "Notifications")
+                        }
+                    }
                 }
             )
         },
@@ -129,20 +139,20 @@ fun MainView(authViewModel: AuthenticationViewModel) {
     }
 }
 
-//@Composable
-//fun NotificationIconWithBadge(unseenCount: Int) {
-//    BadgedBox(badge = {
-//        if (unseenCount > 0) {
-//            // Display the badge with the unseen count
-//            Badge { Text("$unseenCount") }
-//        }
-//    }) {
-//        Icon(
-//            imageVector = Icons.Filled.Notifications,
-//            contentDescription = "Notifications"
-//        )
-//    }
-//}
+@Composable
+fun NotificationIconWithBadge(unseenCount: Int) {
+    BadgedBox(badge = {
+        if (unseenCount > 0) {
+            // Display the badge with the unseen count
+            Badge { Text("$unseenCount") }
+        }
+    }) {
+        Icon(
+            imageVector = Icons.Filled.Notifications,
+            contentDescription = "Notifications"
+        )
+    }
+}
 
 @Preview()
 @Composable
