@@ -1,5 +1,6 @@
 package app.knock.client.components
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -63,8 +64,7 @@ class InAppFeedViewModel(
     init {
         // Set initial options based on parameters
         feedClientOptions = feedClientOptions.copy(
-            status = currentFilter.value.scope,
-            tenant = feedClientOptions.tenant
+            status = currentFilter.value.scope
         )
     }
 
@@ -494,9 +494,10 @@ class InAppFeedViewModel(
 
 
 class InAppFeedViewModelFactory(
+    private val context: Context,
     private val feedClientOptions: FeedClientOptions = FeedClientOptions(),
     private val currentFilter: InAppFeedFilter? = null,
-    private var filterOptions: List<InAppFeedFilter> = listOf(InAppFeedFilter(FeedItemScope.ALL), InAppFeedFilter(FeedItemScope.UNREAD), InAppFeedFilter(FeedItemScope.ARCHIVED)),
+    private var filterOptions: List<InAppFeedFilter> = listOf(InAppFeedFilter(context, FeedItemScope.ALL), InAppFeedFilter(context, FeedItemScope.UNREAD), InAppFeedFilter(context, FeedItemScope.ARCHIVED)),
     private var topButtonActions: List<FeedTopActionButtonType> = listOf(FeedTopActionButtonType.MarkAllAsRead(), FeedTopActionButtonType.ArchiveRead())
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

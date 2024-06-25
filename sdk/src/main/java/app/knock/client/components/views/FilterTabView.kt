@@ -78,7 +78,7 @@ fun FilterTabView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel, 
 @Composable
 fun PreviewFilterTabView() {
     val viewModel: InAppFeedViewModel = viewModel(
-    factory = InAppFeedViewModelFactory()
+    factory = InAppFeedViewModelFactory(LocalContext.current)
     )
     FilterTabView(viewModel = viewModel, theme = FilterTabTheme(LocalContext.current))
 }

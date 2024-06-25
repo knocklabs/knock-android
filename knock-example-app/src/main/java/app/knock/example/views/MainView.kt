@@ -48,7 +48,7 @@ import kotlinx.coroutines.flow.onEach
 @Composable
 fun MainView(authViewModel: AuthenticationViewModel) {
     var selectedTab by remember { mutableIntStateOf(0) }
-    val feedViewModel: InAppFeedViewModel = viewModel(factory = InAppFeedViewModelFactory())
+    val feedViewModel: InAppFeedViewModel = viewModel(factory = InAppFeedViewModelFactory(LocalContext.current))
     var showingSheet by remember { mutableStateOf(false) }
     val feed by feedViewModel.feed.collectAsState()
     val theme = InAppFeedViewTheme(context = LocalContext.current, titleString = null)

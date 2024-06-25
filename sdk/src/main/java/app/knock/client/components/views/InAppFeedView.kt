@@ -215,7 +215,7 @@ fun LastRowView(theme: InAppFeedViewTheme, viewModel: InAppFeedViewModel) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewInAppFeedView() {
-    val viewModel: InAppFeedViewModel = viewModel(factory = InAppFeedViewModelFactory())
+    val viewModel: InAppFeedViewModel = viewModel(factory = InAppFeedViewModelFactory(LocalContext.current))
     val markdown1 = MarkdownContentBlock(name = "markdown", content = "", rendered = "<p>Hey <strong>Dennis</strong> 👋 - Ian Malcolm completed an activity.</p>")
     val item = FeedItem(
         id = "1",

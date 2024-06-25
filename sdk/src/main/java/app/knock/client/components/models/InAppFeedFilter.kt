@@ -6,8 +6,10 @@ import app.knock.client.components.themes.EmptyFeedViewTheme
 import app.knock.client.models.feed.FeedItemScope
 
 data class InAppFeedFilter(
+    val context: Context,
     val scope: FeedItemScope,
     val title: String = defaultTitle(scope),
+    val emptyViewTheme: EmptyFeedViewTheme = defaultEmptyViewConfig(context, scope)
 ) {
     companion object {
         fun defaultEmptyViewConfig(context: Context, scope: FeedItemScope): EmptyFeedViewTheme {
