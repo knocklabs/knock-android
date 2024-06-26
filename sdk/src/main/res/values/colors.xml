@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="gray3">#f0f0f3</color>
+    <color name="gray4">#e8e8ec</color>
+    <color name="gray5">#e0e1e6</color>
+    <color name="gray6">#d9d9e0</color>
+    <color name="gray9">#8b8d98</color>
+    <color name="gray11">#60646c</color>
+    <color name="gray12">#1c2024</color>
+    <color name="accent3">#feebe7</color>
+    <color name="accent9">#e54d2e</color>
+    <color name="accent11">#d13415</color>
+    <color name="surface1">#ffffff</color>
+    <color name="blue9">#3e63dd</color>
+    <color name="green9">#29a383</color>
+</resources>

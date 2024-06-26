@@ -2,7 +2,9 @@ package app.knock.example.views
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -15,6 +17,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,23 +27,49 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import app.knock.client.Knock
+import app.knock.client.components.InAppFeedViewModel
+import app.knock.client.components.InAppFeedViewModelFactory
+import app.knock.client.components.themes.InAppFeedViewTheme
+import app.knock.client.components.views.InAppFeedView
+import app.knock.client.modules.FeedManager
+import app.knock.example.Utils
 import app.knock.example.viewmodels.AuthenticationViewModel
-import app.knock.example.viewmodels.InAppFeedViewModel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainView(authViewModel: AuthenticationViewModel) {
     var selectedTab by remember { mutableIntStateOf(0) }
-    val feedViewModel: InAppFeedViewModel = viewModel()
+    val feedViewModel: InAppFeedViewModel = viewModel(factory = InAppFeedViewModelFactory(LocalContext.current))
     var showingSheet by remember { mutableStateOf(false) }
-    val feedState by feedViewModel.feed.collectAsState()
+    val feed by feedViewModel.feed.collectAsState()
+    val theme = InAppFeedViewTheme(context = LocalContext.current, titleString = null)
 
     LaunchedEffect(key1 = Unit) {
-        feedViewModel.initializeFeed()
+        if (Knock.shared.feedManager == null) {
+            Knock.shared.feedManager = FeedManager(feedId = Utils.inAppChannelId)
+            feedViewModel.connectFeedAndObserveNewMessages()
+        }
+
+        feedViewModel.didTapFeedItemRowPublisher
+            .onEach { feedItem ->
+                // Handle the feed item row tap event
+            }
+            .launchIn(this)
+
+        feedViewModel.didTapFeedItemButtonPublisher
+            .onEach { feedItemButtonEvent ->
+                // Handle the feed item button block tap event
+            }
+            .launchIn(this)
     }
 
     Scaffold(
@@ -48,11 +77,11 @@ fun MainView(authViewModel: AuthenticationViewModel) {
             TopAppBar(
                 title = { Text(if(selectedTab == 0) "Messages" else "Preferences") },
                 actions = {
-                    val unseenCount = feedState?.meta?.unseenCount ?: 0
+                    val unreadCount = feed.meta.unreadCount
 
                     IconButton(modifier = Modifier.padding(horizontal = 16.dp), onClick = { showingSheet = true }) {
-                        if (unseenCount > 0) {
-                            NotificationIconWithBadge(unseenCount)
+                        if (unreadCount > 0) {
+                            NotificationIconWithBadge(unreadCount)
                         } else {
                             Icon(Icons.Filled.Notifications, contentDescription = "Notifications")
                         }
@@ -80,8 +109,32 @@ fun MainView(authViewModel: AuthenticationViewModel) {
     }
 
     if (showingSheet) {
-        InAppFeedView(feedViewModel) {
-            showingSheet = false
+        Scaffold(
+            topBar = {
+            TopAppBar(
+                title = {
+                    Text("Notifications",
+                        style = theme.titleStyle,
+                    )
+                        },
+                actions = {
+                    IconButton(
+                        onClick = { showingSheet = false },
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "Close",
+                            tint = Color.Gray
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = theme.upperBackgroundColor
+                )
+            )
+        }) { innerPadding ->
+            InAppFeedView(Modifier.padding(innerPadding), feedViewModel, theme = theme)
         }
     }
 }

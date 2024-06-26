@@ -7,6 +7,7 @@ import app.knock.client.logError
 import app.knock.client.models.feed.BulkOperation
 import app.knock.client.models.feed.Feed
 import app.knock.client.models.feed.FeedClientOptions
+import app.knock.client.models.feed.FeedSettings
 import app.knock.client.models.messages.KnockMessageStatusUpdateType
 import app.knock.client.models.networking.URLQueryItem
 import app.knock.client.services.FeedService
@@ -64,6 +65,10 @@ internal class FeedModule(private val feedId: String, private val defaultOptions
     suspend fun makeBulkStatusUpdate(type: KnockMessageStatusUpdateType, options: FeedClientOptions? = null): BulkOperation {
         val mergedOptions = defaultOptions.mergeOptions(options)
         return feedService.makeBulkStatusUpdate(userId, feedId, type, mergedOptions)
+    }
+
+    suspend fun getFeedSettings(): FeedSettings {
+        return feedService.getFeedSettings(userId, feedId)
     }
 
     fun connectToFeed(options: FeedClientOptions? = null) {

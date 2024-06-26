@@ -35,6 +35,7 @@ suspend fun Knock.getAllUserPreferences(): List<PreferenceSet> {
     return preferenceModule.getAllUserPreferences()
 }
 
+@Suppress("unused")
 fun Knock.getAllUserPreferences(completionHandler: (Result<List<PreferenceSet>>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         val preferences = withContext(Dispatchers.IO) {
@@ -56,6 +57,7 @@ suspend fun Knock.getUserPreferences(preferenceId: String): PreferenceSet {
     return preferenceModule.getUserPreferences(preferenceId)
 }
 
+@Suppress("unused")
 fun Knock.getUserPreferences(preferenceId: String, completionHandler: (Result<PreferenceSet>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         val preferences = withContext(Dispatchers.IO) {
@@ -83,6 +85,7 @@ suspend fun Knock.setUserPreferences(preferenceId: String, preferenceSet: Prefer
     return preferenceModule.setUserPreferences(preferenceId, preferenceSet)
 }
 
+@Suppress("unused")
 fun Knock.setUserPreferences(preferenceId: String, preferenceSet: PreferenceSet, completionHandler: (Result<PreferenceSet>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         val preferences = withContext(Dispatchers.IO) {

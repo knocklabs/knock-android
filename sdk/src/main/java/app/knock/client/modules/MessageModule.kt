@@ -17,9 +17,15 @@ internal class MessageModule {
     }
 
     suspend fun updateMessageStatus(messageId: String, status: KnockMessageStatusUpdateType): KnockMessage {
-        return messageService.updateMessageStatus(messageId, status)
+        return when(status) {
+            KnockMessageStatusUpdateType.UNSEEN -> messageService.deleteMessageStatus(messageId, KnockMessageStatusUpdateType.SEEN)
+            KnockMessageStatusUpdateType.UNREAD -> messageService.deleteMessageStatus(messageId, KnockMessageStatusUpdateType.READ)
+            KnockMessageStatusUpdateType.UNARCHIVED -> messageService.deleteMessageStatus(messageId, KnockMessageStatusUpdateType.ARCHIVED)
+            else -> messageService.updateMessageStatus(messageId, status)
+        }
     }
 
+    @Deprecated("Use updateMessageStatus() instead", ReplaceWith("updateMessageStatus()"), level = DeprecationLevel.WARNING)
     suspend fun deleteMessageStatus(messageId: String, status: KnockMessageStatusUpdateType): KnockMessage {
         return messageService.deleteMessageStatus(messageId, status)
     }
@@ -41,6 +47,7 @@ suspend fun Knock.getMessage(messageId: String): KnockMessage {
     return messageModule.getMessage(messageId)
 }
 
+@Suppress("unused")
 fun Knock.getMessage(messageId: String, completionHandler: (Result<KnockMessage>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         val message = withContext(Dispatchers.IO) {
@@ -57,13 +64,12 @@ fun Knock.getMessage(messageId: String, completionHandler: (Result<KnockMessage>
  * Marks the given message with the provided status, recording an event in the process.
  * https://docs.knock.app/reference#update-message-status
  *
- * @param message: The KnockMessage that you want to update.
+ * @param messageId: The KnockMessage that you want to update.
  * @param status: The new status to be associated with the KnockMessage.
  */
 suspend fun Knock.updateMessageStatus(messageId: String, status: KnockMessageStatusUpdateType): KnockMessage {
     return messageModule.updateMessageStatus(messageId, status)
 }
-
 fun Knock.updateMessageStatus(messageId: String, status: KnockMessageStatusUpdateType, completionHandler: (Result<KnockMessage>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         val message = withContext(Dispatchers.IO) {
@@ -77,16 +83,18 @@ fun Knock.updateMessageStatus(messageId: String, status: KnockMessageStatusUpdat
 
 
 /**
- * Un-marks the given status on a message, recording an event in the process.
+ * Un-marks the given status on a message, recording an event in the process. Alternatively, you can just use the updateMessageStatus
  * https://docs.knock.app/reference#undo-message-status
  *
- * @param message: The KnockMessage that you want to update.
+ * @param messageId: The KnockMessage that you want to update.
  * @param status: The new status to be associated with the KnockMessage.
  */
+@Deprecated("Use updateMessageStatus() instead", ReplaceWith("updateMessageStatus()"), level = DeprecationLevel.WARNING)
 suspend fun Knock.deleteMessageStatus(messageId: String, status: KnockMessageStatusUpdateType): KnockMessage {
     return messageModule.deleteMessageStatus(messageId, status)
 }
 
+@Deprecated("Use updateMessageStatus() instead", ReplaceWith("updateMessageStatus()"), level = DeprecationLevel.WARNING)
 fun Knock.deleteMessageStatus(messageId: String, status: KnockMessageStatusUpdateType, completionHandler: (Result<KnockMessage>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         val message = withContext(Dispatchers.IO) {
@@ -112,6 +120,7 @@ suspend fun Knock.batchUpdateStatuses(messageIds: List<String>, status: KnockMes
     return messageModule.batchUpdateStatuses(messageIds, status)
 }
 
+@Suppress("unused")
 fun Knock.batchUpdateStatuses(messageIds: List<String>, status: KnockMessageStatusUpdateType, completionHandler: (Result<List<KnockMessage>>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         val messages = withContext(Dispatchers.IO) {

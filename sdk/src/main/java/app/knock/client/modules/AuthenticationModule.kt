@@ -45,7 +45,7 @@ internal class AuthenticationModule {
 }
 
 /**
- * Convienience method to determine if a user is currently authenticated for the Knock instance.
+ * Convenience method to determine if a user is currently authenticated for the Knock instance.
  */
 fun Knock.isAuthenticated(checkUserToken: Boolean = false): Boolean {
     val isUser = environment.getUserId()?.isEmpty() == false
@@ -63,12 +63,13 @@ fun Knock.isAuthenticated(checkUserToken: Boolean = false): Boolean {
  * You should consider using this in areas where you update your local user's state.
  *
  * @param userId: The id of the Knock channel to lookup.
- * @param userToken: [optional] The id of the Knock channel to lookup.
+ * @param userToken: (optional) The id of the Knock channel to lookup.
  */
 suspend fun Knock.signIn(userId: String, userToken: String?) {
     authenticationModule.signIn(userId, userToken)
 }
 
+@Suppress("unused")
 fun Knock.signIn(userId: String, userToken: String?, completionHandler: (Result<Unit>) -> Unit)= coroutineScope.launch(Dispatchers.Main) {
     try {
         signIn(userId, userToken)
@@ -88,6 +89,7 @@ suspend fun Knock.signOut() {
  * You should call this when your user signs out
  * NOTE: This will not clear the device token so that it can be accessed for the next user to login.
  */
+@Suppress("unused")
 fun Knock.signOut(completionHandler: (Result<Unit>) -> Void)= coroutineScope.launch(Dispatchers.Main) {
     try {
         signOut()

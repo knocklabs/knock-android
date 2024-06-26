@@ -77,6 +77,7 @@ internal class ChannelModule {
         }
     }
 
+    @Suppress("SpellCheckingInspection")
     private fun getTokenDataForServer(
         newToken: String,
         previousTokens: List<String>,
@@ -140,7 +141,7 @@ internal class ChannelModule {
 suspend fun Knock.getUserChannelData(channelId: String): ChannelData {
     return channelModule.getUserChannelData(channelId)
 }
-
+@Suppress("unused")
 fun Knock.getUserChannelData(channelId: String, completionHandler: (Result<ChannelData>) -> Unit) = coroutineScope.launch(
     Dispatchers.Main) {
     try {
@@ -157,6 +158,7 @@ suspend fun Knock.updateUserChannelData(channelId: String, data: Any): ChannelDa
     return channelModule.updateUserChannelData(channelId, data)
 }
 
+@Suppress("unused")
 fun Knock.updateUserChannelData(channelId: String, data: Any, completionHandler: (Result<ChannelData>) -> Unit) = coroutineScope.launch(
     Dispatchers.Main) {
     try {
@@ -173,6 +175,7 @@ suspend fun Knock.getCurrentDeviceToken(): String? {
     return environment.getCurrentFcmToken()
 }
 
+@Suppress("unused")
 fun Knock.getCurrentDeviceToken(completionHandler: (String?) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     val token = withContext(Dispatchers.IO) {
         getCurrentDeviceToken()
@@ -211,6 +214,7 @@ suspend fun Knock.unregisterTokenForFCM(channelId: String, token: String): Chann
     return channelModule.unregisterTokenForFCM(channelId, token)
 }
 
+@Suppress("unused")
 fun Knock.unregisterTokenForFCM(channelId: String, token: String, completionHandler: (Result<ChannelData>) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         val channel = withContext(Dispatchers.IO) {
@@ -222,12 +226,14 @@ fun Knock.unregisterTokenForFCM(channelId: String, token: String, completionHand
     }
 }
 
+@Suppress("unused")
 fun Knock.requestNotificationPermission(activity: Activity, requestCode: Int = 1) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), requestCode)
     }
 }
 
+@Suppress("unused")
 fun Knock.isPushPermissionGranted(context: Context): Boolean {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED

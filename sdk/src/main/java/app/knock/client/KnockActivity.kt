@@ -2,7 +2,6 @@ package app.knock.client
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import app.knock.client.models.messages.KnockMessageStatusUpdateType
@@ -15,11 +14,6 @@ open class KnockActivity : AppCompatActivity(), KnockActivityInterface {
         // See if there is a pending tap event from a PushNotification
         checkForPushNotificationTap(intent)
     }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        checkForPushNotificationTap(intent)
-    }
 }
 
 open class KnockComponentActivity : ComponentActivity(), KnockActivityInterface {
@@ -28,21 +22,16 @@ open class KnockComponentActivity : ComponentActivity(), KnockActivityInterface 
         super.onCreate(savedInstanceState)
         checkForPushNotificationTap(intent)
     }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        checkForPushNotificationTap(intent)
-    }
 }
 
 interface KnockActivityInterface {
-    open fun onKnockPushNotificationTappedInBackGround(intent: Intent) {}
-    open fun onKnockPushNotificationTappedInForeground(message: RemoteMessage) {}
+    fun onKnockPushNotificationTappedInBackground(intent: Intent) {}
+    fun onKnockPushNotificationTappedInForeground(message: RemoteMessage) {}
 
     fun checkForPushNotificationTap(intent: Intent?) {
         intent?.extras?.getString(Knock.KNOCK_MESSAGE_ID_KEY)?.let {
             Knock.shared.updateMessageStatus(it, KnockMessageStatusUpdateType.INTERACTED) {}
-            onKnockPushNotificationTappedInBackGround(intent)
+            onKnockPushNotificationTappedInBackground(intent)
         } ?: (intent?.extras?.get(Knock.KNOCK_PENDING_NOTIFICATION_KEY) as? RemoteMessage)?.let { message ->
             // Clear the intent extra
             intent.extras?.remove(Knock.KNOCK_PENDING_NOTIFICATION_KEY)

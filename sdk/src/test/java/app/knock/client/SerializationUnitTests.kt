@@ -50,6 +50,7 @@ class SerializationUnitTests {
         }
     }
 
+    @Suppress("SpellCheckingInspection")
     @Test
     fun testContentBlockDecoding() {
         val objectMapper: ObjectMapper = jacksonObjectMapper()

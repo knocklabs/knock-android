@@ -2,6 +2,8 @@ package app.knock.client.models.messages
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
+
+@Suppress("unused")
 enum class KnockMessageStatus {
     @JsonProperty("queued") QUEUED,
     @JsonProperty("sent") SENT,

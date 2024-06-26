@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import app.knock.client.Knock
 import app.knock.client.KnockComponentActivity
 import app.knock.client.modules.requestNotificationPermission
-import app.knock.example.theme.KnockandroidTheme
+import app.knock.example.theme.KnockAndroidTheme
 import app.knock.example.views.StartupView
 import com.google.firebase.messaging.RemoteMessage
 
@@ -23,7 +23,7 @@ class MainActivity : KnockComponentActivity() {
         Knock.shared.requestNotificationPermission(this)
 
         setContent {
-            KnockandroidTheme {
+            KnockAndroidTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -34,8 +34,8 @@ class MainActivity : KnockComponentActivity() {
         }
     }
 
-    override fun onKnockPushNotificationTappedInBackGround(intent: Intent) {
-        super.onKnockPushNotificationTappedInBackGround(intent)
+    override fun onKnockPushNotificationTappedInBackground(intent: Intent) {
+        super.onKnockPushNotificationTappedInBackground(intent)
         Log.d(Utils.loggingTag, "tapped in background")
     }
 
