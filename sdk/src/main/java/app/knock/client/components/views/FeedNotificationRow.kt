@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.knock.client.components.KnockColor
@@ -19,6 +20,7 @@ import app.knock.client.models.feed.BlockActionButton
 import app.knock.client.models.feed.ButtonSetContentBlock
 import app.knock.client.models.feed.FeedItem
 import app.knock.client.models.feed.MarkdownContentBlock
+import dev.jeziellago.compose.markdowntext.MarkdownText
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
@@ -50,14 +52,14 @@ fun FeedNotificationRow(
                     )
                 }
                 if (theme.showAvatarView && item.actors.isNotEmpty()) {
-                    AvatarView(item.actors.firstOrNull()?.avatar, item.actors.firstOrNull()?.name)
+                    AvatarView(item.actors.firstOrNull()?.avatar, item.actors.firstOrNull()?.name, theme.avatarViewTheme)
                 }
             }
 
             Column(horizontalAlignment = Alignment.Start) {
                 item.blocks.forEach { block ->
                     when (block) {
-                        is MarkdownContentBlock -> MarkdownContent(block)
+                        is MarkdownContentBlock -> MarkdownContent(block, theme.bodyTextStyle)
                         is ButtonSetContentBlock -> ActionButtonsContent(block, theme, buttonTapAction)
                         else -> {}
                     }
@@ -76,8 +78,8 @@ fun FeedNotificationRow(
 }
 
 @Composable
-fun MarkdownContent(block: MarkdownContentBlock) {
-    MarkdownContentView(block.rendered)
+fun MarkdownContent(block: MarkdownContentBlock, style: TextStyle) {
+    MarkdownText(markdown = block.rendered, style = style, disableLinkMovementMethod = true)
 }
 
 @Composable

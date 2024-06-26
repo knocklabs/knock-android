@@ -13,13 +13,14 @@ import java.util.Locale
 data class FeedNotificationRowTheme(
     val context: Context,
     val backgroundColor: Color = KnockColor.Surface.surface1(context), // Background color of the FeedNotificationRow
-    val notificationContentCSS: String? = null, // Customize the css of the markdown html of the notification body
+    val bodyTextStyle: TextStyle = TextStyle(color = KnockColor.Gray.gray12(context), fontSize = 16.sp), // Set the textStyle of the body of the message
     val unreadNotificationCircleColor: Color = KnockColor.Blue.blue9(context), // Color of the unread circle indicator in the top left of the row
     val showAvatarView: Boolean = true, // Show or hide the avatar/initials view in the upper left corner of the row
+    val avatarViewTheme: AvatarViewTheme = AvatarViewTheme(context = context), // Sets the theme for the AvatarView in the row
     val primaryActionButtonConfig: ActionButtonConfig = ActionButtonStyle.Primary.defaultConfig(context), // Styling for primary action buttons
     val secondaryActionButtonConfig: ActionButtonConfig = ActionButtonStyle.Secondary.defaultConfig(context), // Styling for secondary action buttons
-    val sentAtDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d 'at' h:mm a", Locale.getDefault()),
-    val sentAtDateTextStyle: TextStyle = TextStyle(fontSize = 12.sp, color = Color.Gray),
-    val markAsReadSwipeConfig: SwipeConfig? = FeedNotificationRowSwipeAction.MARK_AS_READ.getDefaultConfig(context), // Set this to null to remove the left swipe action
-    val archiveSwipeConfig: SwipeConfig? = FeedNotificationRowSwipeAction.ARCHIVE.getDefaultConfig(context) // Set this to null to remove the right swipe action
+    val sentAtDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d 'at' h:mm a", Locale.getDefault()), // DateTimeFormatter for the sent timestamp at the bottom of the row
+    val sentAtDateTextStyle: TextStyle = TextStyle(fontSize = 12.sp, color = Color.Gray), // TextStyle for sent timestamp
+    val markAsReadSwipeConfig: SwipeConfig? = FeedNotificationRowSwipeAction.MARK_AS_READ.getDefaultConfig(context), // This is the config to set the mark as read/unread swipe actions. Set to null to remove the action entirely
+    val archiveSwipeConfig: SwipeConfig? = FeedNotificationRowSwipeAction.ARCHIVE.getDefaultConfig(context) // This is the config to set the archive/unarchive swipe actions. Set to null to remove the action entirely
 )
