@@ -11,7 +11,7 @@ import kotlin.coroutines.suspendCoroutine
 class KnockEnvironment {
     companion object {
         const val defaultBaseUrl: String = "https://api.knock.app"
-        const val clientVersion: String = "1.2.0"
+        const val clientVersion: String = "1.2.1"
     }
 
     private val previousPushTokensKey = "knock_previous_push_token"
