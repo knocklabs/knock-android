@@ -13,13 +13,33 @@ import app.knock.client.logDebug
 import app.knock.client.logError
 import app.knock.client.logWarning
 import app.knock.client.models.ChannelData
+import app.knock.client.models.Device
 import app.knock.client.models.KnockException
 import app.knock.client.services.ChannelService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
+import java.util.TimeZone
 internal class ChannelModule {
     private val channelService = ChannelService()
+    
+    private fun getCurrentLocale(): String {
+        return Locale.getDefault().toString().replace('_', '-')
+    }
+    
+    private fun getCurrentTimezone(): String {
+        return TimeZone.getDefault().id
+    }
+    
+    private fun createDevice(token: String): Device {
+        return Device(
+            token = token,
+            locale = getCurrentLocale(),
+            timezone = getCurrentTimezone()
+        )
+    }
+    
     suspend fun getUserChannelData(channelId: String): ChannelData {
         val userId = Knock.shared.environment.getSafeUserId()
         return channelService.getUserChannelData(userId, channelId)
@@ -37,7 +57,7 @@ internal class ChannelModule {
 
         if (!Knock.shared.isAuthenticated() || channelId == null) {
             Knock.shared.logWarning(KnockLogCategory.PUSH_NOTIFICATION, "ChannelId and deviceToken were saved. However, we cannot register for FCM until you have called Knock.signIn().")
-            return ChannelData(channelId ?: "", mutableMapOf("tokens" to listOf(token)))
+            return ChannelData(channelId ?: "", mutableMapOf("devices" to listOf(createDevice(token))))
         }
 
         return prepareToRegisterTokenOnServer(token, channelId)
@@ -49,13 +69,13 @@ internal class ChannelModule {
             val previousTokens = Knock.shared.environment.getPreviousPushTokens()
 
             @Suppress("UNCHECKED_CAST")
-            val tokens: List<String> = channelData.data["tokens"] as? List<String> ?: emptyList()
+            val devices: List<Map<String, Any>> = channelData.data["devices"] as? List<Map<String, Any>> ?: emptyList()
 
-            val updatedTokens = getTokenDataForServer(token, previousTokens, tokens, forUnregistration = true)
+            val updatedDevices = getDeviceDataForServer(token, previousTokens, devices, forUnregistration = true)
 
-            return if (updatedTokens != tokens) {
-                val newTokens = tokens.toSet().minus(token).toList()
-                val data = mapOf("tokens" to newTokens)
+            return if (updatedDevices != devices) {
+                val newDevices = devices.filter { (it["token"] as? String) != token }
+                val data = mapOf("devices" to newDevices)
 
                 val updatedData = updateUserChannelData(channelId, data)
                 Knock.shared.environment.clearPreviousPushTokens()
@@ -78,23 +98,41 @@ internal class ChannelModule {
     }
 
     @Suppress("SpellCheckingInspection")
-    private fun getTokenDataForServer(
+    private fun getDeviceDataForServer(
         newToken: String,
         previousTokens: List<String>,
-        channelDataTokens: List<String>,
+        channelDataDevices: List<Map<String, Any>>,
         forUnregistration: Boolean = false
-    ): List<String> {
-        val updatedTokens = channelDataTokens.toMutableList()
+    ): List<Map<String, Any>> {
+        val updatedDevices = channelDataDevices.toMutableList()
 
-        updatedTokens.removeAll(previousTokens)
-
-        if (forUnregistration) {
-            updatedTokens.remove(newToken)
-        } else if (!updatedTokens.contains(newToken)) {
-            updatedTokens.add(newToken)
+        // Remove devices with previous tokens
+        updatedDevices.removeAll { device ->
+            val token = device["token"] as? String
+            token != null && previousTokens.contains(token)
         }
 
-        return updatedTokens
+        if (forUnregistration) {
+            updatedDevices.removeAll { device ->
+                (device["token"] as? String) == newToken
+            }
+        } else {
+            // Check if device with this token already exists
+            val tokenExists = updatedDevices.any { device ->
+                (device["token"] as? String) == newToken
+            }
+            if (!tokenExists) {
+                // Convert Device to Map for the API
+                val newDevice = createDevice(newToken)
+                updatedDevices.add(mapOf(
+                    "token" to newDevice.token,
+                    "locale" to newDevice.locale,
+                    "timezone" to newDevice.timezone
+                ))
+            }
+        }
+
+        return updatedDevices
     }
 
     private suspend fun prepareToRegisterTokenOnServer(token: String, channelId: String): ChannelData {
@@ -102,23 +140,28 @@ internal class ChannelModule {
             val existingChannelData = getUserChannelData(channelId)
 
             @Suppress("UNCHECKED_CAST")
-            val existingChannelTokens: List<String> = existingChannelData.data["tokens"] as? List<String> ?: emptyList()
+            val existingChannelDevices: List<Map<String, Any>> = existingChannelData.data["devices"] as? List<Map<String, Any>> ?: emptyList()
 
             val previousTokens = Knock.shared.environment.getPreviousPushTokens()
 
-            val preparedTokens = getTokenDataForServer(token, previousTokens, existingChannelTokens)
+            val preparedDevices = getDeviceDataForServer(token, previousTokens, existingChannelDevices)
 
-            if (preparedTokens != existingChannelTokens) {
-                return registerNewTokenDataOnServer(preparedTokens, channelId)
+            if (preparedDevices != existingChannelDevices) {
+                return registerNewDeviceDataOnServer(preparedDevices, channelId)
             } else {
                 existingChannelData
             }
         } catch (e: KnockException.UserIdNotSetError) {
             Knock.shared.logDebug(KnockLogCategory.PUSH_NOTIFICATION, "Cannot register for FCM until Knock.signIn() is called.")
-            return ChannelData(channelId, mutableMapOf("tokens" to listOf(token)))
+            return ChannelData(channelId, mutableMapOf("devices" to listOf(createDevice(token))))
         } catch (e: KnockException.NetworkError) {
             if (e.code == 404) {
-                return registerNewTokenDataOnServer(listOf(token), channelId)
+                val newDevice = createDevice(token)
+                return registerNewDeviceDataOnServer(listOf(mapOf(
+                    "token" to newDevice.token,
+                    "locale" to newDevice.locale,
+                    "timezone" to newDevice.timezone
+                )), channelId)
             } else {
                 throw e
             }
@@ -127,8 +170,8 @@ internal class ChannelModule {
         }
     }
 
-    private suspend fun registerNewTokenDataOnServer(tokens: List<String>, channelId: String): ChannelData {
-        val data = (mapOf("tokens" to tokens))
+    private suspend fun registerNewDeviceDataOnServer(devices: List<Map<String, Any>>, channelId: String): ChannelData {
+        val data = (mapOf("devices" to devices))
         val newChannelData = updateUserChannelData(channelId, data)
 
         Knock.shared.environment.clearPreviousPushTokens()

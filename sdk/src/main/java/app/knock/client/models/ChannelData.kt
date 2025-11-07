@@ -17,3 +17,10 @@ data class ChannelData(
     @JsonSetter(nulls = Nulls.AS_EMPTY)
     var data: MutableMap<String, Any> = hashMapOf(),
 )
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class Device(
+    val token: String,
+    val locale: String? = null,
+    val timezone: String? = null
+)
