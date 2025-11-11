@@ -13,6 +13,7 @@ data class FeedClientOptions(
     var hasTenant: Boolean? = null, // Optionally scope to notifications with any tenancy or no tenancy
     var archived: FeedItemArchivedScope? = null, // Optionally scope to a given archived status (defaults to `exclude`)
     var triggerData: Map<String, Any>? = null,
+    var locale: String? = null,
 ) {
     /**
      * Merge new options to the exiting ones, if the new ones are nil, only a copy of `self` will be returned
@@ -56,6 +57,9 @@ data class FeedClientOptions(
         }
         if (options.triggerData != null) {
             mergedOptions.triggerData = options.triggerData
+        }
+        if (options.locale != null) {
+            mergedOptions.locale = options.locale
         }
 
         return mergedOptions
