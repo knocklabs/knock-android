@@ -126,8 +126,8 @@ internal class ChannelModule {
                 val newDevice = createDevice(newToken)
                 updatedDevices.add(mapOf(
                     "token" to newDevice.token,
-                    "locale" to newDevice.locale,
-                    "timezone" to newDevice.timezone
+                    "locale" to newDevice.locale!!,
+                    "timezone" to newDevice.timezone!!
                 ))
             }
         }
@@ -159,8 +159,8 @@ internal class ChannelModule {
                 val newDevice = createDevice(token)
                 return registerNewDeviceDataOnServer(listOf(mapOf(
                     "token" to newDevice.token,
-                    "locale" to newDevice.locale,
-                    "timezone" to newDevice.timezone
+                    "locale" to newDevice.locale!!,
+                    "timezone" to newDevice.timezone!!
                 )), channelId)
             } else {
                 throw e
