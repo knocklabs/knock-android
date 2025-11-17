@@ -56,7 +56,8 @@ internal class FeedModule(private val feedId: String, private val defaultOptions
             URLQueryItem("has_tenant", mergedOptions.hasTenant),
             URLQueryItem("status", statusString),
             URLQueryItem("archived", archivedString),
-            URLQueryItem("trigger_data", triggerDataJsonString)
+            URLQueryItem("trigger_data", triggerDataJsonString),
+            URLQueryItem("locale", mergedOptions.locale)
         )
 
         return feedService.getUserFeedContent(userId, feedId, mergedOptions, queryItems)
