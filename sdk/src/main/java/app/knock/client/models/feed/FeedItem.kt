@@ -1,6 +1,7 @@
 package app.knock.client.models.feed
 
 import app.knock.client.models.KnockUser
+import app.knock.client.models.messages.WorkflowSource
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSetter
@@ -24,6 +25,7 @@ data class FeedItem(
     var linkClickedAt: ZonedDateTime? = null,
     var readAt: ZonedDateTime? = null,
     var seenAt: ZonedDateTime? = null,
+    var source: WorkflowSource? = null,
     var tenant: String? = null,
     var totalActivities: Int,
     var totalActors: Int,
