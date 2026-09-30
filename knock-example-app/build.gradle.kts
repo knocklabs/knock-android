@@ -20,7 +20,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // CI builds with -PminifyExample to check the SDK's consumer R8 rules.
+            isMinifyEnabled = providers.gradleProperty("minifyExample").isPresent
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

@@ -13,10 +13,14 @@ internal class KnockIntent(private val context: Context, cls: Class<*>?, message
         action = ACTION_MAIN
     }
 
+    // PendingIntents that differ only in extras are considered equal, so each message needs its own request code;
+    // with a shared code every new notification replaced (and cancelled) the tap intent of all earlier ones.
+    private val requestCode = (message.data[Knock.KNOCK_MESSAGE_ID_KEY] ?: message.messageId ?: "${System.nanoTime()}").hashCode()
+
     internal val pendingIntent get() = PendingIntent.getActivity(
         context,
-        0,
+        requestCode,
         this,
-        PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 }

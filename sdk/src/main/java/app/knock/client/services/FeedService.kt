@@ -10,7 +10,7 @@ import app.knock.client.models.networking.URLQueryItem
 
 internal class FeedService: KnockAPIService() {
     suspend fun getUserFeedContent(userId: String, feedId: String, options: FeedClientOptions? = null, queryItems: List<URLQueryItem>): Feed {
-        return get<Feed>("/users/$userId/feeds/$feedId", queryItems)
+        return get<Feed>("/users/${userId.asPathSegment()}/feeds/${feedId.asPathSegment()}", queryItems)
     }
 
     suspend fun makeBulkStatusUpdate(userId: String, feedId: String, type: KnockMessageStatusUpdateType, options: FeedClientOptions): BulkOperation {
@@ -31,10 +31,10 @@ internal class FeedService: KnockAPIService() {
         )
 
         val typeValue = serializeValueAsString(type)
-        return post<BulkOperation>("/channels/$feedId/messages/bulk/$typeValue", body)
+        return post<BulkOperation>("/channels/${feedId.asPathSegment()}/messages/bulk/$typeValue", body)
     }
 
     suspend fun getFeedSettings(userId: String, feedId: String) : FeedSettings {
-        return get<FeedSettings>("/users/$userId/feeds/$feedId/settings")
+        return get<FeedSettings>("/users/${userId.asPathSegment()}/feeds/${feedId.asPathSegment()}/settings")
     }
 }

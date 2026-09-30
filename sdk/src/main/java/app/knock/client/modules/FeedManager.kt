@@ -41,6 +41,14 @@ class FeedManager(
         feedModule.disconnectFromFeed()
     }
 
+    internal fun resumeConnection() {
+        feedModule.resumeConnection()
+    }
+
+    internal fun onUserChanged() {
+        feedModule.onUserChanged()
+    }
+
     fun on(eventName: String = "new-message", callback: (Message) -> Unit) {
         feedModule.on(eventName, callback)
     }

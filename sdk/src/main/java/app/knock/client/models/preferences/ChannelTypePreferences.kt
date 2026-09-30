@@ -38,6 +38,12 @@ data class ChannelTypePreferences(
     @JsonSerialize(using = BooleanOrConditionsArraySerializer::class)
     @JsonIgnoreProperties(ignoreUnknown = true)
     var chat: Either<Boolean, ConditionsArray>? = null,
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonDeserialize(using = BooleanOrConditionsArrayDeserializer::class)
+    @JsonSerialize(using = BooleanOrConditionsArraySerializer::class)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    var http: Either<Boolean, ConditionsArray>? = null,
 ) {
     fun asArrayOfPreferenceItems(): List<ChannelTypePreferenceItem> {
         return listOfNotNull(

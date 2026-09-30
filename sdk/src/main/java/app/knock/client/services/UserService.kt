@@ -4,10 +4,10 @@ import app.knock.client.models.KnockUser
 
 internal class UserService: KnockAPIService() {
     suspend fun getUser(userId: String): KnockUser {
-        return get("/users/$userId", null)
+        return get("/users/${userId.asPathSegment()}", null)
     }
 
     suspend fun updateUser(user: KnockUser): KnockUser {
-        return put("/users/${user.id}", user)
+        return put("/users/${user.id.asPathSegment()}", user)
     }
 }

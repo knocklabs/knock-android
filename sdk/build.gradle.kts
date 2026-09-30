@@ -4,15 +4,18 @@ plugins {
     id("maven-publish")
 }
 
+// Keep in sync with KnockEnvironment.clientVersion (enforced by KnockEnvironmentTests).
+val knockVersion = "1.2.6"
+
 group = "app.knock"
-version = "1.2.5"
+version = knockVersion
 
 publishing {
     publications {
         register<MavenPublication>("release") {
             artifactId = "knock-android"
             groupId = "app.knock"
-            version = "1.2.5"
+            version = knockVersion
             afterEvaluate {
                 from(components["release"])
             }
@@ -54,6 +57,10 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+        unitTests.all { it.systemProperty("knock.sdkVersion", knockVersion) }
+    }
 
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
@@ -73,17 +80,15 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material:1.6.8")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("com.github.jeziellago:compose-markdown:0.4.1")
-    implementation("androidx.test:core-ktx:1.6.1")
-    implementation("androidx.test.ext:junit-ktx:1.2.1")
-    implementation("androidx.test:runner:1.6.1")
 
     testImplementation("org.mockito:mockito-core:3.12.4")
     testImplementation("androidx.arch.core:core-testing:2.2.0")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("org.robolectric:robolectric:4.17")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation("androidx.test:core:1.6.1")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
@@ -104,12 +109,9 @@ dependencies {
 
     // Arrow
     api("io.arrow-kt:arrow-core:1.2.0")
-    implementation("io.arrow-kt:arrow-integrations-jackson-module:0.14.1")
 
     // Swipable Rows
     implementation("me.saket.swipe:swipe:1.3.0")
-
-    implementation("com.google.code.gson:gson:2.10.1")
 
     api("com.google.firebase:firebase-messaging-ktx:24.0.0")
 }

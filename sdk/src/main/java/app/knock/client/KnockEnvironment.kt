@@ -5,16 +5,17 @@ import android.content.SharedPreferences
 import app.knock.client.models.KnockException
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 @Suppress("unused")
 class KnockEnvironment {
     companion object {
         const val defaultBaseUrl: String = "https://api.knock.app"
-        const val clientVersion: String = "1.2.1"
+        const val clientVersion: String = "1.2.6"
     }
 
     private val previousPushTokensKey = "knock_previous_push_token"
+    private val devicePushTokenKey = "knock_device_push_token"
 
     @Volatile
     private var userId: String? = null
@@ -103,17 +104,35 @@ class KnockEnvironment {
     @Throws(Exception::class)
     fun getSafePushChannelId(): String = pushChannelId ?: throw KnockException.PushChannelIdNotSetError
 
+    /**
+     * Stores the current FCM token. When it replaces a different token, the old one is remembered as a
+     * "previous" token so the next registration removes it from the user's channel data.
+     */
     fun setDeviceToken(token: String?) {
-        val previousTokens = getPreviousPushTokens()
-        if (token != null && !previousTokens.contains(token)) {
-            setPreviousPushTokens(tokens = previousTokens + token)
+        val preferences = getSafeSharedPreferences()
+        val oldToken = preferences.getString(devicePushTokenKey, null)
+        var previousTokens = getPreviousPushTokens()
+        if (oldToken != null && oldToken != token && !previousTokens.contains(oldToken)) {
+            previousTokens = previousTokens + oldToken
         }
+        // SDK versions before 1.2.6 stored the current token in this list; it must never be treated as stale.
+        if (token != null) {
+            previousTokens = previousTokens - token
+        }
+        setPreviousPushTokens(previousTokens)
+        preferences.edit().putString(devicePushTokenKey, token).apply()
     }
 
     suspend fun getCurrentFcmToken(): String? {
-        val token = suspendCoroutine { continuation ->
-            // Get the current FCM token
-            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+        val tokenTask = try {
+            FirebaseMessaging.getInstance().token
+        } catch (e: Exception) {
+            // Thrown when Firebase isn't configured for the app (e.g. apps that only use the in-app feed).
+            Knock.shared.logWarning(KnockLogCategory.PUSH_NOTIFICATION, "Unable to get the FCM token. Is Firebase configured?", exception = e)
+            return null
+        }
+        return suspendCancellableCoroutine { continuation ->
+            tokenTask.addOnCompleteListener { task ->
                 if (!task.isSuccessful) {
                     Knock.shared.logError(KnockLogCategory.PUSH_NOTIFICATION, task.exception.toString())
                     continuation.resume(null)
@@ -122,7 +141,6 @@ class KnockEnvironment {
                 continuation.resume(task.result)
             }
         }
-        return token
     }
 
     private fun setPreviousPushTokens(tokens: List<String>) {

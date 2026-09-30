@@ -10,7 +10,9 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 @JsonTypeInfo(
     use = Id.NAME,
     include = As.PROPERTY,
-    property = "type"
+    property = "type",
+    // Unknown block types decode to null (and are skipped in FeedItem.blocks) instead of failing the whole feed.
+    defaultImpl = Void::class
 )
 @JsonSubTypes(
     JsonSubTypes.Type(value = MarkdownContentBlock::class, name = "markdown"),
