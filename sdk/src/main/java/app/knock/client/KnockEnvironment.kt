@@ -11,7 +11,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 class KnockEnvironment {
     companion object {
         const val defaultBaseUrl: String = "https://api.knock.app"
-        const val clientVersion: String = "1.2.1"
+        const val clientVersion: String = "1.2.6"
     }
 
     private val previousPushTokensKey = "knock_previous_push_token"

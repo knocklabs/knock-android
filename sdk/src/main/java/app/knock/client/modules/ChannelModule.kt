@@ -227,7 +227,7 @@ fun Knock.getCurrentDeviceToken(completionHandler: (String?) -> Unit) = coroutin
 }
 
 /**
- * Registers an Apple Push Notification Service token so that the device can receive remote push notifications.
+ * Registers a Firebase Cloud Messaging (FCM) token so that the device can receive remote push notifications.
  * This is a convenience method that internally gets the channel data and searches for the token.
  * If it exists, then it's already registered and it returns. If the data does not exists or the token is missing from the array, it's added.
  *
@@ -235,7 +235,7 @@ fun Knock.getCurrentDeviceToken(completionHandler: (String?) -> Unit) = coroutin
  *
  * **Attention:** There's a race condition because the getting/setting of the token are not made in a transaction.
  *
- * @param channelId the id of the APNS channel
+ * @param channelId the id of the FCM push channel
  * @param token the FCM device token as a `String`
  */
 suspend fun Knock.registerTokenForFCM(channelId: String, token: String): ChannelData {

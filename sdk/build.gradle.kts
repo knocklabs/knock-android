@@ -4,15 +4,18 @@ plugins {
     id("maven-publish")
 }
 
+// Keep in sync with KnockEnvironment.clientVersion (enforced by KnockEnvironmentTests).
+val knockVersion = "1.2.6"
+
 group = "app.knock"
-version = "1.2.5"
+version = knockVersion
 
 publishing {
     publications {
         register<MavenPublication>("release") {
             artifactId = "knock-android"
             groupId = "app.knock"
-            version = "1.2.5"
+            version = knockVersion
             afterEvaluate {
                 from(components["release"])
             }
@@ -56,6 +59,7 @@ android {
     }
     testOptions {
         unitTests.isReturnDefaultValues = true
+        unitTests.all { it.systemProperty("knock.sdkVersion", knockVersion) }
     }
 
     composeOptions {

@@ -29,9 +29,9 @@ sealed class KnockException : Exception() {
             is NetworkError -> "$title | code: $code | description: $description"
             UserIdNotSetError -> "UserId not found. Please authenticate your userId with Knock.shared.signIn()."
             UserTokenNotSet -> "User token must be set for production environments. Please authenticate your user token with Knock.shared.signIn()."
-            PushChannelIdNotSetError -> "PushChannelId not found. Please setup with Knock.shared.setup() or Knock.shared.registerTokenForAPNS()."
-            DevicePushTokenNotSet -> "Device Push Notification token not found. Please setup with Knock.shared.registerTokenForAPNS()."
-            KnockNotSetup -> "Knock instance still needs to be setup. Please setup with Knock.shared.setup()."
+            PushChannelIdNotSetError -> "PushChannelId not found. Please set it with Knock.setup() or Knock.shared.registerTokenForFCM()."
+            DevicePushTokenNotSet -> "Device Push Notification token not found. Please register it with Knock.shared.registerTokenForFCM()."
+            KnockNotSetup -> "Knock instance still needs to be setup. Please set it up with Knock.setup()."
             WrongKeyError -> "You are using your secret API key on the client. Please use the public key."
             KnockSetupError -> "Please call Knock.setup() before trying to use Knock.shared."
         }
