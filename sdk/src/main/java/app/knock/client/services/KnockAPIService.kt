@@ -9,6 +9,7 @@ import app.knock.client.logNetworking
 import app.knock.client.models.KnockException
 import app.knock.client.models.networking.HTTPMethod
 import app.knock.client.models.networking.URLQueryItem
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE
 import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -49,6 +50,7 @@ internal open class KnockAPIService {
 
     init {
         mapper.propertyNamingStrategy = SNAKE_CASE
+        mapper.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
         mapper.registerModule(JavaTimeModule())
         mapper.registerKotlinModule()
     }

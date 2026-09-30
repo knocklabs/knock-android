@@ -12,7 +12,7 @@ data class KnockMessage(
     val id: String,
     val channelId: String,
     val recipient: Any,
-    var workflow: String,
+    var workflow: String?,
     var tenant: String?,
     var status: KnockMessageStatus,
     var engagementStatuses: List<KnockMessageEngagementStatus>,

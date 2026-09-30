@@ -28,4 +28,10 @@ data class FeedItem(
     var totalActivities: Int,
     var totalActors: Int,
     var updatedAt: ZonedDateTime? = null,
-)
+) {
+    init {
+        // Blocks of a type this SDK version doesn't know decode to null (see ContentBlockBase); drop them.
+        @Suppress("USELESS_CAST")
+        blocks = (blocks as List<ContentBlockBase?>).filterNotNull()
+    }
+}

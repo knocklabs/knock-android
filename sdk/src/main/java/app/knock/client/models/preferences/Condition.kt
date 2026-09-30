@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.SerializerProvider
 data class Condition(
     val variable: String,
     var operator: String,
-    var argument: String,
+    var argument: String?,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

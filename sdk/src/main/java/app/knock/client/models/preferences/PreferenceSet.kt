@@ -2,6 +2,7 @@ package app.knock.client.models.preferences
 
 import arrow.core.Either
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonSetter
 import com.fasterxml.jackson.annotation.Nulls
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
@@ -25,4 +26,14 @@ data class PreferenceSet (
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonSetter(nulls = Nulls.AS_EMPTY)
     var categories: Map<String, Either<Boolean, WorkflowPreference>>? = mapOf(),
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonDeserialize(contentUsing = BooleanOrConditionsArrayDeserializer::class)
+    @JsonSerialize(contentUsing = BooleanOrConditionsArraySerializer::class)
+    var channels: Map<String, Either<Boolean, ConditionsArray>>? = null,
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonDeserialize(using = BooleanOrConditionsArrayDeserializer::class)
+    @JsonSerialize(using = BooleanOrConditionsArraySerializer::class)
+    var commercialSubscribed: Either<Boolean, ConditionsArray>? = null,
 )
