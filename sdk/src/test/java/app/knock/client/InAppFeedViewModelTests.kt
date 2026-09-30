@@ -39,13 +39,15 @@ class InAppFeedViewModelTests {
         viewModelStore = ViewModelStore()
 
         // Create an instance of the ViewModelFactory
+        val ctx = mockContext()
         val factory = InAppFeedViewModelFactory(
+            context = ctx,
             feedClientOptions = FeedClientOptions(),
-            currentFilter = InAppFeedFilter(FeedItemScope.ALL),
+            currentFilter = InAppFeedFilter(ctx, FeedItemScope.ALL),
             filterOptions = listOf(
-                InAppFeedFilter(FeedItemScope.ALL),
-                InAppFeedFilter(FeedItemScope.UNREAD),
-                InAppFeedFilter(FeedItemScope.ARCHIVED)
+                InAppFeedFilter(ctx, FeedItemScope.ALL),
+                InAppFeedFilter(ctx, FeedItemScope.UNREAD),
+                InAppFeedFilter(ctx, FeedItemScope.ARCHIVED)
             ),
             topButtonActions = listOf(
                 FeedTopActionButtonType.MarkAllAsRead(),
