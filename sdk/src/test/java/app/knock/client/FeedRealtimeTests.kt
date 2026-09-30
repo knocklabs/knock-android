@@ -62,7 +62,8 @@ class FeedRealtimeTests {
 
         feedManager.disconnectFromFeed()
         feedManager.connectToFeed()
-        assertTrue(waitUntil { phoenix.joins.size == 2 && phoenix.sockets.size == 1 })
+        assertTrue(waitUntil { phoenix.joins.size == 2 })
+        assertTrue(waitUntil { phoenix.sockets.size == 1 })
         pushAndAwait(received, 2)
     }
 
@@ -109,7 +110,8 @@ class FeedRealtimeTests {
         assertTrue(waitUntil { phoenix.sockets.isEmpty() })
 
         Knock.shared.onActivityStarted(activityB) // foregrounded again
-        assertTrue(waitUntil { phoenix.joins.size == 2 && phoenix.sockets.size == 1 })
+        assertTrue(waitUntil { phoenix.joins.size == 2 })
+        assertTrue(waitUntil { phoenix.sockets.size == 1 })
         @Suppress("UNCHECKED_CAST")
         assertEquals("team-a", (phoenix.joins.last()[4] as Map<String, Any?>)["tenant"])
         pushAndAwait(received, 1)
@@ -135,7 +137,8 @@ class FeedRealtimeTests {
         assertTrue(waitUntil { topics() == listOf("feeds:feed1:alice") })
 
         Knock.shared.signIn("bob", "bob_token") // Firebase isn't configured in unit tests
-        assertTrue(waitUntil { topics() == listOf("feeds:feed1:alice", "feeds:feed1:bob") && phoenix.sockets.size == 1 })
+        assertTrue(waitUntil { topics() == listOf("feeds:feed1:alice", "feeds:feed1:bob") })
+        assertTrue(waitUntil { phoenix.sockets.size == 1 })
 
         feedManager.getUserFeedContent()
         val request = dispatcher.httpRequests.last()

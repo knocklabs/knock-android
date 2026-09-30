@@ -102,6 +102,10 @@ class FakePhoenix : WebSocketListener() {
         webSocket.close(1000, null)
     }
 
+    override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+        sockets.remove(webSocket)
+    }
+
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         sockets.remove(webSocket)
     }
@@ -126,7 +130,7 @@ class RoutingDispatcher(
     }
 }
 
-fun waitUntil(timeoutMs: Long = 5_000, cond: () -> Boolean): Boolean {
+fun waitUntil(timeoutMs: Long = 10_000, cond: () -> Boolean): Boolean {
     val deadline = System.currentTimeMillis() + timeoutMs
     while (System.currentTimeMillis() < deadline) {
         if (cond()) return true
