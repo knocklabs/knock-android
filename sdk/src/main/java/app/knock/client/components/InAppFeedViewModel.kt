@@ -88,16 +88,10 @@ class InAppFeedViewModel(
 
     fun connectFeedAndObserveNewMessages() {
         viewModelScope.launch {
-            // Placeholder for feed manager connection logic
             Knock.shared.feedManager?.connectToFeed()
             Knock.shared.feedManager?.on { _ ->
-                feedClientOptions.before = _feed.value.pageInfo.before
-                viewModelScope.launch {
-                    val userFeed = withContext(Dispatchers.IO) {
-                        Knock.shared.feedManager?.getUserFeedContent(feedClientOptions)
-                    }
-                    userFeed?.let { mergeFeedsForNewMessageReceived(it) }
-                }
+                // Socket callbacks arrive on a background thread; read and update state on the main thread.
+                viewModelScope.launch { fetchNewItems() }
             }
             val isBrandingRequired = getBrandingRequired()
             withContext(Dispatchers.Main) {
@@ -123,49 +117,69 @@ class InAppFeedViewModel(
 
     suspend fun refreshFeed(showIndicator: Boolean = false) {
         if (showIndicator) _showRefreshIndicator.emit(true)
-        val originalStatus = feedClientOptions.status
-        val archived = if (feedClientOptions.status == FeedItemScope.ARCHIVED) FeedItemArchivedScope.ONLY else null
-        val status = if (feedClientOptions.status == FeedItemScope.ARCHIVED) FeedItemScope.ALL else feedClientOptions.status
-        feedClientOptions.archived = archived
-        feedClientOptions.status = status
-        feedClientOptions.before = null
-        feedClientOptions.after = null
+        feedClientOptions.archived = if (feedClientOptions.status == FeedItemScope.ARCHIVED) FeedItemArchivedScope.ONLY else null
 
-        val userFeed = withContext(Dispatchers.IO) {
-            try {
-                Knock.shared.feedManager?.getUserFeedContent(feedClientOptions)
-            } catch (e: Exception) {
-                null
+        try {
+            val userFeed = withContext(Dispatchers.IO) {
+                Knock.shared.feedManager?.getUserFeedContent(requestOptions())
             }
-        }
-
-        userFeed?.let {
+            userFeed?.let {
+                withContext(Dispatchers.Main) {
+                    _feed.value = it.copy(pageInfo = it.pageInfo.copy(before = it.entries.firstOrNull()?.feedCursor))
+                }
+            }
+        } catch (e: Exception) {
+            logError("Failed: refreshFeed", e)
+        } finally {
             withContext(Dispatchers.Main) {
-                _feed.value = it
                 _showRefreshIndicator.value = false
             }
-            _feed.value.pageInfo.before = _feed.value.entries.firstOrNull()?.feedCursor
-            feedClientOptions.status = originalStatus
         }
     }
+
+    private var isFetchingNextPage = false
 
     fun fetchNewPageOfFeedItems() {
         viewModelScope.launch {
             val after = _feed.value.pageInfo.after ?: return@launch
-            feedClientOptions.after = after
-
-            val newFeed = withContext(Dispatchers.IO) {
-                try {
-                    Knock.shared.feedManager?.getUserFeedContent(feedClientOptions)
-                } catch (e: Exception) {
-                    null
+            if (isFetchingNextPage) return@launch
+            isFetchingNextPage = true
+            try {
+                val newFeed = withContext(Dispatchers.IO) {
+                    Knock.shared.feedManager?.getUserFeedContent(requestOptions(after = after))
                 }
-            }
-
-            newFeed?.let {
-                mergeFeedsForNewPageOfFeed(it)
+                newFeed?.let { mergeFeedsForNewPageOfFeed(it) }
+            } catch (e: Exception) {
+                logError("Failed: fetchNewPageOfFeedItems", e)
+            } finally {
+                isFetchingNextPage = false
             }
         }
+    }
+
+    private suspend fun fetchNewItems() {
+        try {
+            val newFeed = withContext(Dispatchers.IO) {
+                Knock.shared.feedManager?.getUserFeedContent(requestOptions(before = _feed.value.pageInfo.before))
+            }
+            newFeed?.let { mergeFeedsForNewMessageReceived(it) }
+        } catch (e: Exception) {
+            logError("Failed: fetching new feed items", e)
+        }
+    }
+
+    /**
+     * Options for a single feed request. Built as a copy so pagination cursors never leak between requests;
+     * the Archived filter is requested as `archived=only` across all statuses.
+     */
+    private fun requestOptions(before: String? = null, after: String? = null): FeedClientOptions {
+        val isArchivedFilter = feedClientOptions.status == FeedItemScope.ARCHIVED
+        return feedClientOptions.copy(
+            status = if (isArchivedFilter) FeedItemScope.ALL else feedClientOptions.status,
+            archived = if (isArchivedFilter) FeedItemArchivedScope.ONLY else feedClientOptions.archived,
+            before = before,
+            after = after,
+        )
     }
 
     /// Determines whether there is another page of content to fetch when paginating the feedItem list
@@ -202,7 +216,7 @@ class InAppFeedViewModel(
         when (updatedStatus) {
             KnockMessageStatusUpdateType.SEEN -> if (item.seenAt != null) return
             KnockMessageStatusUpdateType.READ -> if (item.readAt != null) return
-            KnockMessageStatusUpdateType.INTERACTED -> if (item.insertedAt != null) return
+            KnockMessageStatusUpdateType.INTERACTED -> if (item.interactedAt != null) return
             KnockMessageStatusUpdateType.ARCHIVED -> if (item.archivedAt != null) return
             KnockMessageStatusUpdateType.UNREAD -> if (item.readAt == null) return
             KnockMessageStatusUpdateType.UNSEEN -> if (item.seenAt == null) return
@@ -445,7 +459,7 @@ class InAppFeedViewModel(
     private suspend fun fetchNewMetaData() {
         try {
             val newFeed = withContext(Dispatchers.IO) {
-                Knock.shared.feedManager?.getUserFeedContent(feedClientOptions)
+                Knock.shared.feedManager?.getUserFeedContent(requestOptions())
             }
             newFeed?.let {
                 withContext(Dispatchers.Main) {
@@ -459,11 +473,12 @@ class InAppFeedViewModel(
 
     private suspend fun mergeFeedsForNewMessageReceived(newFeed: Feed) {
         withContext(Dispatchers.Main) {
+            val newIds = newFeed.entries.map { it.id }.toSet()
             _feed.emit(
                 _feed.value.copy(
-                    entries = newFeed.entries + _feed.value.entries,
+                    entries = newFeed.entries + _feed.value.entries.filterNot { it.id in newIds },
                     meta = newFeed.meta,
-                    pageInfo = _feed.value.pageInfo.copy(before = newFeed.entries.firstOrNull()?.feedCursor)
+                    pageInfo = _feed.value.pageInfo.copy(before = newFeed.entries.firstOrNull()?.feedCursor ?: _feed.value.pageInfo.before)
                 )
             )
         }
@@ -497,7 +512,8 @@ class InAppFeedViewModelFactory(
     private val context: Context,
     private val feedClientOptions: FeedClientOptions = FeedClientOptions(),
     private val currentFilter: InAppFeedFilter? = null,
-    private var filterOptions: List<InAppFeedFilter> = listOf(InAppFeedFilter(context, FeedItemScope.ALL), InAppFeedFilter(context, FeedItemScope.UNREAD), InAppFeedFilter(context, FeedItemScope.ARCHIVED)),
+    // The filters live in the ViewModel, so they must not hold on to an Activity context.
+    private var filterOptions: List<InAppFeedFilter> = listOf(FeedItemScope.ALL, FeedItemScope.UNREAD, FeedItemScope.ARCHIVED).map { InAppFeedFilter(context.applicationContext, it) },
     private var topButtonActions: List<FeedTopActionButtonType> = listOf(FeedTopActionButtonType.MarkAllAsRead(), FeedTopActionButtonType.ArchiveRead())
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

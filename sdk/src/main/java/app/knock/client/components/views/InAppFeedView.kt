@@ -41,7 +41,6 @@ import java.time.ZonedDateTime
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun InAppFeedView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel, theme: InAppFeedViewTheme = InAppFeedViewTheme(LocalContext.current)) {
-    var selectedItemId by remember { mutableStateOf<String?>(null) }
     val filterOptions by viewModel.filterOptions.collectAsState()
     val currentFilter by viewModel.currentFilter.collectAsState()
     val feed by viewModel.feed.collectAsState()
@@ -124,7 +123,7 @@ fun InAppFeedView(modifier: Modifier = Modifier, viewModel: InAppFeedViewModel, 
 
                             SwipeableActionsBox(
                                 Modifier.clickable {
-                                    selectedItemId = item.id
+                                    viewModel.feedItemRowTapped(item)
                                 },
                                 startActions = markAsReadAction,
                                 endActions = archiveSwipeAction
