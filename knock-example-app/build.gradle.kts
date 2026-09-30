@@ -1,9 +1,22 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("com.google.gms.google-services")
 }
+
+// Firebase is optional: push notifications only work when you add your own google-services.json.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
+// Credentials come from local.properties (not committed), e.g. knock.publishableKey=pk_test_...
+val localProperties = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+}
+fun knockProperty(name: String, default: String = ""): String =
+    "\"" + (localProperties.getProperty("knock.$name") ?: default) + "\""
 
 android {
     namespace = "app.knock.example"
@@ -17,6 +30,12 @@ android {
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "KNOCK_PUBLISHABLE_KEY", knockProperty("publishableKey"))
+        buildConfigField("String", "KNOCK_USER_ID", knockProperty("userId"))
+        buildConfigField("String", "KNOCK_IN_APP_CHANNEL_ID", knockProperty("inAppChannelId"))
+        buildConfigField("String", "KNOCK_PUSH_CHANNEL_ID", knockProperty("pushChannelId"))
+        buildConfigField("String", "KNOCK_HOSTNAME", knockProperty("hostname", "https://api.knock.app"))
     }
 
     buildTypes {
@@ -35,6 +54,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
