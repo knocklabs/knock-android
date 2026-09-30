@@ -24,6 +24,7 @@ class Knock private constructor(internal val context: Context) : Application.Act
 
         internal val KNOCK_PENDING_NOTIFICATION_KEY = "knock_pending_notification_key"
         internal val KNOCK_MESSAGE_ID_KEY = "knock_message_id"
+        internal val KNOCK_PUSH_TAP_HANDLED_KEY = "knock_push_tap_handled"
 
         @SuppressLint("StaticFieldLeak")
         @Volatile
@@ -33,6 +34,10 @@ class Knock private constructor(internal val context: Context) : Application.Act
                 sharedInstance?.let { return it }
                 throw KnockException.KnockSetupError
             }
+
+        /** The shared instance, or null when [setup] hasn't been called (e.g. in a service started before the app). */
+        internal val sharedOrNull: Knock?
+            get() = sharedInstance
 
         /**
          * Sets all the needed information for your global Knock instance.

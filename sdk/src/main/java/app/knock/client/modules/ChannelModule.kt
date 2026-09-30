@@ -25,7 +25,7 @@ internal class ChannelModule {
     private val channelService = ChannelService()
     
     private fun getCurrentLocale(): String {
-        return Locale.getDefault().toString().replace('_', '-')
+        return Locale.getDefault().toLanguageTag()
     }
     
     private fun getCurrentTimezone(): String {

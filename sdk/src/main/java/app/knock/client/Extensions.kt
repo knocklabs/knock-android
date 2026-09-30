@@ -38,7 +38,7 @@ fun RemoteMessage.presentNotification(context: Context, handlingClass: Class<*>?
         notificationManager.notify(uuid, notificationBuilder.build())
 
     } catch (e: Exception) {
-        Knock.shared.logError(
+        Knock.sharedOrNull?.logError(
             KnockLogCategory.PUSH_NOTIFICATION,
             "RemoteMessage.presentNotification",
             exception = e
