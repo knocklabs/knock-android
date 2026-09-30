@@ -29,6 +29,19 @@ jobs:
       - name: JitPack build
         run: ./gradlew clean -Pgroup=com.github.knocklabs -Pversion=ci -xtest -xlint assemble publishToMavenLocal --stacktrace
 
+      - name: Check published dependencies
+        run: |
+          pom=$(ls ~/.m2/repository/app/knock/knock-android/*/knock-android-*.pom)
+          if grep -q "<groupId>androidx.test" $pom; then
+            echo "::error::Test libraries leaked into the published POM ($pom)"
+            exit 1
+          fi
+
+      - name: Minified consumer build (R8 with the SDK's consumer rules)
+        run: |
+          ./gradlew :knock-example-app:assembleRelease -PminifyExample --stacktrace
+          python3 .github/scripts/check_r8_mapping.py knock-example-app/build/outputs/mapping/release/mapping.txt
+
       - name: Run unit tests
         run: ./gradlew :sdk:testDebugUnitTest --stacktrace
 
