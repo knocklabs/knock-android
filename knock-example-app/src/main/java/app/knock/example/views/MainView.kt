@@ -137,5 +137,5 @@ fun MainView(authViewModel: AuthenticationViewModel) {
 @Preview()
 @Composable
 private fun PreviewMainView() {
-    MainView(AuthenticationViewModel())
+    MainView(viewModel())
 }

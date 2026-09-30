@@ -93,5 +93,5 @@ fun PreferenceToggleRow(
 @Preview(showBackground = true, device = "id:pixel_5")
 @Composable
 private fun PreferencesViewPreviewView() {
-    PreferencesView(AuthenticationViewModel())
+    PreferencesView(viewModel())
 }

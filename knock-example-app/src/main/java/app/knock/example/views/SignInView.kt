@@ -1,5 +1,6 @@
 package app.knock.example.views
 
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -75,6 +76,6 @@ fun SignInView(authViewModel: AuthenticationViewModel) {
 @Composable
 fun PreviewSignInView() {
     KnockAndroidTheme {
-        SignInView(AuthenticationViewModel())
+        SignInView(viewModel())
     }
 }
