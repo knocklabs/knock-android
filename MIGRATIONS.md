@@ -1,5 +1,28 @@
 # Migration Guide
 
+## Upgrading to Version 1.3.0
+
+1.3.0 updates the SDK's toolchain and dependencies. Your app needs at least:
+
+| Requirement | Minimum |
+| --- | --- |
+| Android Gradle Plugin | 8.6 |
+| `compileSdk` | 35 |
+| Kotlin | 2.1 (the SDK and its AndroidX dependencies are compiled with Kotlin 2.x) |
+| `minSdk` | 26 (unchanged) |
+
+These minimums were checked by building a sample app with AGP 8.6.1, compileSdk 35 and Kotlin 2.1.21, including a
+minified release build. Kotlin 2.0 fails with "Module was compiled with an incompatible version of Kotlin".
+
+Other changes:
+
+- `firebase-messaging-ktx` was replaced by `firebase-messaging` (Firebase discontinued the KTX artifacts). If you
+  use the `com.google.firebase.messaging.ktx` APIs through the SDK, switch to the equivalent APIs in
+  `com.google.firebase.messaging`, or declare the dependency yourself.
+- The SDK no longer depends on Material Components (`com.google.android.material:material`). If your app uses its
+  themes or widgets, declare the dependency in your app.
+- Compose 1.11 and Firebase Messaging 25 require `minSdk` 23, which the SDK's `minSdk` 26 already covers.
+
 ## Upgrading to Version 1.2.6
 
 1.2.6 is a bug-fix release. A few fixes change types or behavior you may depend on:

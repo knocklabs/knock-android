@@ -1,5 +1,6 @@
 package app.knock.client.components.views
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -211,6 +212,7 @@ fun LastRowView(theme: InAppFeedViewTheme, viewModel: InAppFeedViewModel) {
     }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition") // preview-only sample data
 @Preview(showBackground = true)
 @Composable
 fun PreviewInAppFeedView() {

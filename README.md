@@ -65,3 +65,17 @@ Knock.setup(context = applicationContext, publishableKey = "your-pk", pushChanne
 // Step 2: Sign in the user. Ideal timing: as soon as you have the userId.
 Knock.shared.signIn(userId = "userId", userToken = "userToken")
 ```
+
+## Example app
+
+`knock-example-app` reads its Knock credentials from `local.properties` (not committed):
+
+```properties
+knock.publishableKey=pk_test_...
+knock.userId=your-user-id
+knock.inAppChannelId=your-in-app-feed-channel-id
+knock.pushChannelId=your-fcm-channel-id
+```
+
+Push notifications are optional: add your Firebase `google-services.json` to `knock-example-app/` to enable them.
+
