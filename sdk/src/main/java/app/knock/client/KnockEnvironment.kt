@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 import app.knock.client.models.KnockException
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 @Suppress("unused")
 class KnockEnvironment {
@@ -111,9 +111,15 @@ class KnockEnvironment {
     }
 
     suspend fun getCurrentFcmToken(): String? {
-        val token = suspendCoroutine { continuation ->
-            // Get the current FCM token
-            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+        val tokenTask = try {
+            FirebaseMessaging.getInstance().token
+        } catch (e: Exception) {
+            // Thrown when Firebase isn't configured for the app (e.g. apps that only use the in-app feed).
+            Knock.shared.logWarning(KnockLogCategory.PUSH_NOTIFICATION, "Unable to get the FCM token. Is Firebase configured?", exception = e)
+            return null
+        }
+        return suspendCancellableCoroutine { continuation ->
+            tokenTask.addOnCompleteListener { task ->
                 if (!task.isSuccessful) {
                     Knock.shared.logError(KnockLogCategory.PUSH_NOTIFICATION, task.exception.toString())
                     continuation.resume(null)
@@ -122,7 +128,6 @@ class KnockEnvironment {
                 continuation.resume(task.result)
             }
         }
-        return token
     }
 
     private fun setPreviousPushTokens(tokens: List<String>) {

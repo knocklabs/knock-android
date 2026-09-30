@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import app.knock.client.models.KnockException
 import app.knock.client.modules.AuthenticationModule
@@ -27,6 +26,7 @@ class Knock private constructor(internal val context: Context) : Application.Act
         internal val KNOCK_MESSAGE_ID_KEY = "knock_message_id"
 
         @SuppressLint("StaticFieldLeak")
+        @Volatile
         private var sharedInstance: Knock? = null
         val shared: Knock
             get() {
@@ -51,19 +51,9 @@ class Knock private constructor(internal val context: Context) : Application.Act
                 sharedInstance = Knock(context)
             }
 
-            // Register lifecycle callbacks
-            // This will register if the API target is 29 and higher
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                when(context) {
-                    is Application -> {
-                        context.unregisterActivityLifecycleCallbacks(sharedInstance!!)
-                        context.registerActivityLifecycleCallbacks(sharedInstance!!)
-                    }
-                    is Activity -> {
-                        context.unregisterActivityLifecycleCallbacks(sharedInstance!!)
-                        context.registerActivityLifecycleCallbacks(sharedInstance!!)
-                    }
-                }
+            (context.applicationContext as? Application)?.let { application ->
+                application.unregisterActivityLifecycleCallbacks(shared)
+                application.registerActivityLifecycleCallbacks(shared)
             }
 
 
@@ -88,14 +78,25 @@ class Knock private constructor(internal val context: Context) : Application.Act
     internal val messageModule by lazy { MessageModule() }
     internal val channelModule by lazy { ChannelModule() }
 
+    @Volatile
     var feedManager: FeedManager? = null
 
-    override fun onActivityStopped(activity: Activity) {
-        feedManager?.disconnectFromFeed()
-    }
+    // Activity callbacks arrive on the main thread. Counting started activities keeps the feed connected while
+    // navigating between activities (B.onStart runs before A.onStop) and disconnects only when the app is backgrounded.
+    private var startedActivityCount = 0
 
     override fun onActivityStarted(activity: Activity) {
-        feedManager?.connectToFeed()
+        startedActivityCount++
+        if (startedActivityCount == 1) {
+            feedManager?.resumeConnection()
+        }
+    }
+
+    override fun onActivityStopped(activity: Activity) {
+        startedActivityCount = maxOf(0, startedActivityCount - 1)
+        if (startedActivityCount == 0) {
+            feedManager?.disconnectFromFeed()
+        }
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}

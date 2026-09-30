@@ -10,30 +10,32 @@ import kotlinx.coroutines.launch
 internal class AuthenticationModule {
 
     suspend fun signIn(userId: String, userToken: String?) {
-        Knock.shared.environment.setUserId(userId)
-        Knock.shared.environment.setUserToken(userToken)
+        val environment = Knock.shared.environment
+        val userChanged = environment.getUserId() != userId || environment.getUserToken() != userToken
+        environment.setUserId(userId)
+        environment.setUserToken(userToken)
+        if (userChanged) {
+            Knock.shared.feedManager?.onUserChanged()
+        }
 
-        val token = Knock.shared.getCurrentDeviceToken()
-        val channelId = Knock.shared.environment.getPushChannelId()
-        if (token != null && channelId != null) {
-            try {
-                Knock.shared.channelModule.registerTokenForFCM(channelId, token)
-            } catch (e: Exception) {
-                Knock.shared.logWarning(KnockLogCategory.USER, "signIn", "Successfully set user, however, unable to registerTokenForAPNS at this time.")
-            }
+        val channelId = environment.getPushChannelId() ?: return
+        val token = Knock.shared.getCurrentDeviceToken() ?: return
+        try {
+            Knock.shared.channelModule.registerTokenForFCM(channelId, token)
+        } catch (e: Exception) {
+            Knock.shared.logWarning(KnockLogCategory.USER, "signIn", "Successfully set user, however, unable to registerTokenForFCM at this time.")
         }
     }
 
     suspend fun signOut() {
-        val channelId = Knock.shared.environment.getPushChannelId()
-        val token = Knock.shared.getCurrentDeviceToken()
-        if (channelId != null && token != null) {
-            try {
+        try {
+            val channelId = Knock.shared.environment.getPushChannelId()
+            val token = channelId?.let { Knock.shared.getCurrentDeviceToken() }
+            if (channelId != null && token != null) {
                 Knock.shared.channelModule.unregisterTokenForFCM(channelId, token)
-            } finally {
-                clearDataForSignOut()
             }
-        } else {
+        } finally {
+            Knock.shared.feedManager?.disconnectFromFeed()
             clearDataForSignOut()
         }
     }
@@ -90,7 +92,7 @@ suspend fun Knock.signOut() {
  * NOTE: This will not clear the device token so that it can be accessed for the next user to login.
  */
 @Suppress("unused")
-fun Knock.signOut(completionHandler: (Result<Unit>) -> Void)= coroutineScope.launch(Dispatchers.Main) {
+fun Knock.signOut(completionHandler: (Result<Unit>) -> Unit)= coroutineScope.launch(Dispatchers.Main) {
     try {
         signOut()
         completionHandler(Result.success(Unit))
