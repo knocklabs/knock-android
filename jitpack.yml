@@ -1,2 +1,4 @@
+# JitPack runs `./gradlew clean -Pgroup=... -Pversion=... -xtest -xlint assemble publishToMavenLocal` on this JDK;
+# CI runs the same command (see .github/workflows/build.yml). AGP 8.13 requires JDK 17+.
 jdk:
   - openjdk17
