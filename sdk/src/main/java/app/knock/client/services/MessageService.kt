@@ -5,17 +5,17 @@ import app.knock.client.models.messages.KnockMessageStatusUpdateType
 
 internal class MessageService: KnockAPIService() {
     suspend fun getMessage(messageId: String): KnockMessage {
-        return get<KnockMessage>("/messages/$messageId")
+        return get<KnockMessage>("/messages/${messageId.asPathSegment()}")
     }
 
     suspend fun updateMessageStatus(messageId: String, status: KnockMessageStatusUpdateType): KnockMessage {
         val statusValue = serializeValueAsString(status)
-        return put<KnockMessage>("/messages/$messageId/$statusValue")
+        return put<KnockMessage>("/messages/${messageId.asPathSegment()}/$statusValue")
     }
 
     suspend fun deleteMessageStatus(messageId: String, status: KnockMessageStatusUpdateType): KnockMessage {
         val statusValue = serializeValueAsString(status)
-        return delete<KnockMessage>("/messages/$messageId/$statusValue")
+        return delete<KnockMessage>("/messages/${messageId.asPathSegment()}/$statusValue")
     }
 
     suspend fun batchUpdateStatuses(messageIds: List<String>, status: KnockMessageStatusUpdateType): List<KnockMessage> {
