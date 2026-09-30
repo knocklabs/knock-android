@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.3.0
+
+Toolchain and dependency update. No API or behavior changes beyond 1.2.6, but **apps must meet new minimum build
+requirements**. See [MIGRATIONS.md](MIGRATIONS.md#upgrading-to-version-130).
+
+### Changed
+
+- Built with Gradle 9.5.1, Android Gradle Plugin 8.13.2, Kotlin 2.2.21 (Compose compiler plugin), compileSdk 36 and
+  Java/JVM target 11. The project now builds on JDK 17 through JDK 25.
+- Dependencies: Compose BOM 2026.06.01 (Compose 1.11), AndroidX core 1.16.0, activity 1.10.1, lifecycle 2.10.0,
+  appcompat 1.7.1, JavaPhoenixClient 1.3.1, Jackson 2.19.4, Arrow 1.2.4, Coil 2.7.0.
+- `com.google.firebase:firebase-messaging-ktx` (discontinued by Firebase) is replaced by
+  `com.google.firebase:firebase-messaging` 25.1.3.
+- Removed the unused Material Components (`com.google.android.material:material`) dependency.
+- The published artifact includes a sources jar.
+
+### Example app
+
+- Firebase is optional: the google-services plugin is applied only when `google-services.json` exists, and the
+  placeholder file was removed.
+- Credentials are read from `local.properties`.
+- Targets SDK 36.
+
 ## 1.2.6
 
 Stabilization release: bug fixes only, no new features. See [MIGRATIONS.md](MIGRATIONS.md#upgrading-to-version-126)

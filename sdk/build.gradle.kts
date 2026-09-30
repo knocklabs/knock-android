@@ -6,7 +6,7 @@ plugins {
 }
 
 // Keep in sync with KnockEnvironment.clientVersion (enforced by KnockEnvironmentTests).
-val knockVersion = "1.2.6"
+val knockVersion = "1.3.0"
 
 group = "app.knock"
 version = knockVersion
