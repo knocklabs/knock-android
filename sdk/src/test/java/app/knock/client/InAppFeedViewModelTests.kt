@@ -1,7 +1,9 @@
 package app.knock.client
 
+import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
+import androidx.test.core.app.ApplicationProvider
 import app.knock.client.components.InAppFeedViewModel
 import app.knock.client.components.InAppFeedViewModelFactory
 import app.knock.client.components.models.FeedTopActionButtonType
@@ -21,8 +23,11 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.time.ZonedDateTime
 
+@RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class InAppFeedViewModelTests {
 
@@ -36,16 +41,18 @@ class InAppFeedViewModelTests {
     fun setUp() {
         Dispatchers.setMain(mainDispatcher)
         // Get application context for initializing the ViewModelFactory
+        val context = ApplicationProvider.getApplicationContext<Context>()
         viewModelStore = ViewModelStore()
 
         // Create an instance of the ViewModelFactory
         val factory = InAppFeedViewModelFactory(
+            context = context,
             feedClientOptions = FeedClientOptions(),
-            currentFilter = InAppFeedFilter(FeedItemScope.ALL),
+            currentFilter = InAppFeedFilter(context, FeedItemScope.ALL),
             filterOptions = listOf(
-                InAppFeedFilter(FeedItemScope.ALL),
-                InAppFeedFilter(FeedItemScope.UNREAD),
-                InAppFeedFilter(FeedItemScope.ARCHIVED)
+                InAppFeedFilter(context, FeedItemScope.ALL),
+                InAppFeedFilter(context, FeedItemScope.UNREAD),
+                InAppFeedFilter(context, FeedItemScope.ARCHIVED)
             ),
             topButtonActions = listOf(
                 FeedTopActionButtonType.MarkAllAsRead(),
