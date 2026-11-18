@@ -35,6 +35,20 @@ internal class FeedModule(private val feedId: String, private val defaultOptions
         )
 
         this.socket = Socket(websocketPath, params)
+
+        socket.logger = {
+            Knock.shared.logDebug(KnockLogCategory.FEED, it)
+        }
+        socket.onOpen {
+            Knock.shared.logDebug(KnockLogCategory.FEED, "Socket Opened")
+        }
+        socket.onClose {
+            Knock.shared.logDebug(KnockLogCategory.FEED, "Socket Closed")
+        }
+        socket.onError { throwable, response ->
+            Knock.shared.logError(KnockLogCategory.FEED, "Socket Error ${response?.code}", description = throwable.message)
+        }
+
         this.userId = Knock.shared.environment.getSafeUserId()
         this.feedTopic = "feeds:$feedId:$userId"
     }
@@ -73,20 +87,6 @@ internal class FeedModule(private val feedId: String, private val defaultOptions
     }
 
     fun connectToFeed(options: FeedClientOptions? = null) {
-        // Setup the socket to receive open/close events
-        socket.logger = {
-            Knock.shared.logDebug(KnockLogCategory.FEED, it)
-        }
-        socket.onOpen {
-            Knock.shared.logDebug(KnockLogCategory.FEED, "Socket Opened")
-        }
-        socket.onClose {
-            Knock.shared.logDebug(KnockLogCategory.FEED, "Socket Closed")
-        }
-        socket.onError { throwable, response ->
-            Knock.shared.logError(KnockLogCategory.FEED, "Socket Error ${response?.code}", description = throwable.message)
-        }
-
         val mergedOptions = defaultOptions.mergeOptions(options)
         val params = paramsFromOptions(mergedOptions)
 
