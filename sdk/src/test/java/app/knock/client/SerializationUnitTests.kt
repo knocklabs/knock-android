@@ -4,6 +4,7 @@ import app.knock.client.models.feed.ButtonSetContentBlock
 import app.knock.client.models.feed.FeedItem
 import app.knock.client.models.feed.MarkdownContentBlock
 import app.knock.client.models.feed.TextContentBlock
+import app.knock.client.models.messages.WorkflowSource
 import app.knock.client.models.preferences.ChannelTypePreferences
 import app.knock.client.models.preferences.PreferenceSet
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -53,7 +54,13 @@ class SerializationUnitTests {
     @Suppress("SpellCheckingInspection")
     @Test
     fun testContentBlockDecoding() {
+        // Configure the mapper the same way KnockAPIService does for feed responses.
+        // A plain mapper (no SNAKE_CASE strategy) cannot bind wire keys like `total_activities`
+        // or the nested `source.version_id`, so it does not represent real feed deserialization.
         val objectMapper: ObjectMapper = jacksonObjectMapper()
+        objectMapper.propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
+        objectMapper.registerModule(JavaTimeModule())
+        objectMapper.registerKotlinModule()
 
         val jsonString = """
             {
@@ -101,5 +108,61 @@ class SerializationUnitTests {
         assert(item.blocks[0] is MarkdownContentBlock)
         assert(item.blocks[1] is TextContentBlock)
         assert(item.blocks[2] is ButtonSetContentBlock)
+    }
+
+    @Suppress("SpellCheckingInspection")
+    @Test
+    fun testFeedItemSourceDecoding() {
+        // Mirrors the mapper configuration used by KnockAPIService for feed responses,
+        // so `version_id` maps to `WorkflowSource.versionId` via the snake_case strategy.
+        val mapper = jacksonObjectMapper()
+        mapper.propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
+        mapper.registerModule(JavaTimeModule())
+        mapper.registerKotlinModule()
+
+        val jsonString = """
+            {
+                "__cursor": "g3QAAAABZAALaW5zZXJ0ZWRfYXR0AAAADWQACl",
+                "activities": [],
+                "actors": [],
+                "blocks": [],
+                "id": "2e36JCjQAu5trvYtvmW9O14odis",
+                "total_activities": 1,
+                "total_actors": 1,
+                "source": {
+                    "key": "claim-request-approved",
+                    "version_id": "v_01"
+                },
+                "tenant": "team-a"
+            }
+        """.trimIndent()
+
+        val item: FeedItem = mapper.readValue(jsonString)
+        Assert.assertEquals(WorkflowSource("claim-request-approved", "v_01"), item.source)
+        Assert.assertEquals("claim-request-approved", item.source?.key)
+        Assert.assertEquals("v_01", item.source?.versionId)
+    }
+
+    @Test
+    fun testFeedItemWithoutSourceStillDecodes() {
+        val mapper = jacksonObjectMapper()
+        mapper.propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
+        mapper.registerModule(JavaTimeModule())
+        mapper.registerKotlinModule()
+
+        val jsonString = """
+            {
+                "__cursor": "g3QAAAABZAALaW5zZXJ0ZWRfYXR0AAAADWQACl",
+                "activities": [],
+                "actors": [],
+                "blocks": [],
+                "id": "2e36JCjQAu5trvYtvmW9O14odis",
+                "total_activities": 1,
+                "total_actors": 1
+            }
+        """.trimIndent()
+
+        val item: FeedItem = mapper.readValue(jsonString)
+        Assert.assertNull(item.source)
     }
 }
