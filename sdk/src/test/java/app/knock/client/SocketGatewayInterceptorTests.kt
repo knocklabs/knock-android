@@ -1,5 +1,10 @@
 package app.knock.client
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import org.junit.Before
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import app.knock.client.models.sockets.SocketGatewayConnection
 import app.knock.client.models.sockets.UnsupportedSocketModeException
 import app.knock.client.modules.SocketGatewayConnectionCache
@@ -21,6 +26,7 @@ import java.time.Instant
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
+@RunWith(RobolectricTestRunner::class)
 class SocketGatewayInterceptorTests {
     private val server = MockWebServer().apply { start() }
     private var fetches = 0
@@ -31,25 +37,41 @@ class SocketGatewayInterceptorTests {
         fetchError?.let { throw it }
         SocketGatewayConnection(
             "websocket",
-            server.url("/ws/v1/websocket?auth_token=tok&vsn=signed").toString().replace("http", "ws"),
+            server.url("/ws/v1/websocket?auth_token=tok&vsn=signed").toString()
+                .replace("http", "ws"),
             Instant.now().plusSeconds(600)
         )
     })
 
-    private val client = OkHttpClient.Builder().addInterceptor(SocketGatewayInterceptor(cache)).build()
+    private val client =
+        OkHttpClient.Builder().addInterceptor(SocketGatewayInterceptor(cache)).build()
+
+    @Before
+    fun setUp() {
+        Knock.setup(ApplicationProvider.getApplicationContext(), "pk_test", null)
+    }
 
     @After
     fun tearDown() = server.shutdown()
 
     private class Listener : WebSocketListener() {
         val events = LinkedBlockingQueue<Any>()
-        override fun onOpen(webSocket: WebSocket, response: Response) { events.add("open") }
-        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) { events.add(t) }
+        override fun onOpen(webSocket: WebSocket, response: Response) {
+            events.add("open")
+        }
+
+        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+            events.add(t)
+        }
     }
 
     private fun connect(): Listener {
         val listener = Listener()
-        client.newWebSocket(Request.Builder().url("http://unused.invalid/ws/v1/websocket?vsn=2.0.0&api_key=pk&user_token=ut").build(), listener)
+        client.newWebSocket(
+            Request.Builder()
+                .url("http://unused.invalid/ws/v1/websocket?vsn=2.0.0&api_key=pk&user_token=ut")
+                .build(), listener
+        )
         return listener
     }
 

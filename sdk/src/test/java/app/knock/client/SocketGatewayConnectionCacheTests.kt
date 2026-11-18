@@ -1,5 +1,10 @@
 package app.knock.client
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import org.junit.Before
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import app.knock.client.models.sockets.SocketGatewayConnection
 import app.knock.client.modules.SocketGatewayConnectionCache
 import org.junit.Assert.assertEquals
@@ -8,6 +13,7 @@ import org.junit.Test
 import java.io.IOException
 import java.time.Instant
 
+@RunWith(RobolectricTestRunner::class)
 class SocketGatewayConnectionCacheTests {
     private var now = 0L
     private var fetches = 0
@@ -22,6 +28,11 @@ class SocketGatewayConnectionCacheTests {
         },
         now = { now }
     )
+
+    @Before
+    fun setUp() {
+        Knock.setup(ApplicationProvider.getApplicationContext<Context>(), "pk_test", null)
+    }
 
     @Test
     fun reusesValueBeforeExpiry() {
