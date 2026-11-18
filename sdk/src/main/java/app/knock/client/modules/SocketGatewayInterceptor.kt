@@ -17,7 +17,7 @@ internal class SocketGatewayInterceptor(private val cache: SocketGatewayConnecti
         val originalUrl = originalRequest.url
 
         try {
-            val cachedGatewayConnection = cache.get();
+            val cachedGatewayConnection = cache.get()
 
             // HttpUrl only accepts http(s) protocols, so convert the gateway's ws or wss protocol
             val gatewayConnectUrl = cachedGatewayConnection.url
