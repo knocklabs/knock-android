@@ -62,6 +62,15 @@ internal open class KnockAPIService {
         return decodeData(result)
     }
 
+    /**
+     * Blocking variant of [post], for callers that are already running on a worker thread, such as an OkHttp
+     * interceptor. Must not be called from the main thread.
+     */
+    inline fun <reified T: Any> postBlocking(path: String, body: Any? = null): T {
+        val result = makeBlockingRequest(HTTPMethod.POST, path, body = body)
+        return decodeData(result)
+    }
+
     suspend inline fun <reified T: Any> put(path: String, body: Any? = null): T {
         val result = makeGeneralRequest(HTTPMethod.PUT, path, body = body)
         return decodeData(result)
@@ -95,6 +104,45 @@ internal open class KnockAPIService {
         return mapper.valueToTree<TextNode>(value).textValue()
     }
 
+    fun buildRequest(
+        method: HTTPMethod,
+        path: String,
+        queryItems: List<URLQueryItem>? = null,
+        body: Any? = null
+    ): Request {
+        val urlString = "$apiBasePath$path"
+        var url = URL(urlString).toHttpUrlOrNull()
+        if (url == null) {
+            val exception = KnockException.NetworkError("Invalid URL", 400, "Invalid URL: $urlString")
+            Knock.shared.logNetworking("Invalid URL: $urlString", exception = exception)
+            throw exception
+        }
+
+        queryItems?.let {
+            var urlBuilder = url!!.newBuilder()
+            for (item in queryItems) {
+                item.value?.let { value ->
+                    urlBuilder = urlBuilder.addQueryParameter(item.name, "$value")
+                }
+            }
+            url = urlBuilder.build()
+        }
+
+        var builder = Request.Builder()
+            .addHeader("Authorization", "Bearer $publishableKey")
+            .addHeader("User-Agent", "knock-kotlin@$clientVersion")
+            .addHeader("Content-Type","application/json")
+            .url(url!!)
+
+        userToken?.let {
+            builder = builder.addHeader("X-Knock-User-Token", it)
+        }
+
+        builder = addMethod(builder, method, body)
+
+        return builder.build()
+    }
+
     suspend fun makeGeneralRequest(
         method: HTTPMethod,
         path: String,
@@ -102,38 +150,12 @@ internal open class KnockAPIService {
         body: Any? = null
     ): String = withContext(Dispatchers.IO) {
         suspendCancellableCoroutine { continuation ->
-            val urlString = "$apiBasePath$path"
-            var url = URL(urlString).toHttpUrlOrNull()
-            if (url == null) {
-                val exception = KnockException.NetworkError("Invalid URL", 400, "Invalid URL: $urlString")
-                Knock.shared.logNetworking("Invalid URL: $urlString", exception = exception)
-                continuation.resumeWithException(exception)
+            val request = try {
+                buildRequest(method, path, queryItems, body)
+            } catch (e: KnockException.NetworkError) {
+                continuation.resumeWithException(e)
                 return@suspendCancellableCoroutine
             }
-
-            queryItems?.let {
-                var urlBuilder = url!!.newBuilder()
-                for (item in queryItems) {
-                    item.value?.let { value ->
-                        urlBuilder = urlBuilder.addQueryParameter(item.name, "$value")
-                    }
-                }
-                url = urlBuilder.build()
-            }
-
-            var builder = Request.Builder()
-                .addHeader("Authorization", "Bearer $publishableKey")
-                .addHeader("User-Agent", "knock-kotlin@$clientVersion")
-                .addHeader("Content-Type","application/json")
-                .url(url!!)
-
-            userToken?.let {
-                builder = builder.addHeader("X-Knock-User-Token", it)
-            }
-
-            builder = addMethod(builder, method, body)
-
-            val request = builder.build()
 
             // Execute the request
             Knock.shared.httpClient.newCall(request).enqueue(object : Callback {
@@ -169,6 +191,29 @@ internal open class KnockAPIService {
         }
     }
 
+    internal fun makeBlockingRequest(
+        method: HTTPMethod,
+        path: String,
+        queryItems: List<URLQueryItem>? = null,
+        body: Any? = null
+    ): String {
+        val request = buildRequest(method, path, queryItems, body)
+        try {
+            Knock.shared.httpClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    val e = KnockException.NetworkError(code = response.code, description = "Api request failure", response = response, request = request)
+                    Knock.shared.logNetworking("Api request failure", request = request, response = response, exception = e)
+                    throw e
+                }
+                val result = response.body?.string().orEmpty()
+                Knock.shared.logNetworking("Api request successful", request = request, response = response)
+                return result
+            }
+        } catch (e: IOException) {
+            Knock.shared.logNetworking("Api request failure", request = request, exception = e)
+            throw e
+        }
+    }
 
     private fun addMethod(builder: Request.Builder, method: HTTPMethod, body: Any?): Request.Builder {
         return when (method) {

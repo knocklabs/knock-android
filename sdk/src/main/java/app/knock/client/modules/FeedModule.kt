@@ -10,7 +10,9 @@ import app.knock.client.models.feed.FeedClientOptions
 import app.knock.client.models.feed.FeedSettings
 import app.knock.client.models.messages.KnockMessageStatusUpdateType
 import app.knock.client.models.networking.URLQueryItem
+import app.knock.client.models.sockets.UnsupportedSocketModeException
 import app.knock.client.services.FeedService
+import app.knock.client.services.SocketGatewayService
 import org.phoenixframework.Channel
 import org.phoenixframework.Message
 import org.phoenixframework.Socket
@@ -34,7 +36,13 @@ internal class FeedModule(private val feedId: String, private val defaultOptions
             "user_token" to (Knock.shared.environment.getUserToken() ?: "")
         )
 
-        this.socket = Socket(websocketPath, params)
+        val socketGatewayService = SocketGatewayService()
+        val connectionCache = SocketGatewayConnectionCache(fetch = { socketGatewayService.fetchSocketGatewayConnection() })
+        val socketClient = Knock.shared.httpClient.newBuilder()
+            .addInterceptor(SocketGatewayInterceptor(connectionCache))
+            .build()
+
+        this.socket = Socket(websocketPath, params, client = socketClient)
 
         socket.logger = {
             Knock.shared.logDebug(KnockLogCategory.FEED, it)
@@ -47,6 +55,10 @@ internal class FeedModule(private val feedId: String, private val defaultOptions
         }
         socket.onError { throwable, response ->
             Knock.shared.logError(KnockLogCategory.FEED, "Socket Error ${response?.code}", description = throwable.message)
+            // Disconnect the socket if this error resulted from the socket gateway returning an unsupported mode
+            if (generateSequence(throwable) { it.cause }.any { it is UnsupportedSocketModeException }) {
+                socket.disconnect()
+            }
         }
 
         this.userId = Knock.shared.environment.getSafeUserId()
